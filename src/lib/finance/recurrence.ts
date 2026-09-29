@@ -32,7 +32,5 @@ export function remainingMonths(duration: Duration, elapsed: number, fiMonth: nu
 			return Math.max(0, duration.months - elapsed);
 		case 'untilFI':
 			return Math.max(0, fiMonth - elapsed);
-		case 'lifelong':
-			return Infinity;
 	}
 }

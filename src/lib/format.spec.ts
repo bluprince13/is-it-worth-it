@@ -56,7 +56,6 @@ describe('formatDuration', () => {
 		expect(formatDuration({ kind: 'fixed', months: 36 })).toBe('for 3 years');
 		expect(formatDuration({ kind: 'fixed', months: 18 })).toBe('for 18 months');
 		expect(formatDuration({ kind: 'untilFI' })).toBe('until you retire');
-		expect(formatDuration({ kind: 'lifelong' })).toBe('for life');
 	});
 });
 

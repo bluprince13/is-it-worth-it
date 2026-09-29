@@ -36,8 +36,4 @@ describe('remainingMonths', () => {
 		expect(remainingMonths({ kind: 'untilFI' }, 0, 100)).toBe(100);
 		expect(remainingMonths({ kind: 'untilFI' }, 120, 100)).toBe(0);
 	});
-
-	it('never ends when lifelong', () => {
-		expect(remainingMonths({ kind: 'lifelong' }, 500, 100)).toBe(Infinity);
-	});
 });

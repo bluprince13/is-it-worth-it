@@ -82,21 +82,14 @@ describe('one-off purchase', () => {
 });
 
 describe('recurring purchase', () => {
-	it('delays retirement the same whether lifelong or until the target', () => {
-		const lifelong = result(profile, netflix({ kind: 'lifelong' }), 'retirement-delay')!;
-		const untilFI = result(profile, netflix({ kind: 'untilFI' }), 'retirement-delay')!;
-		expect(untilFI.value).toBeGreaterThan(0);
-		expect(lifelong.value).toBeCloseTo(untilFI.value);
-	});
-
 	it('shows hours of work per year', () => {
-		const work = result(profile, netflix({ kind: 'lifelong' }), 'work-hours')!;
+		const work = result(profile, netflix({ kind: 'untilFI' }), 'work-hours')!;
 		expect(work.value).toBeCloseTo(180 / (42_000 / (40 * 46.4)));
 		expect(work.caption).toBe('of work a year');
 	});
 
 	it('shows earn-back as time each year', () => {
-		const earnBack = result(profile, netflix({ kind: 'lifelong' }), 'wealth-earn-back')!;
+		const earnBack = result(profile, netflix({ kind: 'untilFI' }), 'wealth-earn-back')!;
 		expect(earnBack.value).toBeCloseTo((180 / 17_000) * 365.25);
 		expect(earnBack.headline).toBe('3.9 days');
 	});
@@ -104,7 +97,7 @@ describe('recurring purchase', () => {
 
 describe('summarise', () => {
 	it('names the purchase and combines work time with retirement delay', () => {
-		const purchase = { ...netflix({ kind: 'lifelong' }), label: 'Netflix' };
+		const purchase = { ...netflix({ kind: 'untilFI' }), label: 'Netflix' };
 		const sentence = summarise(evaluate(profile, purchase).results, purchase);
 		expect(sentence).toMatch(
 			/^Netflix costs .+ of work a year and would delay reaching your retirement target by .+\.$/
@@ -147,11 +140,13 @@ describe('invested instead', () => {
 		expect(fv.result.value).toBeCloseTo(expected);
 	});
 
-	it('stops until-retirement payments at the target date but not lifelong ones', () => {
-		const long = { investYears: 60 };
-		const value = (duration: Purchase['duration']) =>
-			evaluate(profile, netflix(duration), long).results.find((r) => r.lens.id === 'future-value')!
-				.result.value;
-		expect(value({ kind: 'lifelong' })).toBeGreaterThan(value({ kind: 'untilFI' }));
+	it('shows equations that end in the headline figure', () => {
+		const threeYears = netflix({ kind: 'fixed', months: 36 });
+		const fv = evaluate(profile, threeYears, years).results.find(
+			(r) => r.lens.id === 'future-value'
+		)!.result;
+		expect(fv.working[0]).toMatch(/^Monthly return: \(1 \+ 5%\)\^\(1\/12\) − 1 = 0\.407%$/);
+		expect(fv.working[1]).toMatch(/^£15 × \(\(1 \+ 0\.407%\)\^36 − 1\) ÷ 0\.407% = £/);
+		expect(fv.working.at(-1)).toMatch(new RegExp(`\\^7 = ${fv.headline.replace('£', '£')}$`));
 	});
 });

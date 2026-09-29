@@ -36,15 +36,8 @@ describe('retirementDelay', () => {
 	});
 
 	it('takes a recurring cost out of savings until the target', () => {
-		const purchase: Purchase = { amount: 100, recurrence: monthly, duration: { kind: 'lifelong' } };
+		const purchase: Purchase = { amount: 100, recurrence: monthly, duration: { kind: 'untilFI' } };
 		expect(retirementDelay(flat, purchase).withPurchase.fiMonth).toBeCloseTo(100_000 / 900);
-	});
-
-	it('treats lifelong and until-retirement the same', () => {
-		const base = { amount: 100, recurrence: monthly };
-		const lifelong = retirementDelay(flat, { ...base, duration: { kind: 'lifelong' } });
-		const untilFI = retirementDelay(flat, { ...base, duration: { kind: 'untilFI' } });
-		expect(lifelong.delayMonths).toBeCloseTo(untilFI.delayMonths!);
 	});
 
 	it('stops charging after a fixed duration that ends before the target', () => {

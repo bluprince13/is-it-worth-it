@@ -243,7 +243,7 @@
 		<Segmented
 			label="Invest until"
 			options={[
-				{ value: 'target', label: 'Until target' },
+				{ value: 'target', label: 'Until retirement' },
 				{ value: 'years', label: 'For N years' }
 			]}
 			bind:value={draft.investHorizon}

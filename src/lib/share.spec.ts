@@ -19,13 +19,13 @@ const netflix: PurchaseDraft = {
 	recurring: true,
 	every: 1,
 	unit: 'month',
-	durationKind: 'lifelong'
+	durationKind: 'untilFI'
 };
 
 describe('encodeShare', () => {
 	it('writes compact params for purchase and profile', () => {
 		expect(encodeShare(netflix, profile)).toBe(
-			'amt=15&for=Netflix+%26+chill&every=1m&dur=life&pay=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5'
+			'amt=15&for=Netflix+%26+chill&every=1m&dur=fi&pay=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5'
 		);
 	});
 
@@ -55,6 +55,10 @@ describe('decodeShare', () => {
 		const withYears = { ...netflix, investHorizon: 'years' as const, investYears: 15 };
 		expect(encodeShare(withYears, profile)).toContain('inv=15');
 		expect(decodeShare(encodeShare(withYears, profile)).draft).toEqual(withYears);
+	});
+
+	it('reads links that still say dur=life as until retirement', () => {
+		expect(decodeShare('amt=15&every=1m&dur=life').draft?.durationKind).toBe('untilFI');
 	});
 
 	it('round-trips until-retirement', () => {

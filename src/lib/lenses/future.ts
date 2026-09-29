@@ -1,4 +1,4 @@
-import { futureValue, futureValueOfMonthlySeries } from '$lib/finance/growth';
+import { futureValue, futureValueOfMonthlySeries, monthlyGrowthRate } from '$lib/finance/growth';
 import { monthlyCost, remainingMonths } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatNumber, formatPercent } from '$lib/format';
 import type { Profile } from '$lib/finance/types';
@@ -12,6 +12,11 @@ const RETIREMENT_FIELDS: (keyof Profile)[] = [
 	'retirementTarget',
 	'realReturn'
 ];
+
+/** Exponents keep a decimal or two so the equation reproduces the result. */
+function exponent(n: number): string {
+	return String(Number(n.toFixed(2)));
+}
 
 function yearsText(months: number): string {
 	return `${(months / 12).toFixed(1)} years`;
@@ -112,25 +117,38 @@ export const futureValueLens: Lens = {
 				headline: formatMoney(value),
 				caption,
 				sentence: `If invested at an assumed ${rate} a year above inflation, in today's money.`,
-				working: [`${formatMoney(purchase.amount)} × (1 + ${rate})^${formatNumber(horizon / 12)}`]
+				working: [
+					`${formatMoney(purchase.amount)} × (1 + ${rate})^${exponent(horizon / 12)} = ${formatMoney(value)}`
+				]
 			};
 		}
 
 		// Payments stop at the end of their duration but keep compounding to the horizon.
-		const duration = purchase.duration ?? { kind: 'lifelong' };
+		const duration = purchase.duration ?? { kind: 'untilFI' };
 		const paying = Math.min(horizon, remainingMonths(duration, 0, fiMonth ?? horizon));
 		const payment = monthlyCost(purchase);
-		const value =
-			futureValueOfMonthlySeries(payment, profile.realReturn, paying) *
-			futureValue(1, profile.realReturn, (horizon - paying) / 12);
+		const i = monthlyGrowthRate(profile.realReturn);
+		const monthlyRate = `${(i * 100).toFixed(3)}%`;
+		const atLastPayment = futureValueOfMonthlySeries(payment, profile.realReturn, paying);
+		const value = futureValue(atLastPayment, profile.realReturn, (horizon - paying) / 12);
+		const working =
+			i === 0
+				? [`${formatMoney(payment)} × ${exponent(paying)} months = ${formatMoney(atLastPayment)}`]
+				: [
+						`Monthly return: (1 + ${rate})^(1/12) − 1 = ${monthlyRate}`,
+						`${formatMoney(payment)} × ((1 + ${monthlyRate})^${exponent(paying)} − 1) ÷ ${monthlyRate} = ${formatMoney(atLastPayment)}`
+					];
+		if (horizon > paying) {
+			working.push(
+				`${formatMoney(atLastPayment)} × (1 + ${rate})^${exponent((horizon - paying) / 12)} = ${formatMoney(value)}`
+			);
+		}
 		return {
 			value,
 			headline: formatMoney(value),
 			caption,
 			sentence: `The payments made in that time, if invested at an assumed ${rate} a year above inflation, in today's money.`,
-			working: [
-				`${formatNumber(paying)} monthly payments of ${formatMoney(payment)}, each compounded to month ${formatNumber(horizon)}`
-			]
+			working
 		};
 	}
 };

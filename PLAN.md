@@ -30,9 +30,9 @@ Notation: `X` = amount per payment; `c` = cost per year for recurring; `T` = how
 Every lens that handles recurring costs uses the same two inputs:
 
 - **Frequency**: daily, weekly, monthly, quarterly or yearly, or a custom "every N days/weeks/months". Normalised to `c = X × payments per year`.
-- **Duration (`T`)**: a number of years or months, **until I retire (FI)**, or **lifelong**.
+- **Duration (`T`)**: a number of years or months, or **until I retire** (the default).
 
-Duration only matters while payments come out of savings before the retirement target is reached: the target itself is the user's own figure and never changes. So "lifelong" and "until I retire" give the same retirement delay; a fixed period differs only if it ends before the target date. In "Invested instead" over N years, lifelong payments continue past the target date while "until I retire" payments stop there.
+Duration only matters while payments come out of savings before the retirement target is reached: the target itself is the user's own figure and never changes. A fixed period differs from "until I retire" only if it ends before the target date. In "Invested instead" over N years, "until I retire" payments stop at the target date and the total keeps compounding to year N. (A separate "lifelong" option was removed: with a fixed target it gave the same retirement delay.)
 
 ### A. Time — "what did I trade for it?"
 
@@ -49,7 +49,7 @@ Duration only matters while payments come out of savings before the retirement t
    - One-off: lowers today's net worth.
    - Recurring: payments come out of savings each month until the target is reached (or a fixed duration ends).
    - Already at or above the target: the card shows N/A ("net worth already meets the retirement target") and the summary leaves retirement out.
-5. **Invested instead** — what the money would be worth if invested at `r`, over a horizon chosen on the card: until the retirement target date (default) or N years. One-off: `X(1+r)^n`. Recurring: payments made within the horizon, each compounded to its end (payments that stop early keep growing).
+5. **Invested instead** — what the money would be worth if invested at `r`, over a horizon chosen on the card: "Until retirement" (the target date, default) or "For N years". One-off: `X(1+r)^n`. Recurring: payments made within the horizon, each compounded to its end (payments that stop early keep growing). "How it's calculated" shows the equations: monthly return, the annuity formula, and any further growth.
 
 Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the target is used as entered), side-by-side comparison of purchases, budget lenses (days of living costs, reframed totals: judged not useful), severity labels on cards (the thresholds behind "significant" or "major" weren't meaningful to readers), value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
 
@@ -70,11 +70,11 @@ Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the 
 ┌──────────────────────────────────────────────┐
 │  £ [ 15 ]  ( One-off | Recurring )            │  ← hero input
 │  every [ 1 ] [ month ▾ ]                      │  ← if recurring
-│  for ( [ 3 ] years | until FI | lifelong )    │
+│  for ( [ 3 ] years | until I retire )         │
 │  for [ Netflix            ]  [ ⚙ Profile ]    │
 ├──────────────────────────────────────────────┤
 │  Summary: "About 1 hour of work a month.      │
-│  Delays retirement by ~5 weeks (lifelong)."   │
+│  Delays retirement by ~5 weeks."              │
 ├──────────────────────────────────────────────┤
 │  TIME       │  WEALTH       │  FUTURE        │  ← grouped cards
 │  58 hours   │  0.3% of NW   │  +9 days to FI │
@@ -85,10 +85,10 @@ Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the 
 
 - **Hero input**: amount, one-off / recurring toggle, optional label. Recurring reveals:
   - **Frequency**: preset chips (daily, weekly, monthly, quarterly, yearly) plus "every N [days/weeks/months/years]".
-  - **Duration**: segmented control with a number of years or months, "until I retire", or "lifelong". Default: lifelong, since subscriptions tend to stick.
-  - A live line under the inputs: "= £180/year, £2,700 until FI, lifelong".
+  - **Duration**: segmented control with a number of years or months, or "until I retire" (default).
+  - A live line under the inputs: "= £180 a year, until you retire".
 - **Summary strip**: the 3 most telling lenses in one sentence, always including the retirement delay when the profile allows it. No overall score.
-- **Lens cards**: headline number, one-line sentence, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line. For a lifelong cost the chart shows the FI line moving up as well as the path moving down.
+- **Lens cards**: headline number, one-line sentence, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line.
 - **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, retirement target, plus one assumption (real return) with a default. No withdrawal rate: the target is used as entered. £ throughout; no tax inputs.
 - **Reset**: a Reset button in the profile panel footer clears every entered figure (placeholders apply again; return goes back to 5%). It asks for confirmation inline and is disabled when there's nothing to clear.
 - **Validation**: take-home pay > £0; retirement target > £0; hours per week > 0 and ≤ 100; savings ≥ £0 and < take-home pay (or the placeholder pay if empty); net worth ≥ £0; investment return 0–100%; amount > £0; "every N" and "for N" whole numbers ≥ 1. Invalid figures show an inline error and are saved as typed. They are never replaced by a placeholder: every card that uses one shows "Can't be calculated because your … isn't valid" with a link to the profile, and the summary sentence leaves it out. Each lens declares every profile field it reads (including the return) so this is exact.
@@ -105,7 +105,7 @@ Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the 
 ```ts
 type Unit = 'day' | 'week' | 'month' | 'year';
 type Recurrence = { every: number; unit: Unit }; // e.g. { every: 1, unit: 'month' }
-type Duration = { kind: 'fixed'; months: number } | { kind: 'untilFI' } | { kind: 'lifelong' };
+type Duration = { kind: 'fixed'; months: number } | { kind: 'untilFI' };
 interface Purchase {
 	amount: number;
 	recurrence?: Recurrence;
@@ -148,8 +148,8 @@ interface LensResult {
   ```
 - **Retirement simulation**: monthly steps, `NW ← NW × (1+r)^(1/12) + monthlySavings − purchasePaymentsThisMonth`; FI when `NW ≥ target`. Baseline target = the profile's retirement target. The target is fixed; a recurring cost only reduces monthly savings while it's being paid. Cap at 80 years and report "not reachable" rather than looping. The crossing is interpolated within the month, so a £4 coffee still shows a delay in hours or days rather than rounding to zero.
 - **Recurrence helpers**: `paymentsPerYear`, `annualCost`, `monthlyCost` (every frequency is averaged into a monthly cost, so the simulation stays monthly), `remainingMonths(duration, elapsed, fiMonth)`.
-- **Tests**: unit tests for every lens and finance helper (known-answer cases, edge cases: zero net worth, already FI, no salary, 0% return, a fixed duration that ends exactly at FI, lifelong vs until-FI).
-- **Share links**: `?amt=15&for=Netflix&every=1m&dur=life&pay=42000&hrs=40&sav=12000&nw=100000&tgt=750000&ret=5&inv=10` (return as a percentage; `inv` only when "Invested instead" is set to N years). Read on load, then removed from the address bar so later edits and refreshes aren't confused with the link.
+- **Tests**: unit tests for every lens and finance helper (known-answer cases, edge cases: zero net worth, already FI, no salary, 0% return, a fixed duration that ends exactly at FI).
+- **Share links**: `?amt=15&for=Netflix&every=1m&dur=fi&pay=42000&hrs=40&sav=12000&nw=100000&tgt=750000&ret=5&inv=10` (return as a percentage; `inv` only when "Invested instead" is set to N years). Read on load, then removed from the address bar so later edits and refreshes aren't confused with the link.
 
 ### Milestones
 

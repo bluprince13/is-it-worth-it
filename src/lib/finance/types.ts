@@ -5,8 +5,7 @@ export interface Recurrence {
 	unit: Unit;
 }
 
-export type Duration =
-	{ kind: 'fixed'; months: number } | { kind: 'untilFI' } | { kind: 'lifelong' };
+export type Duration = { kind: 'fixed'; months: number } | { kind: 'untilFI' };
 
 export interface Purchase {
 	amount: number;

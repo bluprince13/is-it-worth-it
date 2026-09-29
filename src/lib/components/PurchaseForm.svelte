@@ -42,8 +42,7 @@
 
 	const durationOptions: { value: Duration['kind']; label: string }[] = [
 		{ value: 'fixed', label: 'For a while' },
-		{ value: 'untilFI', label: 'Until I retire' },
-		{ value: 'lifelong', label: 'Lifelong' }
+		{ value: 'untilFI', label: 'Until I retire' }
 	];
 
 	const purchase = $derived(toPurchase(draft));

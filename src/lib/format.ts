@@ -52,8 +52,6 @@ export function formatElapsed(days: number): string {
 
 export function formatDuration(duration: Duration): string {
 	switch (duration.kind) {
-		case 'lifelong':
-			return 'for life';
 		case 'untilFI':
 			return 'until you retire';
 		case 'fixed':
