@@ -6,6 +6,7 @@
 	import PurchaseForm from '$lib/components/PurchaseForm.svelte';
 	import RetirementChart from '$lib/components/RetirementChart.svelte';
 	import ShareButton from '$lib/components/ShareButton.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { buildRetirementSeries } from '$lib/chart/retirementSeries';
 	import {
 		DEFAULT_DRAFT,
@@ -100,6 +101,8 @@
 
 	const headerButton =
 		'rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800';
+	const iconButton =
+		'rounded-xl border border-stone-300 bg-white p-2 text-stone-600 shadow-sm hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800';
 
 	function listFields(keys: (keyof Profile)[]): string {
 		const labels = keys.map((k) => FIELD_LABELS[k].toLowerCase());
@@ -126,6 +129,7 @@
 			</p>
 		</div>
 		<div class="relative flex shrink-0 gap-2">
+			<ThemeToggle class={iconButton} />
 			<ShareButton
 				class={headerButton}
 				link={() => `${location.origin}${location.pathname}?${encodeShare(draft, profile)}`}
