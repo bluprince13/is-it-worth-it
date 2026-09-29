@@ -50,3 +50,16 @@ export function toPurchase(draft: PurchaseDraft): Purchase {
 		duration: toDuration(draft)
 	};
 }
+
+function example(label: string, amount: number, recurring?: Partial<PurchaseDraft>): PurchaseDraft {
+	return { ...DEFAULT_DRAFT, label, amount, recurring: recurring !== undefined, ...recurring };
+}
+
+export const EXAMPLES: PurchaseDraft[] = [
+	example('Daily coffee', 3.5, { every: 1, unit: 'day', durationKind: 'lifelong' }),
+	example('Netflix', 15, { every: 1, unit: 'month', durationKind: 'lifelong' }),
+	example('Gym', 40, { every: 1, unit: 'month', durationKind: 'untilFI' }),
+	example('New phone every 2 years', 1_000, { every: 2, unit: 'year', durationKind: 'lifelong' }),
+	example('Holiday', 3_000),
+	example('New car', 25_000)
+];

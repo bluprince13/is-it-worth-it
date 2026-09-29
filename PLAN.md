@@ -69,7 +69,7 @@ Not doing (at least in v1): value lenses that need extra inputs per purchase (co
 
 ### Principles
 
-- **Private by default.** Financial profile stays in `localStorage`; nothing is sent anywhere. Share links carry the purchase only, never the profile.
+- **Private by default.** Financial profile stays in `localStorage`; nothing is sent to a server. A share link carries everything entered, purchase and profile, and says so when copied. Opening a link shows its figures without overwriting the viewer's own saved profile unless they choose to keep them.
 - **Progressive disclosure.** Amount + take-home pay is enough to start. Each extra profile field unlocks more lenses ("Add net worth to unlock 3 more views").
 - **Neutral, not preachy.** Every lens gets the same visual weight. The app shows scale, not a verdict.
 - **Show the working.** Each result expands to show the formula and inputs used.
@@ -172,14 +172,14 @@ interface LensResult {
 - **Retirement simulation**: monthly steps, `NW ← NW × (1+r)^(1/12) + monthlySavings − purchasePaymentsThisMonth`; FI when `NW ≥ target`. Baseline target = `annualSpend ÷ SWR`. With the purchase, target += `c ÷ SWR` if lifelong, or the present value at the FI month of payments still due if it's a fixed duration that outlasts FI; "until FI" adds nothing. Because the target depends on the FI month, iterate by checking each month's `NW` against that month's target. Cap at 80 years and report "not reachable" rather than looping. The crossing is interpolated within the month, so a £4 coffee still shows a delay in hours or days rather than rounding to zero.
 - **Recurrence helpers**: `paymentsPerYear`, `annualCost`, `monthlyCost` (every frequency is averaged into a monthly cost, so the simulation stays monthly), `remainingMonths(duration, elapsed, fiMonth)`, `totalCost`.
 - **Tests**: unit tests for every lens and finance helper (known-answer cases, edge cases: zero net worth, already FI, no salary, 0% return, a fixed duration that ends exactly at FI, lifelong vs until-FI).
-- **URL state**: `?amt=15&every=1m&for=life&label=Netflix` so a purchase can be shared or bookmarked.
+- **Share links**: `?amt=15&for=Netflix&every=1m&dur=life&pay=42000&hrs=40&sav=12000&nw=100000&ret=5&swr=4` (return and SWR as percentages). Read on load, then removed from the address bar so later edits and refreshes aren't confused with the link.
 
 ### Milestones
 
 1. ✅ Scaffold SvelteKit + Tailwind + finance and recurrence helpers + tests.
 2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
 3. ✅ Retirement-delay chart (near-retirement and whole-path views), summary sentence, severity chips.
-4. Presets, URL sharing.
+4. ✅ Example presets, share links carrying purchase and profile.
 5. Compare mode, polish (a11y, empty states).
 
 ---

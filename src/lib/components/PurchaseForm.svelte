@@ -9,6 +9,11 @@
 
 	let customFrequency = $state(false);
 
+	$effect.pre(() => {
+		void draft;
+		customFrequency = false;
+	});
+
 	const presetKey = (every: number, unit: Unit) => `${every}-${unit}`;
 
 	const frequencyOptions = [
