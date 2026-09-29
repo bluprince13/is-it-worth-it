@@ -1,40 +1,72 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { hourlyWage, WORKING_WEEKS_PER_YEAR } from '$lib/finance/wage';
-import { formatMoney, formatWorkTime } from '$lib/format';
+import { formatDuration, formatMoney, formatWorkTime } from '$lib/format';
+import { annualCostLine, decimals } from './cost';
 import type { Lens, LensContext, LensResult } from './types';
 
-function workTime(
-	{ purchase, profile, recurring }: LensContext,
-	wage: number,
-	working: string[]
-): LensResult | null {
+function hoursLine(cost: string, wage: number, hours: number): string {
+	return `${cost} ÷ ${formatMoney(wage)} = ${decimals(hours)} hours`;
+}
+
+/** Months of payments, or null when they run to a retirement date the profile can't give. */
+function payingMonths({ purchase, retirement }: LensContext): number | null {
+	const duration = purchase.duration ?? { kind: 'untilFI' };
+	if (duration.kind === 'fixed') return duration.months;
+	const fiMonth = retirement?.baseline.fiMonth;
+	return fiMonth ? fiMonth : null;
+}
+
+function workTime(ctx: LensContext, wage: number, wageLine: string): LensResult | null {
 	if (!(wage > 0)) return null;
+	const { purchase, profile, recurring } = ctx;
 	const hoursPerWeek = profile.hoursPerWeek!;
-	const hours = purchase.amount / wage;
 	const perHour = `At ${formatMoney(wage)} an hour.`;
-	working = [
-		...working,
-		`${formatMoney(purchase.amount)} ÷ ${formatMoney(wage)} = ${hours.toFixed(2)} hours`
-	];
 
 	if (!recurring) {
+		const hours = purchase.amount / wage;
 		return {
 			value: hours,
 			headline: formatWorkTime(hours, hoursPerWeek),
 			caption: '',
 			sentence: perHour,
-			working
+			working: [wageLine, hoursLine(formatMoney(purchase.amount), wage, hours)]
 		};
 	}
-	const yearlyHours = annualCost(purchase) / wage;
+
+	const yearly = annualCost(purchase);
+	const yearlyHours = yearly / wage;
+	const months = payingMonths(ctx);
+	if (months === null) {
+		return {
+			value: yearlyHours,
+			headline: formatWorkTime(yearlyHours, hoursPerWeek),
+			caption: 'a year',
+			sentence: perHour,
+			working: [
+				wageLine,
+				annualCostLine(purchase),
+				hoursLine(`${formatMoney(yearly)} a year`, wage, yearlyHours)
+			]
+		};
+	}
+
+	const years = months / 12;
+	const total = yearly * years;
+	const hours = total / wage;
+	const period =
+		purchase.duration?.kind === 'fixed'
+			? formatDuration(purchase.duration)
+			: `for ${years.toFixed(1)} years, to your retirement target date`;
 	return {
-		value: yearlyHours,
-		headline: formatWorkTime(yearlyHours, hoursPerWeek),
-		caption: 'a year',
-		sentence: `${formatWorkTime(hours, hoursPerWeek)} each payment. ${perHour}`,
+		value: hours,
+		headline: formatWorkTime(hours, hoursPerWeek),
+		caption: `in total, paid ${period}`,
+		sentence: `${formatWorkTime(yearlyHours, hoursPerWeek)} a year. ${perHour}`,
 		working: [
-			...working,
-			`${formatMoney(annualCost(purchase))} a year ÷ ${formatMoney(wage)} = ${yearlyHours.toFixed(2)} hours`
+			wageLine,
+			annualCostLine(purchase),
+			`${formatMoney(yearly)} a year × ${decimals(years)} years = ${formatMoney(total)}`,
+			hoursLine(formatMoney(total), wage, hours)
 		]
 	};
 }
@@ -48,9 +80,11 @@ export const workHours: Lens = {
 	compute(ctx) {
 		const { takeHomePerYear, hoursPerWeek } = ctx.profile;
 		const wage = hourlyWage(takeHomePerYear!, hoursPerWeek!);
-		return workTime(ctx, wage, [
+		return workTime(
+			ctx,
+			wage,
 			`${formatMoney(takeHomePerYear!)} take-home ÷ (${hoursPerWeek} h/week × ${WORKING_WEEKS_PER_YEAR} weeks) = ${formatMoney(wage)}/hour`
-		]);
+		);
 	}
 };
 

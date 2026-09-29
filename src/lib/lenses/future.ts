@@ -1,7 +1,14 @@
 import { futureValue, futureValueOfMonthlySeries, monthlyGrowthRate } from '$lib/finance/growth';
 import { monthlyCost, remainingMonths } from '$lib/finance/recurrence';
-import { formatElapsed, formatMoney, formatNumber, formatPercent } from '$lib/format';
-import type { Profile } from '$lib/finance/types';
+import {
+	formatDuration,
+	formatElapsed,
+	formatMoney,
+	formatNumber,
+	formatPercent
+} from '$lib/format';
+import { annualCostLine, decimals, monthlyCostLine } from './cost';
+import type { Profile, Purchase } from '$lib/finance/types';
 import type { Lens } from './types';
 
 const DAYS_PER_MONTH = 365.25 / 12;
@@ -13,11 +20,6 @@ const RETIREMENT_FIELDS: (keyof Profile)[] = [
 	'realReturn'
 ];
 
-/** Exponents keep a decimal or two so the equation reproduces the result. */
-function exponent(n: number): string {
-	return String(Number(n.toFixed(2)));
-}
-
 function yearsText(months: number): string {
 	return `${(months / 12).toFixed(1)} years`;
 }
@@ -27,6 +29,22 @@ function retirementSentence(before: number, after: number): string {
 	return was === now
 		? `On these figures, net worth reaches the retirement target in about ${now} either way; the difference is under 0.1 years.`
 		: `On these figures, net worth reaches the retirement target in ${now} instead of ${was}.`;
+}
+
+function purchaseLines(purchase: Purchase, netWorth: number, annualSavings: number): string[] {
+	if (!purchase.recurrence) {
+		return [
+			`Net worth today: ${formatMoney(netWorth)} − ${formatMoney(purchase.amount)} = ${formatMoney(netWorth - purchase.amount)}`
+		];
+	}
+	const duration = purchase.duration ?? { kind: 'untilFI' };
+	const saved = annualSavings / 12;
+	const payment = monthlyCost(purchase);
+	return [
+		annualCostLine(purchase),
+		monthlyCostLine(purchase),
+		`Saved a month: ${formatMoney(saved)} − ${formatMoney(payment)} = ${formatMoney(saved - payment)}, ${duration.kind === 'fixed' ? formatDuration(duration) : 'until net worth reaches the retirement target'}`
+	];
 }
 
 export const retirementDelayLens: Lens = {
@@ -41,7 +59,8 @@ export const retirementDelayLens: Lens = {
 		const { baseline, withPurchase, delayMonths } = retirement;
 		const working = [
 			`Retirement target: ${formatMoney(profile.retirementTarget!)}`,
-			`Assumes net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`
+			`Assumes net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`,
+			...purchaseLines(ctx.purchase, profile.netWorth!, profile.annualSavings!)
 		];
 
 		if (baseline.fiMonth === 0) {
@@ -116,7 +135,7 @@ export const futureValueLens: Lens = {
 				caption,
 				sentence: `Assuming a ${rate} return a year above inflation.`,
 				working: [
-					`${formatMoney(purchase.amount)} × (1 + ${rate})^${exponent(horizon / 12)} = ${formatMoney(value)}`
+					`${formatMoney(purchase.amount)} × (1 + ${rate})^${decimals(horizon / 12)} = ${formatMoney(value)}`
 				]
 			};
 		}
@@ -129,16 +148,26 @@ export const futureValueLens: Lens = {
 		const monthlyRate = `${(i * 100).toFixed(3)}%`;
 		const atLastPayment = futureValueOfMonthlySeries(payment, profile.realReturn, paying);
 		const value = futureValue(atLastPayment, profile.realReturn, (horizon - paying) / 12);
-		const working =
-			i === 0
-				? [`${formatMoney(payment)} × ${exponent(paying)} months = ${formatMoney(atLastPayment)}`]
+		const payingReason =
+			paying < remainingMonths(duration, 0, fiMonth ?? Infinity)
+				? `up to the ${formatNumber(horizon / 12)}-year horizon`
+				: duration.kind === 'fixed'
+					? formatDuration(duration)
+					: 'to the retirement target date';
+		const working = [
+			annualCostLine(purchase),
+			monthlyCostLine(purchase),
+			`Months paid: ${decimals(paying)}, ${payingReason}`,
+			...(i === 0
+				? [`${formatMoney(payment)} × ${decimals(paying)} months = ${formatMoney(atLastPayment)}`]
 				: [
 						`Monthly return: (1 + ${rate})^(1/12) − 1 = ${monthlyRate}`,
-						`${formatMoney(payment)} × ((1 + ${monthlyRate})^${exponent(paying)} − 1) ÷ ${monthlyRate} = ${formatMoney(atLastPayment)}`
-					];
+						`${formatMoney(payment)} × ((1 + ${monthlyRate})^${decimals(paying)} − 1) ÷ ${monthlyRate} = ${formatMoney(atLastPayment)}`
+					])
+		];
 		if (horizon > paying) {
 			working.push(
-				`${formatMoney(atLastPayment)} × (1 + ${rate})^${exponent((horizon - paying) / 12)} = ${formatMoney(value)}`
+				`${formatMoney(atLastPayment)} × (1 + ${rate})^${decimals((horizon - paying) / 12)} = ${formatMoney(value)}`
 			);
 		}
 		return {

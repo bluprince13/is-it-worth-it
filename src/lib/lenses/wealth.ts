@@ -1,5 +1,6 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatPercent } from '$lib/format';
+import { annualCostLine } from './cost';
 import type { Lens, LensResult } from './types';
 
 /** Attributed reference point only: states the rule and the user's figure, not a verdict. */
@@ -39,7 +40,10 @@ export const netWorthShare: Lens = {
 			caption: 'of your net worth every year',
 			sentence: `${formatMoney(yearly)} a year out of ${formatMoney(netWorth)}, or ${formatMoney(yearly / 365.25)} a day.`,
 			info: ruleInfo(netWorth),
-			working: [`${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)}`]
+			working: [
+				annualCostLine(purchase),
+				`${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)}`
+			]
 		};
 	}
 };
@@ -68,6 +72,7 @@ export const wealthEarnBack: Lens = {
 		const share = cost / returns;
 		const days = share * 365.25;
 		const working = [
+			...(recurring ? [annualCostLine(purchase)] : []),
 			returnsLine,
 			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(returns)} × 365.25 = ${formatElapsed(days)}`
 		];

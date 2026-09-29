@@ -87,6 +87,11 @@ describe('one-off purchase', () => {
 		expect(delay.caption).toBe('net worth already meets the retirement target');
 	});
 
+	it('takes a one-off from net worth today', () => {
+		const delay = result(profile, bike, 'retirement-delay')!;
+		expect(delay.working).toContain('Net worth today: £100,000 − £1,200 = £98,800');
+	});
+
 	it('reports when the target is not reached', () => {
 		const delay = result({ ...profile, annualSavings: 0, netWorth: 0 }, bike, 'retirement-delay')!;
 		expect(delay.headline).toBe('Not reached');
@@ -94,10 +99,56 @@ describe('one-off purchase', () => {
 });
 
 describe('recurring purchase', () => {
-	it('shows hours of work per year', () => {
-		const work = result(profile, netflix({ kind: 'untilFI' }), 'work-hours')!;
-		expect(work.value).toBeCloseTo(180 / (42_000 / (40 * 46.4)));
+	const wage = 42_000 / (40 * 46.4);
+
+	it('totals hours of work over a fixed duration', () => {
+		const work = result(profile, netflix({ kind: 'fixed', months: 36 }), 'work-hours')!;
+		expect(work.value).toBeCloseTo((180 * 3) / wage);
+		expect(work.caption).toBe('in total, paid for 3 years');
+		expect(work.working).toContain('£15 a month × 12 payments a year = £180 a year');
+		expect(work.working).toContain('£180 a year × 3 years = £540');
+	});
+
+	it('totals hours of work up to the retirement target date', () => {
+		const purchase = netflix({ kind: 'untilFI' });
+		const { retirement, results } = evaluate(profile, purchase);
+		const work = results.find((r) => r.lens.id === 'work-hours')!.result;
+		const years = retirement!.baseline.fiMonth! / 12;
+		expect(work.value).toBeCloseTo((180 * years) / wage);
+		expect(work.caption).toBe(
+			`in total, paid for ${years.toFixed(1)} years, to your retirement target date`
+		);
+	});
+
+	it('shows hours of work per year when the retirement date is unknown', () => {
+		const work = result(
+			{ ...profile, annualSavings: NaN },
+			netflix({ kind: 'untilFI' }),
+			'work-hours'
+		)!;
+		expect(work.value).toBeCloseTo(180 / wage);
 		expect(work.caption).toBe('a year');
+	});
+
+	it('shows how an infrequent payment becomes a yearly and monthly cost', () => {
+		const insurance: Purchase = {
+			amount: 1_000,
+			recurrence: { every: 2, unit: 'year' },
+			duration: { kind: 'untilFI' }
+		};
+		const fv = result(profile, insurance, 'future-value')!;
+		expect(fv.working.slice(0, 3)).toEqual([
+			'£1,000 every 2 years × 0.5 payments a year = £500 a year',
+			'£500 a year ÷ 12 = £41.67 a month',
+			expect.stringMatching(/^Months paid: [\d.]+, to the retirement target date$/)
+		]);
+		const delay = result(profile, insurance, 'retirement-delay')!;
+		expect(delay.working).toContain(
+			'Saved a month: £1,000 − £41.67 = £958, until net worth reaches the retirement target'
+		);
+		expect(result(profile, insurance, 'net-worth-share')!.working[0]).toBe(
+			'£1,000 every 2 years × 0.5 payments a year = £500 a year'
+		);
 	});
 
 	it('shows earn-back as time each year', () => {
@@ -136,8 +187,9 @@ describe('invested instead', () => {
 		const fv = evaluate(profile, threeYears, years).results.find(
 			(r) => r.lens.id === 'future-value'
 		)!.result;
-		expect(fv.working[0]).toMatch(/^Monthly return: \(1 \+ 5%\)\^\(1\/12\) − 1 = 0\.407%$/);
-		expect(fv.working[1]).toMatch(/^£15 × \(\(1 \+ 0\.407%\)\^36 − 1\) ÷ 0\.407% = £/);
+		expect(fv.working[2]).toBe('Months paid: 36, for 3 years');
+		expect(fv.working[3]).toMatch(/^Monthly return: \(1 \+ 5%\)\^\(1\/12\) − 1 = 0\.407%$/);
+		expect(fv.working[4]).toMatch(/^£15 × \(\(1 \+ 0\.407%\)\^36 − 1\) ÷ 0\.407% = £/);
 		expect(fv.working.at(-1)).toMatch(new RegExp(`\\^7 = ${fv.headline.replace('£', '£')}$`));
 	});
 });
