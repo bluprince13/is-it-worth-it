@@ -10,8 +10,8 @@
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { buildRetirementSeries } from '$lib/chart/retirementSeries';
 	import {
-		DEFAULT_DRAFT,
 		EXAMPLES,
+		INITIAL_DRAFT,
 		investYearsOption,
 		toPurchase,
 		validateDraft
@@ -38,7 +38,7 @@
 	const FEATURED = 'retirement-delay';
 	const GROUP_ORDER: Group[] = ['time', 'wealth', 'future'];
 
-	let draft = $state({ ...DEFAULT_DRAFT });
+	let draft = $state({ ...INITIAL_DRAFT });
 	let profile = $state<Profile>({ ...DEFAULT_PROFILE });
 	let profileOpen = $state(false);
 	let loaded = false;

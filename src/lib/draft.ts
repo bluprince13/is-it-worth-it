@@ -68,6 +68,9 @@ export const EXAMPLES: PurchaseDraft[] = [
 	example('New car', 25_000)
 ];
 
+/** Shown on first load so the app's purpose lands before anything is entered. */
+export const INITIAL_DRAFT: PurchaseDraft = { ...EXAMPLES[0] };
+
 export type DraftErrors = Partial<
 	Record<'amount' | 'every' | 'durationCount' | 'investYears', string>
 >;
