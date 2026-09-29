@@ -22,7 +22,6 @@ function workTime(
 			value: hours,
 			headline: formatWorkTime(hours, hoursPerWeek),
 			caption: 'of work',
-			summary: `costs ${formatWorkTime(hours, hoursPerWeek)} of work`,
 			sentence: perHour,
 			working
 		};
@@ -32,7 +31,6 @@ function workTime(
 		value: yearlyHours,
 		headline: formatWorkTime(yearlyHours, hoursPerWeek),
 		caption: 'of work a year',
-		summary: `costs ${formatWorkTime(yearlyHours, hoursPerWeek)} of work a year`,
 		sentence: `${formatWorkTime(hours, hoursPerWeek)} of work each payment. ${perHour}`,
 		working: [
 			...working,

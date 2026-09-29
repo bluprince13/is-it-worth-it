@@ -68,7 +68,6 @@ export const retirementDelayLens: Lens = {
 				value: Infinity,
 				headline: 'Not reached',
 				caption: 'retirement target within 80 years with this cost',
-				summary: 'would mean net worth doesn’t reach the retirement target within 80 years',
 				sentence: `Without it, net worth reaches the retirement target in ${yearsText(baseline.fiMonth)} on these figures.`,
 				working
 			};
@@ -78,7 +77,6 @@ export const retirementDelayLens: Lens = {
 			value: days,
 			headline: formatElapsed(days),
 			caption: 'later to reach your retirement target',
-			summary: `would delay reaching your retirement target by ${formatElapsed(days)}`,
 			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth),
 			working
 		};

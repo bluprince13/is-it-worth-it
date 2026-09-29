@@ -21,7 +21,7 @@ SvelteKit with `adapter-static` (prerendered, no server), Svelte 5 runes, TypeSc
 ## Layout
 
 - `src/lib/finance/`: pure maths. `fi.ts` simulates net worth month by month until it reaches the retirement target, with and without the purchase. `recurrence.ts` normalises frequencies. `growth.ts` does compounding. `wage.ts` gives the hourly wage.
-- `src/lib/lenses/`: each card ("lens") is a pure function in a registry (`index.ts`). A lens declares every profile field it reads in `requires`. `evaluate()` returns `results` plus `blocked` lenses whose fields are missing or invalid. `summary.ts` builds the sentence above the cards.
+- `src/lib/lenses/`: each card ("lens") is a pure function in a registry (`index.ts`). A lens declares every profile field it reads in `requires`. `evaluate()` returns `results` plus `blocked` lenses whose fields are missing or invalid.
 - `src/lib/profile.ts`: profile fields, typical-UK placeholders, validation, localStorage.
 - `src/lib/draft.ts`: purchase form state, examples and validation.
 - `src/lib/share.ts`: encodes and decodes share-link query params.
@@ -36,7 +36,7 @@ SvelteKit with `adapter-static` (prerendered, no server), Svelte 5 runes, TypeSc
 - **Recurring duration:** "For N years/months" or "Until I retire" (the default).
 - **Invested instead:** compounds either until retirement or for N years, chosen on the card.
 - **Placeholders:** an empty profile field uses the typical-UK figure in `TYPICAL_PROFILE`, shown as grey placeholder text and named in a note on the page.
-- **Invalid fields:** never replaced by a placeholder. Every card that uses the field shows an error with a link to the profile, and the summary leaves it out.
+- **Invalid fields:** never replaced by a placeholder. Every card that uses the field shows an error with a link to the profile.
 
 ## Rules
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import type { Profile, Purchase } from '$lib/finance/types';
 import { futureValue, futureValueOfMonthlySeries } from '$lib/finance/growth';
 import { evaluate } from './index';
-import { summarise } from './summary';
 
 const profile: Profile = {
 	takeHomePerYear: 42_000,
@@ -72,7 +71,6 @@ describe('one-off purchase', () => {
 		const delay = result(rich, bike, 'retirement-delay')!;
 		expect(delay.headline).toBe('N/A');
 		expect(delay.caption).toBe('net worth already meets the retirement target');
-		expect(summarise(evaluate(rich, bike).results, bike)).not.toContain('retirement');
 	});
 
 	it('reports when the target is not reached', () => {
@@ -92,27 +90,6 @@ describe('recurring purchase', () => {
 		const earnBack = result(profile, netflix({ kind: 'untilFI' }), 'wealth-earn-back')!;
 		expect(earnBack.value).toBeCloseTo((180 / 17_000) * 365.25);
 		expect(earnBack.headline).toBe('3.9 days');
-	});
-});
-
-describe('summarise', () => {
-	it('names the purchase and combines work time with retirement delay', () => {
-		const purchase = { ...netflix({ kind: 'untilFI' }), label: 'Netflix' };
-		const sentence = summarise(evaluate(profile, purchase).results, purchase);
-		expect(sentence).toMatch(
-			/^Netflix costs .+ of work a year and would delay reaching your retirement target by .+\.$/
-		);
-	});
-
-	it('falls back to "This" and to what is available', () => {
-		const partial: Profile = { netWorth: 100_000, realReturn: 0.05 };
-		expect(summarise(evaluate(partial, bike).results, bike)).toBe(
-			'This is 1.2% of your net worth.'
-		);
-	});
-
-	it('is null when nothing can be said', () => {
-		expect(summarise(evaluate({ realReturn: 0.05 }, bike).results, bike)).toBeNull();
 	});
 });
 

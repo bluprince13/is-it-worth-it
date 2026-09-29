@@ -22,7 +22,6 @@ export const netWorthShare: Lens = {
 				value: share,
 				headline: formatPercent(share),
 				caption: 'of your net worth',
-				summary: `is ${formatPercent(share)} of your net worth`,
 				sentence: `${formatMoney(purchase.amount)} out of ${formatMoney(netWorth)}. ${ruleReference(netWorth)}`,
 				working: [`${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)}`]
 			};

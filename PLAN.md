@@ -48,10 +48,10 @@ Duration only matters while payments come out of savings before the retirement t
 4. **Retirement delay** (headline lens) — simulate net worth month by month to the user's **retirement target** (a profile input, in today's money), with and without the purchase, and report the difference in days/weeks/months.
    - One-off: lowers today's net worth.
    - Recurring: payments come out of savings each month until the target is reached (or a fixed duration ends).
-   - Already at or above the target: the card shows N/A ("net worth already meets the retirement target") and the summary leaves retirement out.
+   - Already at or above the target: the card shows N/A ("net worth already meets the retirement target").
 5. **Invested instead** — what the money would be worth if invested at `r`, over a horizon chosen on the card: "Until retirement" (the target date, default) or "For N years". One-off: `X(1+r)^n`. Recurring: payments made within the horizon, each compounded to its end (payments that stop early keep growing). "How it's calculated" shows the equations: monthly return, the annuity formula, and any further growth.
 
-Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the target is used as entered), side-by-side comparison of purchases, budget lenses (days of living costs, reframed totals: judged not useful), severity labels on cards (the thresholds behind "significant" or "major" weren't meaningful to readers), value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
+Not doing (at least in v1): a summary sentence above the cards (it repeated the cards without adding anything), a withdrawal rate or "capital to fund it" card (the target is used as entered), side-by-side comparison of purchases, budget lenses (days of living costs, reframed totals: judged not useful), severity labels on cards (the thresholds behind "significant" or "major" weren't meaningful to readers), value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
 
 ---
 
@@ -60,7 +60,7 @@ Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the 
 ### Principles
 
 - **Private by default.** Financial profile stays in `localStorage`; nothing is sent to a server. A share link carries everything entered, purchase and profile, and says so when copied. Opening a link shows its figures without overwriting the viewer's own saved profile unless they choose to keep them.
-- **Works with no setup.** Any empty profile field falls back to a typical UK full-time employee (£30,000 take-home, from the ONS April 2025 median of £39,039 gross; 37.5 hours; £3,000 saved; £20,000 invested; £675,000 retirement target, i.e. 25 × the £27,000 left after saving), so every lens shows straight away. Defaults are shown as grey placeholders, never saved as the user's own, and a note under the summary names the fields still on defaults.
+- **Works with no setup.** Any empty profile field falls back to a typical UK full-time employee (£30,000 take-home, from the ONS April 2025 median of £39,039 gross; 37.5 hours; £3,000 saved; £20,000 invested; £675,000 retirement target, i.e. 25 × the £27,000 left after saving), so every lens shows straight away. Defaults are shown as grey placeholders, never saved as the user's own, and a note above the cards names the fields still on defaults.
 - **Factual, never advice.** Every lens gets the same visual weight. Text states calculations and names assumptions ("on these figures", "assumed 5% return"); it never judges a purchase (no "small enough not to worry"), never says what the user can or should do, and never states a modelled outcome as a fact about their life ("reaches the retirement target in 21 years", not "you'll be financially independent"). A footer says it's for illustration only and not financial advice.
 - **Show the working.** Each result expands to show the formula and inputs used.
 
@@ -73,9 +73,6 @@ Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the 
 │  for ( [ 3 ] years | until I retire )         │
 │  for [ Netflix            ]  [ ⚙ Profile ]    │
 ├──────────────────────────────────────────────┤
-│  Summary: "About 1 hour of work a month.      │
-│  Delays retirement by ~5 weeks."              │
-├──────────────────────────────────────────────┤
 │  TIME       │  WEALTH       │  FUTURE        │  ← grouped cards
 │  58 hours   │  0.3% of NW   │  +9 days to FI │
 │  of work    │  earned back  │  £4,100 at 60  │
@@ -87,11 +84,10 @@ Not doing (at least in v1): a withdrawal rate or "capital to fund it" card (the 
   - **Frequency**: preset chips (daily, weekly, monthly, quarterly, yearly) plus "every N [days/weeks/months/years]".
   - **Duration**: segmented control with a number of years or months, or "until I retire" (default).
   - A live line under the inputs: "= £180 a year, until you retire".
-- **Summary strip**: the 3 most telling lenses in one sentence, always including the retirement delay when the profile allows it. No overall score.
 - **Lens cards**: headline number, one-line sentence, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line.
 - **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, retirement target, plus one assumption (real return) with a default. No withdrawal rate: the target is used as entered. £ throughout; no tax inputs.
 - **Reset**: a Reset button in the profile panel footer clears every entered figure (placeholders apply again; return goes back to 5%). It asks for confirmation inline and is disabled when there's nothing to clear.
-- **Validation**: take-home pay > £0; retirement target > £0; hours per week > 0 and ≤ 100; savings ≥ £0 and < take-home pay (or the placeholder pay if empty); net worth ≥ £0; investment return 0–100%; amount > £0; "every N" and "for N" whole numbers ≥ 1. Invalid figures show an inline error and are saved as typed. They are never replaced by a placeholder: every card that uses one shows "Can't be calculated because your … isn't valid" with a link to the profile, and the summary sentence leaves it out. Each lens declares every profile field it reads (including the return) so this is exact.
+- **Validation**: take-home pay > £0; retirement target > £0; hours per week > 0 and ≤ 100; savings ≥ £0 and < take-home pay (or the placeholder pay if empty); net worth ≥ £0; investment return 0–100%; amount > £0; "every N" and "for N" whole numbers ≥ 1. Invalid figures show an inline error and are saved as typed. They are never replaced by a placeholder: every card that uses one shows "Can't be calculated because your … isn't valid" with a link to the profile. Each lens declares every profile field it reads (including the return) so this is exact.
 - **Share feedback**: a small popover under the header buttons says "Link copied" (and that the link includes profile figures), fading after 4 seconds; the button itself never changes. If the clipboard is blocked, the popover shows the link to copy by hand, with a close button.
 - **Presets** (nice to have): coffee, Netflix, holiday, car, extension — useful for exploring and for the demo.
 
@@ -143,7 +139,7 @@ interface LensResult {
   src/lib/finance/     # pure maths: fv, annuity, simulateToFI, hourlyRate
   src/lib/lenses/      # one file per group + index.ts registry
   src/lib/stores/      # profile (persisted), purchase (URL-synced)
-  src/lib/components/  # AmountInput, FrequencyToggle, LensCard, SummaryStrip, ProfileDrawer, charts
+  src/lib/components/  # AmountInput, FrequencyToggle, LensCard, ProfileDrawer, charts
   src/routes/+page.svelte
   ```
 - **Retirement simulation**: monthly steps, `NW ← NW × (1+r)^(1/12) + monthlySavings − purchasePaymentsThisMonth`; FI when `NW ≥ target`. Baseline target = the profile's retirement target. The target is fixed; a recurring cost only reduces monthly savings while it's being paid. Cap at 80 years and report "not reachable" rather than looping. The crossing is interpolated within the month, so a £4 coffee still shows a delay in hours or days rather than rounding to zero.
@@ -155,7 +151,7 @@ interface LensResult {
 
 1. ✅ Scaffold SvelteKit + Tailwind + finance and recurrence helpers + tests.
 2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
-3. ✅ Retirement-delay chart (near-retirement and whole-path views), summary sentence.
+3. ✅ Retirement-delay chart (near-retirement and whole-path views).
 4. ✅ Example presets, share links carrying purchase and profile.
 5. Polish (a11y, empty states).
 
