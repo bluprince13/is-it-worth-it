@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Profile } from '$lib/finance/types';
-	import { PROFILE_SECTIONS, TYPICAL_PROFILE, type FieldKind } from '$lib/profile';
+	import { PROFILE_SECTIONS, TYPICAL_PROFILE, validateProfile, type FieldKind } from '$lib/profile';
 	import NumberField from './NumberField.svelte';
 
 	let { profile = $bindable(), open = $bindable() }: { profile: Profile; open: boolean } = $props();
 
 	let dialog: HTMLDialogElement;
+
+	const errors = $derived(validateProfile(profile));
 
 	$effect(() => {
 		if (open && !dialog.open) dialog.showModal();
@@ -59,6 +61,7 @@
 								hint={field.hint}
 								{...FIELD_FORMAT[field.kind]}
 								placeholder={TYPICAL_PROFILE[field.key]}
+								error={errors[field.key]}
 								bind:value={profile[field.key]}
 							/>
 						{/each}

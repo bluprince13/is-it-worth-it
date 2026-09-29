@@ -95,6 +95,8 @@ Not doing (at least in v1): side-by-side comparison of purchases, budget lenses 
 - **Summary strip**: the 3 most telling lenses in one sentence, always including the retirement delay when the profile allows it. No overall score.
 - **Lens cards**: headline number, one-line sentence, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line. For a lifelong cost the chart shows the FI line moving up as well as the path moving down.
 - **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, plus two assumptions (real return, SWR) with defaults. Spending is derived as take-home − savings. £ throughout; no tax inputs.
+- **Validation**: take-home pay > £0; hours per week > 0 and ≤ 100; savings ≥ £0 and < take-home pay (or the placeholder pay if empty); net worth ≥ £0; investment return 0–100%; withdrawal rate > 0% and ≤ 10%; amount > £0; "every N" and "for N" whole numbers ≥ 1. Invalid figures show an inline error, are saved as typed, and are replaced by the placeholder in the calculation, with a note on the page naming them.
+- **Share feedback**: the Share button changes to "Copied ✓" for a few seconds alongside the confirmation message.
 - **Presets** (nice to have): coffee, Netflix, holiday, car, extension — useful for exploring and for the demo.
 
 ---

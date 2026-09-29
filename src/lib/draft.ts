@@ -63,3 +63,21 @@ export const EXAMPLES: PurchaseDraft[] = [
 	example('Holiday', 3_000),
 	example('New car', 25_000)
 ];
+
+export type DraftErrors = Partial<Record<'amount' | 'every' | 'durationCount', string>>;
+
+const WHOLE_NUMBER = 'Must be a whole number, 1 or more';
+
+function isPositiveInt(value: number | null | undefined): boolean {
+	return typeof value === 'number' && Number.isInteger(value) && value >= 1;
+}
+
+export function validateDraft(draft: PurchaseDraft): DraftErrors {
+	const errors: DraftErrors = {};
+	if (draft.amount !== undefined && !(draft.amount > 0)) errors.amount = 'Must be more than £0';
+	if (draft.recurring && !isPositiveInt(draft.every)) errors.every = WHOLE_NUMBER;
+	if (draft.recurring && draft.durationKind === 'fixed' && !isPositiveInt(draft.durationCount)) {
+		errors.durationCount = WHOLE_NUMBER;
+	}
+	return errors;
+}

@@ -1,4 +1,5 @@
 import type { Profile } from './finance/types';
+import { formatMoney } from './format';
 
 const STORAGE_KEY = 'is-it-worth-it:profile';
 
@@ -16,18 +17,52 @@ export const TYPICAL_PROFILE: Required<Profile> = {
 	...DEFAULT_PROFILE
 };
 
+export type ProfileErrors = Partial<Record<keyof Profile, string>>;
+
+const isNumber = (value: unknown): value is number =>
+	typeof value === 'number' && Number.isFinite(value);
+
+export function validateProfile(profile: Profile): ProfileErrors {
+	const errors: ProfileErrors = {};
+	const { takeHomePerYear: pay, hoursPerWeek, annualSavings, netWorth, realReturn, swr } = profile;
+
+	if (isNumber(pay) && pay <= 0) errors.takeHomePerYear = 'Must be more than £0';
+	if (isNumber(hoursPerWeek) && (hoursPerWeek <= 0 || hoursPerWeek > 100)) {
+		errors.hoursPerWeek = 'Must be more than 0 and at most 100';
+	}
+	if (isNumber(netWorth) && netWorth < 0) errors.netWorth = 'Must be £0 or more';
+	if (isNumber(annualSavings)) {
+		const effectivePay =
+			isNumber(pay) && !errors.takeHomePerYear ? pay : TYPICAL_PROFILE.takeHomePerYear;
+		if (annualSavings < 0) errors.annualSavings = 'Must be £0 or more';
+		else if (annualSavings >= effectivePay) {
+			errors.annualSavings = `Must be less than take-home pay (${formatMoney(effectivePay)})`;
+		}
+	}
+	if (isNumber(realReturn) && (realReturn < 0 || realReturn > 1)) {
+		errors.realReturn = 'Must be between 0% and 100%';
+	}
+	if (isNumber(swr) && (swr <= 0 || swr > 0.1)) {
+		errors.swr = 'Must be more than 0% and at most 10%';
+	}
+	return errors;
+}
+
+/** Fills empty or invalid fields from TYPICAL_PROFILE and reports which ones. */
 export function withDefaults(profile: Profile): {
 	profile: Required<Profile>;
 	defaulted: (keyof Profile)[];
+	errors: ProfileErrors;
 } {
+	const errors = validateProfile(profile);
 	const merged = { ...TYPICAL_PROFILE };
 	const defaulted: (keyof Profile)[] = [];
 	for (const key of Object.keys(TYPICAL_PROFILE) as (keyof Profile)[]) {
 		const value = profile[key];
-		if (typeof value === 'number' && Number.isFinite(value)) merged[key] = value;
+		if (isNumber(value) && !errors[key]) merged[key] = value;
 		else defaulted.push(key);
 	}
-	return { profile: merged, defaulted };
+	return { profile: merged, defaulted, errors };
 }
 
 export type FieldKind = 'money' | 'hours' | 'percent';

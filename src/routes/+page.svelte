@@ -72,6 +72,8 @@
 	}
 
 	const withTypical = $derived(withDefaults(profile));
+	const invalidFields = $derived(Object.keys(withTypical.errors) as (keyof Profile)[]);
+	const emptyFields = $derived(withTypical.defaulted.filter((k) => !withTypical.errors[k]));
 
 	const purchase = $derived(toPurchase(draft));
 	const evaluation = $derived(evaluate(withTypical.profile, purchase));
@@ -116,7 +118,9 @@
 			</p>
 		</div>
 		<div class="flex shrink-0 gap-2">
-			<button type="button" class={headerButton} onclick={share}>Share</button>
+			<button type="button" class={headerButton} onclick={share}>
+				{shareStatus?.kind === 'copied' ? 'Copied ✓' : 'Share'}
+			</button>
 			<button type="button" class={headerButton} onclick={() => (profileOpen = true)}>
 				Your profile
 			</button>
@@ -187,9 +191,20 @@
 				</p>
 			{/if}
 
-			{#if withTypical.defaulted.length > 0}
+			{#if invalidFields.length > 0}
+				<p class="-mt-6 text-sm text-rose-700 dark:text-rose-400">
+					Your {listFields(invalidFields)}
+					{invalidFields.length === 1 ? "isn't" : "aren't"} valid, so typical UK figures are used instead.
+					<button
+						type="button"
+						class="font-medium underline underline-offset-2"
+						onclick={() => (profileOpen = true)}>Review your profile</button
+					>
+				</p>
+			{/if}
+			{#if emptyFields.length > 0}
 				<p class="-mt-6 text-sm text-stone-500 dark:text-stone-400">
-					Using typical UK figures for your {listFields(withTypical.defaulted)}.
+					Using typical UK figures for your {listFields(emptyFields)}.
 					<button
 						type="button"
 						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FREQUENCY_PRESETS, toPurchase, type PurchaseDraft } from '$lib/draft';
+	import { FREQUENCY_PRESETS, toPurchase, validateDraft, type PurchaseDraft } from '$lib/draft';
 	import { annualCost } from '$lib/finance/recurrence';
 	import type { Duration, Unit } from '$lib/finance/types';
 	import { formatDuration, formatMoney } from '$lib/format';
@@ -47,6 +47,10 @@
 	];
 
 	const purchase = $derived(toPurchase(draft));
+	const errors = $derived(validateDraft(draft));
+
+	const smallInput = (error: string | undefined) =>
+		`w-20 rounded-lg bg-white py-1.5 tabular-nums dark:bg-stone-900 ${error ? 'border-rose-500' : 'border-stone-300 dark:border-stone-700'}`;
 </script>
 
 <section
@@ -58,7 +62,9 @@
 				>Amount</label
 			>
 			<div
-				class="mt-1 flex items-center rounded-xl border border-stone-300 bg-stone-50 focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600 dark:border-stone-700 dark:bg-stone-950"
+				class="mt-1 flex items-center rounded-xl border bg-stone-50 focus-within:ring-1 dark:bg-stone-950 {errors.amount
+					? 'border-rose-500 focus-within:ring-rose-500'
+					: 'border-stone-300 focus-within:border-emerald-600 focus-within:ring-emerald-600 dark:border-stone-700'}"
 			>
 				<span class="pl-4 text-2xl text-stone-400">£</span>
 				<input
@@ -68,12 +74,19 @@
 					min="0"
 					step="any"
 					placeholder="0"
+					aria-invalid={errors.amount ? true : undefined}
+					aria-describedby={errors.amount ? 'amount-error' : undefined}
 					class="w-full min-w-0 border-0 bg-transparent py-2 pr-4 pl-1 text-3xl font-semibold tabular-nums focus:ring-0"
 					bind:value={
 						() => draft.amount, (v) => (draft.amount = v == null || Number.isNaN(v) ? undefined : v)
 					}
 				/>
 			</div>
+			{#if errors.amount}
+				<p id="amount-error" class="mt-1 text-xs text-rose-700 dark:text-rose-400">
+					{errors.amount}
+				</p>
+			{/if}
 		</div>
 		<div class="flex-1">
 			<label for="label" class="block text-sm font-medium text-stone-600 dark:text-stone-300"
@@ -119,7 +132,9 @@
 							min="1"
 							step="1"
 							aria-label="Number of units between payments"
-							class="w-20 rounded-lg border-stone-300 bg-white py-1.5 tabular-nums dark:border-stone-700 dark:bg-stone-900"
+							aria-invalid={errors.every ? true : undefined}
+							aria-describedby={errors.every ? 'every-error' : undefined}
+							class={smallInput(errors.every)}
 							bind:value={draft.every}
 						/>
 						<select
@@ -133,6 +148,11 @@
 							<option value="year">years</option>
 						</select>
 					</div>
+					{#if errors.every}
+						<p id="every-error" class="mt-1 text-xs text-rose-700 dark:text-rose-400">
+							{errors.every}
+						</p>
+					{/if}
 				{/if}
 			</fieldset>
 
@@ -148,7 +168,9 @@
 							min="1"
 							step="1"
 							aria-label="Duration length"
-							class="w-20 rounded-lg border-stone-300 bg-white py-1.5 tabular-nums dark:border-stone-700 dark:bg-stone-900"
+							aria-invalid={errors.durationCount ? true : undefined}
+							aria-describedby={errors.durationCount ? 'duration-error' : undefined}
+							class={smallInput(errors.durationCount)}
 							bind:value={draft.durationCount}
 						/>
 						<select
@@ -160,6 +182,11 @@
 							<option value="month">months</option>
 						</select>
 					</div>
+					{#if errors.durationCount}
+						<p id="duration-error" class="mt-1 text-xs text-rose-700 dark:text-rose-400">
+							{errors.durationCount}
+						</p>
+					{/if}
 				{/if}
 			</fieldset>
 
