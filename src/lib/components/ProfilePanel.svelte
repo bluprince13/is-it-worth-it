@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { Profile } from '$lib/finance/types';
-	import { PROFILE_SECTIONS, TYPICAL_PROFILE, validateProfile, type FieldKind } from '$lib/profile';
+	import {
+		DEFAULT_PROFILE,
+		PROFILE_SECTIONS,
+		TYPICAL_PROFILE,
+		validateProfile,
+		type FieldKind
+	} from '$lib/profile';
 	import NumberField from './NumberField.svelte';
 
 	let { profile = $bindable(), open = $bindable() }: { profile: Profile; open: boolean } = $props();
@@ -8,6 +14,18 @@
 	let dialog: HTMLDialogElement;
 
 	const errors = $derived(validateProfile(profile));
+
+	let confirmingReset = $state(false);
+	const isDefault = $derived(
+		(Object.keys(TYPICAL_PROFILE) as (keyof Profile)[]).every(
+			(key) => profile[key] === DEFAULT_PROFILE[key]
+		)
+	);
+
+	function reset() {
+		profile = { ...DEFAULT_PROFILE };
+		confirmingReset = false;
+	}
 
 	$effect(() => {
 		if (open && !dialog.open) dialog.showModal();
@@ -23,7 +41,10 @@
 
 <dialog
 	bind:this={dialog}
-	onclose={() => (open = false)}
+	onclose={() => {
+		open = false;
+		confirmingReset = false;
+	}}
 	onclick={(e) => e.target === dialog && dialog.close()}
 	aria-labelledby="profile-title"
 	class="m-0 ml-auto h-dvh max-h-none w-full max-w-md bg-stone-50 p-0 text-stone-900 backdrop:bg-stone-950/40 backdrop:backdrop-blur-sm dark:bg-stone-950 dark:text-stone-100"
@@ -69,5 +90,35 @@
 				</section>
 			{/each}
 		</div>
+
+		<footer
+			class="flex min-h-16 items-center justify-between gap-3 border-t border-stone-200 px-5 py-3 text-sm dark:border-stone-800"
+		>
+			{#if confirmingReset}
+				<p>Clear all your figures?</p>
+				<div class="flex gap-2">
+					<button
+						type="button"
+						class="rounded-lg px-3 py-1.5 font-medium text-stone-600 hover:bg-stone-200 dark:text-stone-300 dark:hover:bg-stone-800"
+						onclick={() => (confirmingReset = false)}>Cancel</button
+					>
+					<button
+						type="button"
+						class="rounded-lg bg-rose-600 px-3 py-1.5 font-medium text-white hover:bg-rose-700"
+						onclick={reset}>Reset</button
+					>
+				</div>
+			{:else}
+				<p class="text-xs text-stone-500 dark:text-stone-400">
+					Reset clears your figures so the placeholders are used again.
+				</p>
+				<button
+					type="button"
+					disabled={isDefault}
+					class="shrink-0 rounded-lg border border-stone-300 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-stone-400 disabled:hover:bg-transparent dark:border-stone-700 dark:text-rose-400 dark:hover:bg-rose-950 dark:disabled:text-stone-600"
+					onclick={() => (confirmingReset = true)}>Reset</button
+				>
+			{/if}
+		</footer>
 	</div>
 </dialog>
