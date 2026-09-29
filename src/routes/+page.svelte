@@ -5,6 +5,7 @@
 	import ProfilePanel from '$lib/components/ProfilePanel.svelte';
 	import PurchaseForm from '$lib/components/PurchaseForm.svelte';
 	import RetirementChart from '$lib/components/RetirementChart.svelte';
+	import ShareButton from '$lib/components/ShareButton.svelte';
 	import { buildRetirementSeries } from '$lib/chart/retirementSeries';
 	import { DEFAULT_DRAFT, EXAMPLES, toPurchase } from '$lib/draft';
 	import type { Profile } from '$lib/finance/types';
@@ -28,8 +29,6 @@
 	let loaded = false;
 	/** True while showing figures from a shared link, which must not overwrite the viewer's own. */
 	let profileFromLink = $state(false);
-	let shareStatus = $state<{ kind: 'copied' } | { kind: 'manual'; url: string } | null>(null);
-	let shareTimer: ReturnType<typeof setTimeout>;
 
 	onMount(() => {
 		const shared = decodeShare(location.search);
@@ -57,18 +56,6 @@
 	function useOwnProfile() {
 		profile = loadProfile();
 		profileFromLink = false;
-	}
-
-	async function share() {
-		const url = `${location.origin}${location.pathname}?${encodeShare(draft, profile)}`;
-		clearTimeout(shareTimer);
-		try {
-			await navigator.clipboard.writeText(url);
-			shareStatus = { kind: 'copied' };
-			shareTimer = setTimeout(() => (shareStatus = null), 5000);
-		} catch {
-			shareStatus = { kind: 'manual', url };
-		}
 	}
 
 	const withTypical = $derived(withDefaults(profile));
@@ -117,41 +104,16 @@
 				What a purchase costs you, measured in time, wealth and retirement.
 			</p>
 		</div>
-		<div class="flex shrink-0 gap-2">
-			<button type="button" class={headerButton} onclick={share}>
-				{shareStatus?.kind === 'copied' ? 'Copied ✓' : 'Share'}
-			</button>
+		<div class="relative flex shrink-0 gap-2">
+			<ShareButton
+				class={headerButton}
+				link={() => `${location.origin}${location.pathname}?${encodeShare(draft, profile)}`}
+			/>
 			<button type="button" class={headerButton} onclick={() => (profileOpen = true)}>
 				Your profile
 			</button>
 		</div>
 	</header>
-
-	{#if shareStatus}
-		<div
-			role="status"
-			class="mb-6 rounded-xl border border-stone-200 bg-white p-4 text-sm dark:border-stone-800 dark:bg-stone-900"
-		>
-			{#if shareStatus.kind === 'copied'}
-				<p>
-					<strong class="font-medium">Link copied.</strong>
-					It includes your profile figures, so anyone with the link can see them.
-				</p>
-			{:else}
-				<label for="share-url" class="block font-medium">Copy this link to share</label>
-				<p class="text-stone-500 dark:text-stone-400">
-					It includes your profile figures, so anyone with the link can see them.
-				</p>
-				<input
-					id="share-url"
-					readonly
-					value={shareStatus.url}
-					onfocus={(e) => e.currentTarget.select()}
-					class="mt-2 w-full rounded-lg border-stone-300 bg-stone-50 text-xs dark:border-stone-700 dark:bg-stone-950"
-				/>
-			{/if}
-		</div>
-	{/if}
 
 	{#if profileFromLink}
 		<div
