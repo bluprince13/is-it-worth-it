@@ -57,10 +57,6 @@ describe('decodeShare', () => {
 		expect(decodeShare(encodeShare(withYears, profile)).draft).toEqual(withYears);
 	});
 
-	it('reads links that still say dur=life as until retirement', () => {
-		expect(decodeShare('amt=15&every=1m&dur=life').draft?.durationKind).toBe('untilFI');
-	});
-
 	it('round-trips until-retirement', () => {
 		const untilFI = { ...netflix, durationKind: 'untilFI' as const };
 		expect(decodeShare(encodeShare(untilFI, profile)).draft).toEqual(untilFI);

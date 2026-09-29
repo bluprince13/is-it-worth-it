@@ -66,8 +66,7 @@ function decodeDraft(params: URLSearchParams): PurchaseDraft | undefined {
 
 	const dur = params.get('dur');
 	const fixed = dur?.match(/^(\d+)([ym])$/);
-	// "life" is from links made before the lifelong option was removed.
-	if (dur === 'fi' || dur === 'life') draft.durationKind = 'untilFI';
+	if (dur === 'fi') draft.durationKind = 'untilFI';
 	else if (fixed && Number(fixed[1]) >= 1) {
 		draft.durationKind = 'fixed';
 		draft.durationCount = Number(fixed[1]);
