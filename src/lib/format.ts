@@ -25,18 +25,43 @@ export function formatNumber(value: number): string {
 	return Math.round(value).toLocaleString('en-GB');
 }
 
+function digitsAndFirstPoint(raw: string): string {
+	const clean = raw.replace(/[^\d.]/g, '');
+	const point = clean.indexOf('.');
+	return point === -1
+		? clean
+		: clean.slice(0, point + 1) + clean.slice(point + 1).replace(/\./g, '');
+}
+
 /** Adds thousands separators to a numeric string, keeping any decimal part and a trailing point. */
 export function groupNumberString(raw: string): string {
-	const clean = raw.replace(/[^\d.]/g, '');
+	const clean = digitsAndFirstPoint(raw);
 	const [intPart, fracPart] = clean.split('.');
 	const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-	return clean.includes('.') ? `${grouped}.${fracPart ?? ''}` : grouped;
+	return clean.includes('.') ? `${grouped}.${fracPart}` : grouped;
 }
 
 /** Parses a number from an input string, ignoring thousands separators and whitespace. */
 export function parseNumberString(raw: string): number | undefined {
 	const n = Number(raw.replace(/[,\s]/g, ''));
 	return raw.trim() === '' || Number.isNaN(n) ? undefined : n;
+}
+
+/**
+ * Cleans and groups what was typed into a number input, keeping the caret after the same
+ * digit or decimal point it followed.
+ */
+export function reformatNumberInput(
+	raw: string,
+	caret: number
+): { text: string; caret: number; value: number | undefined } {
+	const text = groupNumberString(raw);
+	const keptBefore = digitsAndFirstPoint(raw.slice(0, caret)).length;
+	let pos = 0;
+	for (let kept = 0; pos < text.length && kept < keptBefore; pos++) {
+		if (text[pos] !== ',') kept++;
+	}
+	return { text, caret: pos, value: parseNumberString(text) };
 }
 
 function quantity(value: number, unit: string): string {

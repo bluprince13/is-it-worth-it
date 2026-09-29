@@ -11,16 +11,15 @@ function storedTheme(): Theme | null {
 	}
 }
 
-function systemTheme(): Theme {
-	return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 class ThemeStore {
 	current = $state<Theme>('light');
 
-	/** Picks up the saved or system theme; called once on the client after mount. */
+	/** Adopts the theme app.html already applied, then follows the system until one is chosen. */
 	init(): void {
-		this.current = storedTheme() ?? systemTheme();
+		this.current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+			if (!storedTheme()) this.current = e.matches ? 'dark' : 'light';
+		});
 	}
 
 	toggle(): void {

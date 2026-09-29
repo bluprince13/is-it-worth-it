@@ -33,8 +33,7 @@
 	const describedBy = $derived(
 		[hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined
 	);
-	const fromDisplay = (v: number | null | undefined) =>
-		v == null || Number.isNaN(v) ? undefined : v / scale;
+	const fromDisplay = (v: number | undefined) => (v === undefined ? undefined : v / scale);
 	const displayPlaceholder = $derived(
 		placeholder === undefined ? undefined : groupNumberString(String(toDisplay(placeholder)))
 	);

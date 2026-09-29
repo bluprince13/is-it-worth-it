@@ -5,13 +5,13 @@ export interface PurchaseDraft {
 	amount?: number;
 	label: string;
 	recurring: boolean;
-	every: number;
+	every: number | undefined;
 	unit: Unit;
 	durationKind: Duration['kind'];
-	durationCount: number;
+	durationCount: number | undefined;
 	durationUnit: 'year' | 'month';
 	investHorizon: 'target' | 'years';
-	investYears: number;
+	investYears: number | undefined;
 }
 
 export const DEFAULT_DRAFT: PurchaseDraft = {

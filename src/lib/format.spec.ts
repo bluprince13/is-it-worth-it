@@ -7,7 +7,8 @@ import {
 	formatPercent,
 	formatWorkTime,
 	groupNumberString,
-	parseNumberString
+	parseNumberString,
+	reformatNumberInput
 } from './format';
 
 describe('formatMoney', () => {
@@ -77,7 +78,9 @@ describe('groupNumberString', () => {
 		['12.5', '12.5'],
 		['12.', '12.'],
 		['1234.5', '1,234.5'],
-		['1234.56', '1,234.56']
+		['1234.56', '1,234.56'],
+		['£1,500x', '1,500'],
+		['1.2.3', '1.23']
 	])('%s → %s', (raw, expected) => {
 		expect(groupNumberString(raw)).toBe(expected);
 	});
@@ -94,5 +97,22 @@ describe('parseNumberString', () => {
 		[' 1,000 ', 1000]
 	])('%s → %s', (raw, expected) => {
 		expect(parseNumberString(raw)).toBe(expected);
+	});
+});
+
+describe('reformatNumberInput', () => {
+	it.each([
+		['12.', 3, '12.', 3, 12],
+		['12.5', 4, '12.5', 4, 12.5],
+		['.5', 2, '.5', 2, 0.5],
+		['1000', 4, '1,000', 5, 1000],
+		['1000', 1, '1,000', 1, 1000],
+		['1500x', 5, '1,500', 5, 1500],
+		['£1,500', 6, '1,500', 5, 1500],
+		['1x500', 2, '1,500', 1, 1500],
+		['1.2.3', 5, '1.23', 4, 1.23],
+		['x', 1, '', 0, undefined]
+	])('%s with caret at %i → %s, caret %i, value %s', (raw, caret, text, newCaret, value) => {
+		expect(reformatNumberInput(raw, caret)).toEqual({ text, caret: newCaret, value });
 	});
 });

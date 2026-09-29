@@ -73,6 +73,13 @@ describe('one-off purchase', () => {
 		expect(earnBack.headline).toBe('2.9 months');
 	});
 
+	it('shows N/A for earn-back when investment returns are zero', () => {
+		const earnBack = result({ ...profile, netWorth: 0 }, bike, 'wealth-earn-back')!;
+		expect(earnBack.headline).toBe('N/A');
+		expect(earnBack.caption).toBe('investment returns are £0 on these figures');
+		expect(earnBack.working).toEqual(['Investment returns a year: £0 × 5% = £0']);
+	});
+
 	it('shows N/A when the target is already met', () => {
 		const rich = { ...profile, netWorth: 1_000_000 };
 		const delay = result(rich, bike, 'retirement-delay')!;

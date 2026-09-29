@@ -15,7 +15,7 @@
 		customFrequency = false;
 	});
 
-	const presetKey = (every: number, unit: Unit) => `${every}-${unit}`;
+	const presetKey = (every: number | undefined, unit: Unit) => `${every}-${unit}`;
 
 	const frequencyOptions = [
 		...FREQUENCY_PRESETS.map((p) => ({
@@ -73,7 +73,7 @@
 					aria-invalid={errors.amount ? true : undefined}
 					aria-describedby={errors.amount ? 'amount-error' : undefined}
 					class="w-full min-w-0 border-0 bg-transparent py-2 pr-4 pl-1 text-3xl font-semibold tabular-nums focus:ring-0"
-					bind:value={() => draft.amount, (v) => (draft.amount = v)}
+					bind:value={draft.amount}
 				/>
 			</div>
 			{#if errors.amount}
@@ -127,7 +127,7 @@
 							aria-invalid={errors.every ? true : undefined}
 							aria-describedby={errors.every ? 'every-error' : undefined}
 							class={smallInput(errors.every)}
-							bind:value={() => draft.every, (v) => (draft.every = v ?? NaN)}
+							bind:value={draft.every}
 						/>
 						<select
 							aria-label="Unit"
@@ -161,7 +161,7 @@
 							aria-invalid={errors.durationCount ? true : undefined}
 							aria-describedby={errors.durationCount ? 'duration-error' : undefined}
 							class={smallInput(errors.durationCount)}
-							bind:value={() => draft.durationCount, (v) => (draft.durationCount = v ?? NaN)}
+							bind:value={draft.durationCount}
 						/>
 						<select
 							aria-label="Duration unit"

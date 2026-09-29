@@ -53,14 +53,23 @@ export const wealthEarnBack: Lens = {
 	compute({ profile, purchase, recurring }) {
 		const { netWorth, realReturn } = profile;
 		const returns = netWorth! * realReturn;
-		if (!(returns > 0)) return null;
+		const returnsLine = `Investment returns a year: ${formatMoney(netWorth!)} × ${formatPercent(realReturn)} = ${formatMoney(returns)}`;
+		if (!(returns > 0)) {
+			return {
+				value: NaN,
+				headline: 'N/A',
+				caption: `investment returns are ${formatMoney(0)} on these figures`,
+				sentence: '',
+				working: [returnsLine]
+			};
+		}
 
 		const cost = recurring ? annualCost(purchase) : purchase.amount;
 		const share = cost / returns;
 		const days = share * 365.25;
 		const working = [
-			`Investment returns a year: ${formatMoney(netWorth!)} × ${formatPercent(realReturn)} = ${formatMoney(returns)}`,
-			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(returns)} × 365 = ${formatElapsed(days)}`
+			returnsLine,
+			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(returns)} × 365.25 = ${formatElapsed(days)}`
 		];
 		if (!recurring) {
 			return {
