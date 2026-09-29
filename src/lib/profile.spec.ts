@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TYPICAL_PROFILE, validateProfile, withDefaults } from './profile';
+import { PROFILE_SECTIONS, TYPICAL_PROFILE, validateProfile, withDefaults } from './profile';
 
 describe('withDefaults', () => {
 	it('fills every empty field with the typical value and reports it', () => {
@@ -76,5 +76,14 @@ describe('validateProfile', () => {
 		expect(profile.annualSavings).toBeNaN();
 		expect(defaulted).toEqual([]);
 		expect(errors.annualSavings).toBeDefined();
+	});
+});
+
+describe('PROFILE_SECTIONS', () => {
+	it('cites a source for the default return behind an info note', () => {
+		const field = PROFILE_SECTIONS.flatMap((s) => s.fields).find((f) => f.key === 'realReturn');
+		expect(field?.info?.href).toMatch(/^https:\/\/www\.jbs\.cam\.ac\.uk\//);
+		expect(field?.info?.text).toContain('5.2% for world equities');
+		expect(field?.info?.text).toContain('The figure used here is 5%');
 	});
 });

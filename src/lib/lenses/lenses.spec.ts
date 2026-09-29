@@ -150,40 +150,38 @@ describe('one-off purchase', () => {
 describe('recurring purchase', () => {
 	const wage = 42_000 / (40 * 46.4);
 
-	it('totals hours of work over a fixed duration', () => {
-		const work = result(profile, netflix({ kind: 'fixed', months: 36 }), 'work-hours')!;
-		expect(work.value).toBeCloseTo((180 * 3) / wage);
-		expect(work.caption).toBe('in total, paid for 3 years');
-		expect(work.working).toContainEqual({
-			label: 'Yearly cost',
-			expr: '£15 a month × 12 payments a year',
-			result: '£180 a year'
-		});
-		expect(work.working).toContainEqual({
-			label: 'Total cost',
-			expr: '£180 a year × 3 years',
-			result: '£540'
-		});
-	});
-
-	it('totals hours of work up to the retirement target date with the cost', () => {
-		const purchase = netflix({ kind: 'untilFI' });
-		const { retirement, results } = evaluate(profile, purchase);
-		const work = results.find((r) => r.lens.id === 'work-hours')!.result;
-		const years = retirement!.withPurchase.fiMonth! / 12;
-		expect(years).toBeGreaterThan(retirement!.baseline.fiMonth! / 12);
-		expect(work.value).toBeCloseTo((180 * years) / wage);
-		expect(work.caption).toBe(
-			`in total, paid for ${years.toFixed(1)} years, to your retirement target date`
-		);
+	it('bases hours of work, net worth share and earn-back on the yearly cost', () => {
+		for (const duration of [
+			{ kind: 'fixed', months: 36 },
+			{ kind: 'untilFI' }
+		] as Purchase['duration'][]) {
+			const purchase = netflix(duration);
+			const work = result(profile, purchase, 'work-hours')!;
+			expect(work.value).toBeCloseTo(180 / wage);
+			expect(work.caption).toBe('a year');
+			expect(work.working).toContainEqual({
+				label: 'Yearly cost',
+				expr: '£15 a month × 12 payments a year',
+				result: '£180 a year'
+			});
+			const share = result(profile, purchase, 'net-worth-share')!;
+			expect(share.caption).toBe('of your current net worth a year');
+			expect(share.sentence).toBe(
+				'The yearly cost of £180 is 0.18% of your current net worth of £100,000.'
+			);
+			const earnBack = result(profile, purchase, 'wealth-earn-back')!;
+			expect(earnBack.caption).toBe('for your investments to earn back one year of the cost');
+			expect(earnBack.sentence).toMatch(/^The yearly cost of £180 is /);
+		}
 	});
 
 	it('hides the until-retirement cards when the target is already met', () => {
 		const rich = { ...profile, netWorth: 1_000_000 };
 		const purchase = netflix({ kind: 'untilFI' });
-		for (const id of ['retirement-delay', 'future-value', 'work-hours']) {
+		for (const id of ['retirement-delay', 'future-value']) {
 			expect(result(rich, purchase, id)).toBeUndefined();
 		}
+		expect(result(rich, purchase, 'work-hours')).toBeDefined();
 		const tenYears = evaluate(rich, purchase, { investYears: 10 }).results;
 		expect(tenYears.find((r) => r.lens.id === 'future-value')).toBeUndefined();
 	});
@@ -194,16 +192,6 @@ describe('recurring purchase', () => {
 		expect(result(rich, purchase, 'work-hours')).toBeDefined();
 		const tenYears = evaluate(rich, purchase, { investYears: 10 }).results;
 		expect(tenYears.find((r) => r.lens.id === 'future-value')).toBeDefined();
-	});
-
-	it('shows hours of work per year when the retirement date is unknown', () => {
-		const work = result(
-			{ ...profile, annualSavings: NaN },
-			netflix({ kind: 'untilFI' }),
-			'work-hours'
-		)!;
-		expect(work.value).toBeCloseTo(180 / wage);
-		expect(work.caption).toBe('a year');
 	});
 
 	it('shows how an infrequent payment becomes a yearly and monthly cost', () => {

@@ -1,6 +1,6 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { hourlyWage, STATUTORY_LEAVE_WEEKS, WORKING_WEEKS_PER_YEAR } from '$lib/finance/wage';
-import { formatDuration, formatMoney, formatWorkTime } from '$lib/format';
+import { formatMoney, formatWorkTime } from '$lib/format';
 import { annualCostStep, decimals } from './cost';
 import type { Lens, LensContext, LensResult, Step } from './types';
 
@@ -39,27 +39,6 @@ function hoursSteps(
 	return steps;
 }
 
-/**
- * Months of payments, or null when they run to a retirement date the profile can't give.
- * "Until I retire" runs to the date with the cost, matching the retirement simulation.
- */
-function payingMonths({ purchase, retirement }: LensContext): number | null {
-	const duration = purchase.duration ?? { kind: 'untilFI' };
-	if (duration.kind === 'fixed') return duration.months;
-	return retirement?.withPurchase.fiMonth ?? null;
-}
-
-function yearsPaidStep({ purchase }: LensContext, years: number): Step {
-	const duration = purchase.duration ?? { kind: 'untilFI' };
-	const result = `${decimals(years)} years`;
-	if (duration.kind === 'untilFI') {
-		return { label: 'Years paid', expr: 'years to retirement target with it, simulated', result };
-	}
-	return duration.months % 12 === 0
-		? { label: 'Years paid', result }
-		: { label: 'Years paid', expr: `${duration.months} months ÷ 12`, result };
-}
-
 function workTime(ctx: LensContext, wage: number, wageSteps: Step[]): LensResult | null {
 	if (!(wage > 0)) return null;
 	const { purchase, profile, recurring } = ctx;
@@ -80,54 +59,23 @@ function workTime(ctx: LensContext, wage: number, wageSteps: Step[]): LensResult
 		};
 	}
 
-	const untilFI = (purchase.duration ?? { kind: 'untilFI' }).kind === 'untilFI';
-	if (untilFI && ctx.retirement?.baseline.fiMonth === 0) return null;
-
 	const yearly = annualCost(purchase);
 	const yearlyHours = yearly / wage;
-	const months = payingMonths(ctx);
-	if (months === null) {
-		return {
-			value: yearlyHours,
-			headline: formatWorkTime(yearlyHours, hoursPerWeek),
-			caption: 'a year',
-			sentence: perHour,
-			working: [
-				...wageSteps,
-				annualCostStep(purchase),
-				...hoursSteps(
-					'Hours of work a year',
-					`${formatMoney(yearly)} a year`,
-					wage,
-					yearlyHours,
-					hoursPerWeek
-				)
-			]
-		};
-	}
-
-	const years = months / 12;
-	const total = yearly * years;
-	const hours = total / wage;
-	const period =
-		purchase.duration?.kind === 'fixed'
-			? formatDuration(purchase.duration)
-			: `for ${years.toFixed(1)} years, to your retirement target date`;
 	return {
-		value: hours,
-		headline: formatWorkTime(hours, hoursPerWeek),
-		caption: `in total, paid ${period}`,
-		sentence: `${formatWorkTime(yearlyHours, hoursPerWeek)} a year. ${perHour}`,
+		value: yearlyHours,
+		headline: formatWorkTime(yearlyHours, hoursPerWeek),
+		caption: 'a year',
+		sentence: `The yearly cost of ${formatMoney(yearly)}, at ${formatMoney(wage)} an hour.`,
 		working: [
 			...wageSteps,
 			annualCostStep(purchase),
-			yearsPaidStep(ctx, years),
-			{
-				label: 'Total cost',
-				expr: `${formatMoney(yearly)} a year × ${decimals(years)} years`,
-				result: formatMoney(total)
-			},
-			...hoursSteps('Hours of work', formatMoney(total), wage, hours, hoursPerWeek)
+			...hoursSteps(
+				'Hours of work a year',
+				`${formatMoney(yearly)} a year`,
+				wage,
+				yearlyHours,
+				hoursPerWeek
+			)
 		]
 	};
 }

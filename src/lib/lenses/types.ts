@@ -1,3 +1,4 @@
+import type { InfoNote } from '$lib/info';
 import type { RetirementDelay } from '$lib/finance/fi';
 import type { Profile, Purchase } from '$lib/finance/types';
 
@@ -29,8 +30,7 @@ export interface LensResult {
 	headline: string;
 	caption: string;
 	sentence: string;
-	/** Extra context behind an info button, e.g. an attributed rule of thumb. */
-	info?: { linkText: string; href: string; text: string };
+	info?: InfoNote;
 	working: Step[];
 }
 

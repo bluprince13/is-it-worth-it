@@ -85,6 +85,7 @@
 								id="profile-{field.key}"
 								label={field.label}
 								hint={field.hint}
+								info={field.info}
 								{...FIELD_FORMAT[field.kind]}
 								placeholder={TYPICAL_PROFILE[field.key]}
 								error={errors[field.key]}

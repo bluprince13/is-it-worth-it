@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { groupNumberString } from '$lib/format';
+	import type { InfoNote } from '$lib/info';
 	import FormattedNumberInput from './FormattedNumberInput.svelte';
+	import InfoButton from './InfoButton.svelte';
+	import InfoPanel from './InfoPanel.svelte';
 
 	interface Props {
 		id: string;
 		label: string;
 		hint?: string;
+		info?: InfoNote;
 		value: number | undefined;
 		/** Shown greyed out when empty; in stored units, like value. */
 		placeholder?: number;
@@ -20,6 +24,7 @@
 		id,
 		label,
 		hint,
+		info,
 		value = $bindable(),
 		placeholder,
 		error,
@@ -27,6 +32,8 @@
 		prefix,
 		suffix
 	}: Props = $props();
+
+	let infoOpen = $state(false);
 
 	const toDisplay = (v: number | undefined) =>
 		v === undefined ? undefined : Math.round(v * scale * 1e6) / 1e6;
@@ -40,11 +47,23 @@
 </script>
 
 <div>
-	<label for={id} class="block text-sm font-medium text-stone-800 dark:text-stone-200"
-		>{label}</label
-	>
+	<div class="flex items-start justify-between gap-3">
+		<label for={id} class="block text-sm font-medium text-stone-800 dark:text-stone-200"
+			>{label}</label
+		>
+		{#if info}
+			<InfoButton
+				label="More about {label.toLowerCase()}"
+				controls="{id}-info"
+				bind:expanded={infoOpen}
+			/>
+		{/if}
+	</div>
 	{#if hint}
 		<p id="{id}-hint" class="text-xs text-stone-500 dark:text-stone-400">{hint}</p>
+	{/if}
+	{#if info && infoOpen}
+		<InfoPanel id="{id}-info" {info} surface="bg-stone-200/60 dark:bg-stone-900" />
 	{/if}
 	<div
 		class="mt-1 flex items-center rounded-lg border bg-white focus-within:ring-1 dark:bg-stone-900 {error

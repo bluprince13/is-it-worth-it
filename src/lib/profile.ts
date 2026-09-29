@@ -1,5 +1,6 @@
 import type { Profile } from './finance/types';
 import { formatMoney } from './format';
+import type { InfoNote } from './info';
 
 const STORAGE_KEY = 'is-it-worth-it:profile';
 
@@ -77,6 +78,7 @@ export interface FieldSpec {
 	key: keyof Profile;
 	label: string;
 	hint?: string;
+	info?: InfoNote;
 	kind: FieldKind;
 }
 
@@ -117,6 +119,12 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 				key: 'realReturn',
 				label: 'Investment return',
 				hint: 'Assumed, per year, above inflation',
+				info: {
+					linkText:
+						'Cambridge Judge Business School’s summary of the UBS Global Investment Returns Yearbook 2025',
+					href: 'https://www.jbs.cam.ac.uk/2025/report-stocks-have-far-outperformed-over-the-past-125-years/',
+					text: `reports annualised returns above inflation from 1900 to 2024 of 5.2% for world equities, 1.7% for bonds and 0.5% for treasury bills. The figure used here is ${DEFAULT_PROFILE.realReturn * 100}% unless another is entered.`
+				},
 				kind: 'percent'
 			}
 		]

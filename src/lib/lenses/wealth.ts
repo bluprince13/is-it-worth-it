@@ -43,8 +43,8 @@ export const netWorthShare: Lens = {
 		return {
 			value: share,
 			headline: formatPercent(share),
-			caption: 'of your net worth every year',
-			sentence: `${formatMoney(yearly)} a year out of ${formatMoney(netWorth)}, or ${formatMoney(yearly / 365.25)} a day.`,
+			caption: 'of your current net worth a year',
+			sentence: `The yearly cost of ${formatMoney(yearly)} is ${formatPercent(share)} of your current net worth of ${formatMoney(netWorth)}.`,
 			info: ruleInfo(netWorth),
 			working: [
 				annualCostStep(purchase),
@@ -106,8 +106,8 @@ export const wealthEarnBack: Lens = {
 		return {
 			value: days,
 			headline: formatElapsed(days),
-			caption: 'each year for your investments to earn it back',
-			sentence: `The yearly cost is ${formatPercent(share)} of the ${formatMoney(returns)} a year that investment returns add on your figures.`,
+			caption: 'for your investments to earn back one year of the cost',
+			sentence: `The yearly cost of ${formatMoney(cost)} is ${formatPercent(share)} of the ${formatMoney(returns)} a year that investment returns add on your figures.`,
 			working
 		};
 	}
