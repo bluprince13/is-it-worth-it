@@ -1,7 +1,6 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { hourlyWage, WORKING_WEEKS_PER_YEAR } from '$lib/finance/wage';
 import { formatMoney, formatWorkTime } from '$lib/format';
-import { severity, THRESHOLDS } from './thresholds';
 import type { Lens, LensContext, LensResult } from './types';
 
 function workTime(
@@ -25,7 +24,6 @@ function workTime(
 			caption: 'of work',
 			summary: `costs ${formatWorkTime(hours, hoursPerWeek)} of work`,
 			sentence: perHour,
-			severity: severity(hours, THRESHOLDS.workHours),
 			working
 		};
 	}
@@ -36,7 +34,6 @@ function workTime(
 		caption: 'of work a year',
 		summary: `costs ${formatWorkTime(yearlyHours, hoursPerWeek)} of work a year`,
 		sentence: `${formatWorkTime(hours, hoursPerWeek)} of work each payment. ${perHour}`,
-		severity: severity(yearlyHours, THRESHOLDS.workHours),
 		working: [
 			...working,
 			`${formatMoney(annualCost(purchase))} a year ÷ ${formatMoney(wage)} = ${yearlyHours.toFixed(2)} hours`

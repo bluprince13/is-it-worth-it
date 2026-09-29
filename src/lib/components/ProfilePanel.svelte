@@ -33,8 +33,7 @@
 			<div>
 				<h2 id="profile-title" class="text-lg font-semibold">Your profile</h2>
 				<p class="text-xs text-stone-500 dark:text-stone-400">
-					Saved in this browser only. Grey figures are typical UK values, used until you enter your
-					own.
+					Saved in this browser only. Grey figures are placeholders, used until you enter your own.
 				</p>
 			</div>
 			<button

@@ -56,12 +56,7 @@ Duration decides how hard a recurring cost hits retirement:
 5. **Future value** — what the money would be worth at your FI date if invested instead: `X(1+r)^n`. Recurring: future value of the payments made before FI (the latte factor).
 6. **Capital needed to fund it** (recurring only) — `c ÷ SWR` if lifelong, otherwise the present value of the remaining payments. "£15/month Netflix for life needs £4,500 invested to pay for it forever."
 
-### D. Budget — "how does it fit my spending?"
-
-7. **Days of living costs** — `X ÷ (annual spend ÷ 365)`, with annual spend = take-home pay − savings.
-8. **Reframed totals** (recurring) — per day, per year, and in total over the chosen duration. Show both directions honestly: per-day makes it feel small, lifetime makes it feel big.
-
-Not doing (at least in v1): side-by-side comparison of purchases, value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
+Not doing (at least in v1): side-by-side comparison of purchases, budget lenses (days of living costs, reframed totals: judged not useful), severity labels on cards (the thresholds behind "significant" or "major" weren't meaningful to readers), value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
 
 ---
 
@@ -90,8 +85,6 @@ Not doing (at least in v1): side-by-side comparison of purchases, value lenses t
 │  58 hours   │  0.3% of NW   │  +9 days to FI │
 │  of work    │  earned back  │  £4,100 at 60  │
 │  ▸ how      │  in 11 days   │  ▸ chart       │
-├──────────────────────────────────────────────┤
-│  BUDGET                                      │
 └──────────────────────────────────────────────┘
 ```
 
@@ -100,21 +93,9 @@ Not doing (at least in v1): side-by-side comparison of purchases, value lenses t
   - **Duration**: segmented control with a number of years or months, "until I retire", or "lifelong". Default: lifelong, since subscriptions tend to stick.
   - A live line under the inputs: "= £180/year, £2,700 until FI, lifelong".
 - **Summary strip**: the 3 most telling lenses in one sentence, always including the retirement delay when the profile allows it. No overall score.
-- **Lens cards**: headline number, one-line sentence, a severity chip (trivial / noticeable / significant / major) for that lens only, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line. For a lifelong cost the chart shows the FI line moving up as well as the path moving down.
+- **Lens cards**: headline number, one-line sentence, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line. For a lifelong cost the chart shows the FI line moving up as well as the path moving down.
 - **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, plus two assumptions (real return, SWR) with defaults. Spending is derived as take-home − savings. £ throughout; no tax inputs.
 - **Presets** (nice to have): coffee, Netflix, holiday, car, extension — useful for exploring and for the demo.
-
-### Severity chips
-
-Each card gets its own 0–3 level from thresholds (no combined score), e.g.
-
-| Lens             | trivial | noticeable | significant | major             |
-| ---------------- | ------- | ---------- | ----------- | ----------------- |
-| Hours of work    | < 1 h   | < 1 day    | < 1 week    | ≥ 1 week          |
-| % net worth      | < 0.01% | < 0.1%     | < 1%        | ≥ 1% (5% flagged) |
-| Retirement delay | < 1 day | < 1 week   | < 1 month   | ≥ 1 month         |
-
-Thresholds live in one config file so they're easy to tune.
 
 ---
 
@@ -144,7 +125,7 @@ interface Profile {
 
 interface Lens {
 	id: string;
-	group: 'time' | 'wealth' | 'future' | 'budget' | 'value';
+	group: 'time' | 'wealth' | 'future';
 	requires: (keyof Profile | keyof Purchase)[];
 	appliesTo: 'once' | 'recurring' | 'both';
 	compute(p: Profile, x: Purchase): LensResult | null;
@@ -154,7 +135,6 @@ interface LensResult {
 	unit: string;
 	headline: string;
 	sentence: string;
-	severity: 0 | 1 | 2 | 3;
 	working: string;
 	series?: Point[];
 }
@@ -163,13 +143,13 @@ interface LensResult {
 - **Layout**
   ```
   src/lib/finance/     # pure maths: fv, annuity, simulateToFI, hourlyRate
-  src/lib/lenses/      # one file per lens + index.ts registry + thresholds.ts
+  src/lib/lenses/      # one file per group + index.ts registry
   src/lib/stores/      # profile (persisted), purchase (URL-synced)
   src/lib/components/  # AmountInput, FrequencyToggle, LensCard, SummaryStrip, ProfileDrawer, charts
   src/routes/+page.svelte
   ```
 - **Retirement simulation**: monthly steps, `NW ← NW × (1+r)^(1/12) + monthlySavings − purchasePaymentsThisMonth`; FI when `NW ≥ target`. Baseline target = `annualSpend ÷ SWR`. With the purchase, target += `c ÷ SWR` if lifelong, or the present value at the FI month of payments still due if it's a fixed duration that outlasts FI; "until FI" adds nothing. Because the target depends on the FI month, iterate by checking each month's `NW` against that month's target. Cap at 80 years and report "not reachable" rather than looping. The crossing is interpolated within the month, so a £4 coffee still shows a delay in hours or days rather than rounding to zero.
-- **Recurrence helpers**: `paymentsPerYear`, `annualCost`, `monthlyCost` (every frequency is averaged into a monthly cost, so the simulation stays monthly), `remainingMonths(duration, elapsed, fiMonth)`, `totalCost`.
+- **Recurrence helpers**: `paymentsPerYear`, `annualCost`, `monthlyCost` (every frequency is averaged into a monthly cost, so the simulation stays monthly), `remainingMonths(duration, elapsed, fiMonth)`.
 - **Tests**: unit tests for every lens and finance helper (known-answer cases, edge cases: zero net worth, already FI, no salary, 0% return, a fixed duration that ends exactly at FI, lifelong vs until-FI).
 - **Share links**: `?amt=15&for=Netflix&every=1m&dur=life&pay=42000&hrs=40&sav=12000&nw=100000&ret=5&swr=4` (return and SWR as percentages). Read on load, then removed from the address bar so later edits and refreshes aren't confused with the link.
 
@@ -177,7 +157,7 @@ interface LensResult {
 
 1. ✅ Scaffold SvelteKit + Tailwind + finance and recurrence helpers + tests.
 2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
-3. ✅ Retirement-delay chart (near-retirement and whole-path views), summary sentence, severity chips.
+3. ✅ Retirement-delay chart (near-retirement and whole-path views), summary sentence.
 4. ✅ Example presets, share links carrying purchase and profile.
 5. Polish (a11y, empty states).
 
@@ -187,5 +167,5 @@ interface LensResult {
 
 - Currency: £ only. No income tax modelling.
 - Retirement: always shown as delay to FI (no fixed-retirement-age mode).
-- No overall significance score; severity is per lens only.
+- No significance scores or severity labels.
 - Styling: Tailwind.

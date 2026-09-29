@@ -40,7 +40,6 @@ describe('evaluate', () => {
 	it('skips recurring-only lenses for a one-off', () => {
 		const ids = evaluate(profile, bike).results.map((r) => r.lens.id);
 		expect(ids).not.toContain('capital-needed');
-		expect(ids).not.toContain('reframed-totals');
 	});
 });
 
@@ -49,13 +48,11 @@ describe('one-off purchase', () => {
 		const work = result(profile, bike, 'work-hours')!;
 		expect(work.value).toBeCloseTo(1_200 / (42_000 / (40 * 46.4)));
 		expect(work.headline).toBe('1.3 working weeks');
-		expect(work.severity).toBe(3);
 	});
 
 	it('compares with net worth', () => {
 		const share = result(profile, bike, 'net-worth-share')!;
 		expect(share.headline).toBe('1.2%');
-		expect(share.severity).toBe(3);
 	});
 
 	it('times how long savings and investments take to earn it back', () => {
@@ -105,12 +102,6 @@ describe('recurring purchase', () => {
 		const earnBack = result(profile, netflix({ kind: 'lifelong' }), 'wealth-earn-back')!;
 		expect(earnBack.value).toBeCloseTo((180 / 17_000) * 365.25);
 		expect(earnBack.headline).toBe('3.9 days');
-	});
-
-	it('totals a fixed duration', () => {
-		const totals = result(profile, netflix({ kind: 'fixed', months: 36 }), 'reframed-totals')!;
-		expect(totals.headline).toBe('£180');
-		expect(totals.sentence).toContain('£540 for 3 years');
 	});
 });
 

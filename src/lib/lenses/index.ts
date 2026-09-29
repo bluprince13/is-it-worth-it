@@ -1,21 +1,19 @@
 import { retirementDelay, type RetirementDelay } from '$lib/finance/fi';
 import { annualSpend } from '$lib/finance/spend';
 import type { Profile, Purchase } from '$lib/finance/types';
-import { budgetLenses } from './budget';
 import { futureLenses } from './future';
 import { timeLenses } from './time';
 import type { Group, Lens, LensContext, LensResult } from './types';
 import { wealthLenses } from './wealth';
 
-export type { Group, Lens, LensResult, Severity } from './types';
+export type { Group, Lens, LensResult } from './types';
 
-export const LENSES: Lens[] = [...futureLenses, ...timeLenses, ...wealthLenses, ...budgetLenses];
+export const LENSES: Lens[] = [...futureLenses, ...timeLenses, ...wealthLenses];
 
 export const GROUP_TITLES: Record<Group, string> = {
 	future: 'Future',
 	time: 'Time',
-	wealth: 'Wealth',
-	budget: 'Budget'
+	wealth: 'Wealth'
 };
 
 export interface Evaluated {

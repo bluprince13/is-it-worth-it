@@ -36,9 +36,3 @@ export function remainingMonths(duration: Duration, elapsed: number, fiMonth: nu
 			return Infinity;
 	}
 }
-
-export function totalCost(purchase: Purchase, fiMonth: number): number {
-	if (!purchase.recurrence) return purchase.amount;
-	const months = remainingMonths(purchase.duration ?? { kind: 'lifelong' }, 0, fiMonth);
-	return monthlyCost(purchase) * months;
-}

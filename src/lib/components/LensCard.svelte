@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { Lens, LensResult, Severity } from '$lib/lenses';
-	import { SEVERITY_LABELS } from '$lib/lenses/thresholds';
+	import type { Lens, LensResult } from '$lib/lenses';
 
 	let {
 		lens,
@@ -9,13 +8,6 @@
 		featured = false,
 		children
 	}: { lens: Lens; result: LensResult; featured?: boolean; children?: Snippet } = $props();
-
-	const SEVERITY_STYLES: Record<Severity, string> = {
-		0: 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300',
-		1: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
-		2: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-		3: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-	};
 </script>
 
 <article
@@ -25,13 +17,6 @@
 >
 	<header class="flex items-start justify-between gap-3">
 		<h3 class="text-sm font-medium text-stone-500 dark:text-stone-400">{lens.title}</h3>
-		{#if result.severity !== undefined}
-			<span
-				class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium {SEVERITY_STYLES[
-					result.severity
-				]}">{SEVERITY_LABELS[result.severity]}</span
-			>
-		{/if}
 	</header>
 
 	<p class="mt-2 leading-tight">

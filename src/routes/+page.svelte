@@ -20,7 +20,7 @@
 	import { decodeShare, encodeShare } from '$lib/share';
 
 	const FEATURED = 'retirement-delay';
-	const GROUP_ORDER: Group[] = ['time', 'wealth', 'future', 'budget'];
+	const GROUP_ORDER: Group[] = ['time', 'wealth', 'future'];
 
 	let draft = $state({ ...DEFAULT_DRAFT });
 	let profile = $state<Profile>({ ...DEFAULT_PROFILE });

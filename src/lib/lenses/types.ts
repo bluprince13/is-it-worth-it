@@ -1,10 +1,7 @@
 import type { RetirementDelay } from '$lib/finance/fi';
 import type { Profile, Purchase } from '$lib/finance/types';
 
-export type Group = 'time' | 'wealth' | 'future' | 'budget';
-
-/** 0 trivial, 1 noticeable, 2 significant, 3 major */
-export type Severity = 0 | 1 | 2 | 3;
+export type Group = 'time' | 'wealth' | 'future';
 
 export interface LensContext {
 	profile: Profile;
@@ -21,7 +18,6 @@ export interface LensResult {
 	/** Verb phrase for the summary sentence, e.g. "would delay retirement by 3 weeks". */
 	summary?: string;
 	sentence: string;
-	severity?: Severity;
 	working: string[];
 }
 

@@ -9,7 +9,6 @@ import {
 	formatNumber,
 	formatPercent
 } from '$lib/format';
-import { severity, THRESHOLDS } from './thresholds';
 import type { Lens, LensContext } from './types';
 
 const DAYS_PER_MONTH = 365.25 / 12;
@@ -61,7 +60,6 @@ export const retirementDelayLens: Lens = {
 				summary: `would cut your safe spending by ${formatMoney(lostIncome)} a year`,
 				sentence:
 					"You're already financially independent, so this comes out of your safe spending instead.",
-				severity: severity(lostIncome / spend, THRESHOLDS.spendShare),
 				working: [...working, `Capital × ${formatPercent(profile.swr)} safe withdrawal rate`]
 			};
 		}
@@ -82,7 +80,6 @@ export const retirementDelayLens: Lens = {
 				caption: 'retirement with this cost',
 				summary: 'would put retirement out of reach',
 				sentence: `Without it you'd be financially independent in ${yearsText(baseline.fiMonth)}.`,
-				severity: 3,
 				working
 			};
 		}
@@ -93,7 +90,6 @@ export const retirementDelayLens: Lens = {
 			caption: 'later retirement',
 			summary: `would delay retirement by ${formatElapsed(days)}`,
 			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth),
-			severity: severity(days, THRESHOLDS.days),
 			working
 		};
 	}
@@ -156,10 +152,6 @@ export const capitalNeeded: Lens = {
 				duration.kind === 'lifelong'
 					? `${formatMoney(annualCost(purchase))} a year ÷ ${swr} safe withdrawal rate. This is what it adds to your FI number.`
 					: `Enough to cover every payment while drawing down at ${swr} a year.`,
-			severity:
-				profile.netWorth && profile.netWorth > 0
-					? severity(capital / profile.netWorth, THRESHOLDS.netWorthShare)
-					: undefined,
 			working: [
 				duration.kind === 'lifelong'
 					? `${formatMoney(annualCost(purchase))} ÷ ${swr}`

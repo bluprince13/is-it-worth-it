@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { annualCost, monthlyCost, paymentsPerYear, remainingMonths, totalCost } from './recurrence';
+import { annualCost, monthlyCost, paymentsPerYear, remainingMonths } from './recurrence';
 
 describe('paymentsPerYear', () => {
 	it.each([
@@ -39,32 +39,5 @@ describe('remainingMonths', () => {
 
 	it('never ends when lifelong', () => {
 		expect(remainingMonths({ kind: 'lifelong' }, 500, 100)).toBe(Infinity);
-	});
-});
-
-describe('totalCost', () => {
-	const monthly = { every: 1, unit: 'month' as const };
-
-	it('is the amount for a one-off', () => {
-		expect(totalCost({ amount: 1200 }, 100)).toBe(1200);
-	});
-
-	it('sums a fixed duration', () => {
-		const purchase = {
-			amount: 15,
-			recurrence: monthly,
-			duration: { kind: 'fixed' as const, months: 36 }
-		};
-		expect(totalCost(purchase, 100)).toBe(540);
-	});
-
-	it('sums until FI', () => {
-		const purchase = { amount: 15, recurrence: monthly, duration: { kind: 'untilFI' as const } };
-		expect(totalCost(purchase, 100)).toBe(1500);
-	});
-
-	it('is unbounded when lifelong', () => {
-		const purchase = { amount: 15, recurrence: monthly, duration: { kind: 'lifelong' as const } };
-		expect(totalCost(purchase, 100)).toBe(Infinity);
 	});
 });

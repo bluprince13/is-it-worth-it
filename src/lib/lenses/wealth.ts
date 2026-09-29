@@ -1,6 +1,5 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatPercent } from '$lib/format';
-import { severity, THRESHOLDS } from './thresholds';
 import type { Lens } from './types';
 
 function netWorthBand(share: number): string {
@@ -28,7 +27,6 @@ export const netWorthShare: Lens = {
 				caption: 'of your net worth',
 				summary: `is ${formatPercent(share)} of your net worth`,
 				sentence: netWorthBand(share),
-				severity: severity(share, THRESHOLDS.netWorthShare),
 				working: [`${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)}`]
 			};
 		}
@@ -40,7 +38,6 @@ export const netWorthShare: Lens = {
 			caption: 'of your net worth every year',
 			sentence:
 				'The 0.01% rule is for occasional treats, not recurring costs, so this is judged per year.',
-			severity: severity(share, THRESHOLDS.netWorthShare),
 			working: [`${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)}`]
 		};
 	}
@@ -71,7 +68,6 @@ export const wealthEarnBack: Lens = {
 				headline: formatElapsed(days),
 				caption: 'for your savings and investments to earn it back',
 				sentence: `Your savings and investments add about ${formatMoney(growth)} a year.`,
-				severity: severity(days, THRESHOLDS.days),
 				working
 			};
 		}
@@ -80,7 +76,6 @@ export const wealthEarnBack: Lens = {
 			headline: formatElapsed(days),
 			caption: 'each year for your savings and investments to earn it back',
 			sentence: `${formatPercent(share)} of the ${formatMoney(growth)} they add each year.`,
-			severity: severity(share, THRESHOLDS.incomeShare),
 			working
 		};
 	}
