@@ -82,6 +82,7 @@ describe('one-off purchase', () => {
 		const share = result(profile, bike, 'net-worth-share')!;
 		expect(share.sentence).toBe('£1,200 out of £100,000.');
 		expect(share.info?.text).toContain('(£10 for you)');
+		expect(share.info?.linkText).toBe('Nick Maggiulli\'s "0.01% rule"');
 		expect(share.info?.href).toBe('https://ofdollarsanddata.com/climbing-the-wealth-ladder/');
 	});
 

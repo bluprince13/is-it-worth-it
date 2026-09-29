@@ -67,14 +67,16 @@
 				id={infoId}
 				class="mt-3 rounded-lg bg-stone-50 p-3 text-sm text-stone-700 dark:bg-stone-950 dark:text-stone-300"
 			>
-				<p>{result.info.text}</p>
-				<a
-					href={result.info.href}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="mt-1 inline-block font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
-					>{result.info.linkText}</a
-				>
+				<p>
+					<a
+						href={result.info.href}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
+						>{result.info.linkText}</a
+					>
+					{result.info.text}
+				</p>
 			</div>
 		{/if}
 

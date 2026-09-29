@@ -6,9 +6,9 @@ import type { Lens, LensResult } from './types';
 /** Attributed reference point only: states the rule and the user's figure, not a verdict. */
 function ruleInfo(netWorth: number): LensResult['info'] {
 	return {
-		text: `Nick Maggiulli's "0.01% rule" describes spending of up to 0.01% of net worth a day (${formatMoney(netWorth * 0.0001)} for you) as not noticeably affecting wealth.`,
+		linkText: `Nick Maggiulli's "0.01% rule"`,
 		href: 'https://ofdollarsanddata.com/climbing-the-wealth-ladder/',
-		linkText: 'Read about the rule'
+		text: `describes spending of up to 0.01% of net worth a day (${formatMoney(netWorth * 0.0001)} for you) as not noticeably affecting wealth.`
 	};
 }
 

@@ -30,7 +30,7 @@ export interface LensResult {
 	caption: string;
 	sentence: string;
 	/** Extra context behind an info button, e.g. an attributed rule of thumb. */
-	info?: { text: string; href: string; linkText: string };
+	info?: { linkText: string; href: string; text: string };
 	working: Step[];
 }
 
