@@ -1,4 +1,4 @@
-import type { Duration, Recurrence, Unit } from './finance/types';
+import type { Duration } from './finance/types';
 
 const pounds = (fractionDigits: number) =>
 	new Intl.NumberFormat('en-GB', {
@@ -48,14 +48,6 @@ export function formatElapsed(days: number): string {
 	if (days < 60) return quantity(days / 7, 'week');
 	if (days < 730) return quantity(days / (365.25 / 12), 'month');
 	return quantity(days / 365.25, 'year');
-}
-
-const UNIT_NAMES: Record<Unit, string> = { day: 'day', week: 'week', month: 'month', year: 'year' };
-
-/** "a month", "every 2 weeks" */
-export function formatRecurrence(recurrence: Recurrence): string {
-	const unit = UNIT_NAMES[recurrence.unit];
-	return recurrence.every === 1 ? `a ${unit}` : `every ${recurrence.every} ${unit}s`;
 }
 
 export function formatDuration(duration: Duration): string {

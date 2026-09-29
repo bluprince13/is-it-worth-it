@@ -1,6 +1,6 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { hourlyWage, WORKING_WEEKS_PER_YEAR } from '$lib/finance/wage';
-import { formatMoney, formatRecurrence, formatWorkTime } from '$lib/format';
+import { formatMoney, formatWorkTime } from '$lib/format';
 import { severity, THRESHOLDS } from './thresholds';
 import type { Lens, LensContext, LensResult } from './types';
 
@@ -31,13 +31,16 @@ function workTime(
 	}
 	const yearlyHours = annualCost(purchase) / wage;
 	return {
-		value: hours,
-		headline: formatWorkTime(hours, hoursPerWeek),
-		caption: `of work ${formatRecurrence(purchase.recurrence!)}`,
-		summary: `costs ${formatWorkTime(hours, hoursPerWeek)} of work ${formatRecurrence(purchase.recurrence!)}`,
-		sentence: `${formatWorkTime(yearlyHours, hoursPerWeek)} of work a year. ${perHour}`,
+		value: yearlyHours,
+		headline: formatWorkTime(yearlyHours, hoursPerWeek),
+		caption: 'of work a year',
+		summary: `costs ${formatWorkTime(yearlyHours, hoursPerWeek)} of work a year`,
+		sentence: `${formatWorkTime(hours, hoursPerWeek)} of work each payment. ${perHour}`,
 		severity: severity(yearlyHours, THRESHOLDS.workHours),
-		working
+		working: [
+			...working,
+			`${formatMoney(annualCost(purchase))} a year ÷ ${formatMoney(wage)} = ${yearlyHours.toFixed(2)} hours`
+		]
 	};
 }
 

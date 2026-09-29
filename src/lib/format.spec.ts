@@ -5,7 +5,6 @@ import {
 	formatMoney,
 	formatMoneyCompact,
 	formatPercent,
-	formatRecurrence,
 	formatWorkTime
 } from './format';
 
@@ -52,12 +51,7 @@ describe('formatElapsed', () => {
 	});
 });
 
-describe('formatRecurrence / formatDuration', () => {
-	it('describes frequency', () => {
-		expect(formatRecurrence({ every: 1, unit: 'month' })).toBe('a month');
-		expect(formatRecurrence({ every: 2, unit: 'week' })).toBe('every 2 weeks');
-	});
-
+describe('formatDuration', () => {
 	it('describes duration', () => {
 		expect(formatDuration({ kind: 'fixed', months: 36 })).toBe('for 3 years');
 		expect(formatDuration({ kind: 'fixed', months: 18 })).toBe('for 18 months');

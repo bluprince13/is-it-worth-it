@@ -40,27 +40,26 @@ Duration decides how hard a recurring cost hits retirement:
 
 ### A. Time — "what did I trade for it?"
 
-1. **Hours of work** — `X ÷ take-home hourly wage`. Also shown as days/weeks of work. Recurring: hours per month and per year, and in total over `T`.
+1. **Hours of work** — `X ÷ take-home hourly wage`. Also shown as days/weeks of work. Recurring: headline is hours of work per year, with hours per payment alongside.
 
 ### B. Wealth — "does it dent me?"
 
 2. **% of net worth**, placed against the thresholds: 0.01% (daily noise), 0.1% (no discussion needed), 1%, 5% (car-rule territory).
-3. **Portfolio earn-back time** — how long your investments take to earn `X`: `X ÷ (NW × r)` years → shown in days/hours. "Your portfolio earns this back in 3 days."
-4. **Total earn-back time** — the same, but counting savings plus returns: `X ÷ (annual savings + NW × r)`.
+3. **Wealth earn-back time** — how long your savings plus investment returns take to earn it back: `X ÷ (annual savings + NW × r)` years, shown as hours/days/weeks. Recurring: the time each year to earn back a year's cost, with the share of yearly wealth growth alongside.
 
 ### C. Future — "what does it cost future me?"
 
-5. **Retirement delay** (headline lens) — simulate net worth month by month to the FI number (`annual spend ÷ SWR`, where annual spend = take-home pay − savings), with and without the purchase, and report the difference in days/weeks/months.
+4. **Retirement delay** (headline lens) — simulate net worth month by month to the FI number (`annual spend ÷ SWR`, where annual spend = take-home pay − savings), with and without the purchase, and report the difference in days/weeks/months.
    - One-off: lowers today's net worth.
    - Recurring: applies the frequency and duration rules above, so a lifelong subscription shows the double hit.
    - Already FI: nothing to delay, so show the drop in safe annual spending instead (`lost capital × SWR`).
-6. **Future value** — what the money would be worth at your FI date if invested instead: `X(1+r)^n`. Recurring: future value of the payments made before FI (the latte factor).
-7. **Capital needed to fund it** (recurring only) — `c ÷ SWR` if lifelong, otherwise the present value of the remaining payments. "£15/month Netflix for life needs £4,500 invested to pay for it forever."
+5. **Future value** — what the money would be worth at your FI date if invested instead: `X(1+r)^n`. Recurring: future value of the payments made before FI (the latte factor).
+6. **Capital needed to fund it** (recurring only) — `c ÷ SWR` if lifelong, otherwise the present value of the remaining payments. "£15/month Netflix for life needs £4,500 invested to pay for it forever."
 
 ### D. Budget — "how does it fit my spending?"
 
-8. **Days of living costs** — `X ÷ (annual spend ÷ 365)`, with annual spend = take-home pay − savings.
-9. **Reframed totals** (recurring) — per day, per year, and in total over the chosen duration. Show both directions honestly: per-day makes it feel small, lifetime makes it feel big.
+7. **Days of living costs** — `X ÷ (annual spend ÷ 365)`, with annual spend = take-home pay − savings.
+8. **Reframed totals** (recurring) — per day, per year, and in total over the chosen duration. Show both directions honestly: per-day makes it feel small, lifetime makes it feel big.
 
 Not doing (at least in v1): value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
 

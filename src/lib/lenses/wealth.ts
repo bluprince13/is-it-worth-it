@@ -1,7 +1,7 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatPercent } from '$lib/format';
 import { severity, THRESHOLDS } from './thresholds';
-import type { Lens, LensContext, LensResult } from './types';
+import type { Lens } from './types';
 
 function netWorthBand(share: number): string {
 	if (share < 0.0001) return 'Under the 0.01% rule: daily noise for your wealth.';
@@ -46,74 +46,44 @@ export const netWorthShare: Lens = {
 	}
 };
 
-function earnBack(
-	{ purchase, recurring }: LensContext,
-	yearlyGrowth: number,
-	source: string,
-	working: string
-): LensResult | null {
-	if (!(yearlyGrowth > 0)) return null;
-	if (!recurring) {
-		const days = (purchase.amount / yearlyGrowth) * 365.25;
-		return {
-			value: days,
-			headline: formatElapsed(days),
-			caption: `for ${source} to earn it back`,
-			sentence: `${source[0].toUpperCase()}${source.slice(1)} add about ${formatMoney(yearlyGrowth)} a year.`,
-			severity: severity(days, THRESHOLDS.days),
-			working: [
-				working,
-				`${formatMoney(purchase.amount)} ÷ ${formatMoney(yearlyGrowth)} × 365 days`
-			]
-		};
-	}
-	const yearly = annualCost(purchase);
-	const share = yearly / yearlyGrowth;
-	return {
-		value: share,
-		headline: formatPercent(share),
-		caption: `of what ${source} add each year`,
-		sentence: `${formatMoney(yearly)} a year out of about ${formatMoney(yearlyGrowth)}.`,
-		severity: severity(share, THRESHOLDS.incomeShare),
-		working: [working, `${formatMoney(yearly)} ÷ ${formatMoney(yearlyGrowth)}`]
-	};
-}
-
-export const portfolioEarnBack: Lens = {
-	id: 'portfolio-earn-back',
-	title: 'Investment earn-back',
-	group: 'wealth',
-	requires: ['netWorth'],
-	appliesTo: 'both',
-	compute(ctx) {
-		const { netWorth, realReturn } = ctx.profile;
-		const growth = netWorth! * realReturn;
-		return earnBack(
-			ctx,
-			growth,
-			'your investments',
-			`${formatMoney(netWorth!)} × ${formatPercent(realReturn)} real return = ${formatMoney(growth)} a year`
-		);
-	}
-};
-
-export const totalEarnBack: Lens = {
-	id: 'total-earn-back',
+export const wealthEarnBack: Lens = {
+	id: 'wealth-earn-back',
 	title: 'Wealth earn-back',
 	group: 'wealth',
 	requires: ['netWorth', 'annualSavings'],
 	appliesTo: 'both',
-	compute(ctx) {
-		const { netWorth, annualSavings, realReturn } = ctx.profile;
+	compute({ profile, purchase, recurring }) {
+		const { netWorth, annualSavings, realReturn } = profile;
 		const returns = netWorth! * realReturn;
 		const growth = annualSavings! + returns;
-		return earnBack(
-			ctx,
-			growth,
-			'your savings and investments',
-			`${formatMoney(annualSavings!)} saved + ${formatMoney(returns)} returns = ${formatMoney(growth)} a year`
-		);
+		if (!(growth > 0)) return null;
+
+		const cost = recurring ? annualCost(purchase) : purchase.amount;
+		const share = cost / growth;
+		const days = share * 365.25;
+		const working = [
+			`${formatMoney(annualSavings!)} saved + ${formatMoney(returns)} investment returns = ${formatMoney(growth)} a year`,
+			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(growth)} × 365 days`
+		];
+		if (!recurring) {
+			return {
+				value: days,
+				headline: formatElapsed(days),
+				caption: 'for your savings and investments to earn it back',
+				sentence: `Your savings and investments add about ${formatMoney(growth)} a year.`,
+				severity: severity(days, THRESHOLDS.days),
+				working
+			};
+		}
+		return {
+			value: days,
+			headline: formatElapsed(days),
+			caption: 'each year for your savings and investments to earn it back',
+			sentence: `${formatPercent(share)} of the ${formatMoney(growth)} they add each year.`,
+			severity: severity(share, THRESHOLDS.incomeShare),
+			working
+		};
 	}
 };
 
-export const wealthLenses = [netWorthShare, portfolioEarnBack, totalEarnBack];
+export const wealthLenses = [netWorthShare, wealthEarnBack];

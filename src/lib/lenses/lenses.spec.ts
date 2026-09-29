@@ -58,9 +58,10 @@ describe('one-off purchase', () => {
 		expect(share.severity).toBe(3);
 	});
 
-	it('times how long investments take to earn it back', () => {
-		const earnBack = result(profile, bike, 'portfolio-earn-back')!;
-		expect(earnBack.value).toBeCloseTo((1_200 / 5_000) * 365.25);
+	it('times how long savings and investments take to earn it back', () => {
+		const earnBack = result(profile, bike, 'wealth-earn-back')!;
+		expect(earnBack.value).toBeCloseTo((1_200 / 17_000) * 365.25);
+		expect(earnBack.headline).toBe('3.7 weeks');
 	});
 
 	it('shows lost safe spending when already FI', () => {
@@ -94,6 +95,18 @@ describe('recurring purchase', () => {
 		expect(lifelong.value).toBeGreaterThan(untilFI.value);
 	});
 
+	it('shows hours of work per year', () => {
+		const work = result(profile, netflix({ kind: 'lifelong' }), 'work-hours')!;
+		expect(work.value).toBeCloseTo(180 / (42_000 / (40 * 46.4)));
+		expect(work.caption).toBe('of work a year');
+	});
+
+	it('shows earn-back as time each year', () => {
+		const earnBack = result(profile, netflix({ kind: 'lifelong' }), 'wealth-earn-back')!;
+		expect(earnBack.value).toBeCloseTo((180 / 17_000) * 365.25);
+		expect(earnBack.headline).toBe('3.9 days');
+	});
+
 	it('totals a fixed duration', () => {
 		const totals = result(profile, netflix({ kind: 'fixed', months: 36 }), 'reframed-totals')!;
 		expect(totals.headline).toBe('£180');
@@ -106,7 +119,7 @@ describe('summarise', () => {
 		const purchase = { ...netflix({ kind: 'lifelong' }), label: 'Netflix' };
 		const sentence = summarise(evaluate(profile, purchase).results, purchase);
 		expect(sentence).toMatch(
-			/^Netflix costs .+ of work a month and would delay retirement by .+\.$/
+			/^Netflix costs .+ of work a year and would delay retirement by .+\.$/
 		);
 	});
 
