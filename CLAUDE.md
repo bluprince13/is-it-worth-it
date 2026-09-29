@@ -44,7 +44,7 @@ SvelteKit with `adapter-static` (prerendered, no server), Svelte 5 runes, TypeSc
   - Text states calculations and names its assumptions ("on these figures", "assumed 5% return").
   - No judgements ("small enough not to worry"), no severity or significance labels, nothing about what the user can or should do.
   - No modelled outcome stated as a fact about the user's life. Write "net worth reaches the retirement target in 21 years", not "you'll be financially independent".
-  - Published rules of thumb (e.g. the 0.01% rule) may be cited only as attributed reference points, never as a verdict.
+  - Published rules of thumb (e.g. the 0.01% rule) may be cited only as attributed reference points behind a card's ⓘ button, with a link to the source, never as a verdict.
   - Keep the "not financial advice" footer.
   - Check new copy for words like should, can, safe, worth, good, really, afford.
 - **"How it's calculated" shows equations** that reproduce the headline figure, not prose.

@@ -9,6 +9,9 @@
 	} & ({ result: LensResult; error?: never } | { result?: never; error: Snippet });
 
 	let { lens, result, error, featured = false, children }: Props = $props();
+
+	const infoId = $props.id();
+	let infoOpen = $state(false);
 </script>
 
 <article
@@ -18,6 +21,24 @@
 >
 	<header class="flex items-start justify-between gap-3">
 		<h3 class="text-sm font-medium text-stone-500 dark:text-stone-400">{lens.title}</h3>
+		{#if result?.info}
+			<button
+				type="button"
+				aria-label="More about {lens.title.toLowerCase()}"
+				aria-expanded={infoOpen}
+				aria-controls={infoId}
+				class="-m-1 flex size-7 shrink-0 items-center justify-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+				onclick={() => (infoOpen = !infoOpen)}
+			>
+				<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4">
+					<path
+						fill-rule="evenodd"
+						d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+			</button>
+		{/if}
 	</header>
 
 	{#if error}
@@ -30,13 +51,31 @@
 					? 'text-4xl sm:text-5xl'
 					: 'text-3xl'}">{result.headline}</span
 			>
-			<span class="block text-stone-600 dark:text-stone-300 {featured ? 'mt-1 text-lg' : ''}"
-				>{result.caption}</span
-			>
+			{#if result.caption}
+				<span class="block text-stone-600 dark:text-stone-300 {featured ? 'mt-1 text-lg' : ''}"
+					>{result.caption}</span
+				>
+			{/if}
 		</p>
 
 		{#if result.sentence}
 			<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">{result.sentence}</p>
+		{/if}
+
+		{#if result.info && infoOpen}
+			<div
+				id={infoId}
+				class="mt-3 rounded-lg bg-stone-50 p-3 text-sm text-stone-700 dark:bg-stone-950 dark:text-stone-300"
+			>
+				<p>{result.info.text}</p>
+				<a
+					href={result.info.href}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="mt-1 inline-block font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
+					>{result.info.linkText}</a
+				>
+			</div>
 		{/if}
 
 		{@render children?.()}

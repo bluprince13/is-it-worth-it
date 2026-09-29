@@ -22,6 +22,8 @@ export interface LensResult {
 	headline: string;
 	caption: string;
 	sentence: string;
+	/** Extra context behind an info button, e.g. an attributed rule of thumb. */
+	info?: { text: string; href: string; linkText: string };
 	working: string[];
 }
 

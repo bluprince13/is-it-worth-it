@@ -114,7 +114,7 @@ export const futureValueLens: Lens = {
 				value,
 				headline: formatMoney(value),
 				caption,
-				sentence: `If invested at an assumed ${rate} a year above inflation, in today's money.`,
+				sentence: `Assuming a ${rate} return a year above inflation.`,
 				working: [
 					`${formatMoney(purchase.amount)} × (1 + ${rate})^${exponent(horizon / 12)} = ${formatMoney(value)}`
 				]
@@ -145,7 +145,7 @@ export const futureValueLens: Lens = {
 			value,
 			headline: formatMoney(value),
 			caption,
-			sentence: `The payments made in that time, if invested at an assumed ${rate} a year above inflation, in today's money.`,
+			sentence: `Assuming a ${rate} return a year above inflation.`,
 			working
 		};
 	}
