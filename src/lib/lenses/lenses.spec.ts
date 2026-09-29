@@ -61,11 +61,12 @@ describe('one-off purchase', () => {
 		expect(earnBack.headline).toBe('3.7 weeks');
 	});
 
-	it('shows lower yearly withdrawals when the target is already met', () => {
+	it('shows N/A when the target is already met', () => {
 		const rich = { ...profile, netWorth: 1_000_000 };
 		const delay = result(rich, bike, 'retirement-delay')!;
-		expect(delay.value).toBeCloseTo(48);
-		expect(delay.caption).toContain('less to withdraw');
+		expect(delay.headline).toBe('N/A');
+		expect(delay.caption).toBe('net worth already meets the retirement target');
+		expect(summarise(evaluate(rich, bike).results, bike)).not.toContain('retirement');
 	});
 
 	it('reports when the target is not reached', () => {

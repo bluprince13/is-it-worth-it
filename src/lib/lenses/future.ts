@@ -26,10 +26,6 @@ function retirementSentence(before: number, after: number): string {
 		: `On these figures, net worth reaches the retirement target in ${now} instead of ${was}.`;
 }
 
-function capitalAtRisk({ purchase, profile, recurring }: LensContext): number {
-	return recurring ? fundingCapital(purchase, profile.swr) : purchase.amount;
-}
-
 export const retirementDelayLens: Lens = {
 	id: 'retirement-delay',
 	title: 'Retirement delay',
@@ -54,14 +50,12 @@ export const retirementDelayLens: Lens = {
 		}
 
 		if (baseline.fiMonth === 0) {
-			const lostIncome = capitalAtRisk(ctx) * profile.swr;
 			return {
-				value: lostIncome,
-				headline: formatMoney(lostIncome),
-				caption: 'a year less to withdraw in retirement',
-				summary: `would reduce yearly retirement withdrawals by ${formatMoney(lostIncome)}`,
-				sentence: `On these figures, net worth already meets the retirement target, so this is shown as lower yearly withdrawals at a ${formatPercent(profile.swr)} withdrawal rate.`,
-				working: [...working, `Capital × ${formatPercent(profile.swr)} withdrawal rate`]
+				value: NaN,
+				headline: 'N/A',
+				caption: 'net worth already meets the retirement target',
+				sentence: 'On these figures, there is no retirement date to delay.',
+				working
 			};
 		}
 		if (baseline.fiMonth === null) {
