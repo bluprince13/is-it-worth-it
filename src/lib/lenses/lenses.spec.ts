@@ -39,12 +39,12 @@ describe('evaluate', () => {
 
 	it('blocks only the lenses that use an invalid field', () => {
 		const { results, blocked } = evaluate({ ...profile, annualSavings: NaN }, bike);
-		expect(blocked.map((b) => b.lens.id).sort()).toEqual([
-			'future-value',
-			'retirement-delay',
+		expect(blocked.map((b) => b.lens.id).sort()).toEqual(['future-value', 'retirement-delay']);
+		expect(results.map((r) => r.lens.id)).toEqual([
+			'work-hours',
+			'net-worth-share',
 			'wealth-earn-back'
 		]);
-		expect(results.map((r) => r.lens.id)).toEqual(['work-hours', 'net-worth-share']);
 	});
 });
 
@@ -67,10 +67,10 @@ describe('one-off purchase', () => {
 		expect(share.headline).toBe('1.2%');
 	});
 
-	it('times how long savings and investments take to earn it back', () => {
+	it('times how long investment returns take to earn it back', () => {
 		const earnBack = result(profile, bike, 'wealth-earn-back')!;
-		expect(earnBack.value).toBeCloseTo((1_200 / 17_000) * 365.25);
-		expect(earnBack.headline).toBe('3.7 weeks');
+		expect(earnBack.value).toBeCloseTo((1_200 / 5_000) * 365.25);
+		expect(earnBack.headline).toBe('2.9 months');
 	});
 
 	it('shows N/A when the target is already met', () => {
@@ -95,8 +95,8 @@ describe('recurring purchase', () => {
 
 	it('shows earn-back as time each year', () => {
 		const earnBack = result(profile, netflix({ kind: 'untilFI' }), 'wealth-earn-back')!;
-		expect(earnBack.value).toBeCloseTo((180 / 17_000) * 365.25);
-		expect(earnBack.headline).toBe('3.9 days');
+		expect(earnBack.value).toBeCloseTo((180 / 5_000) * 365.25);
+		expect(earnBack.headline).toBe('13 days');
 	});
 });
 

@@ -41,7 +41,7 @@ Duration only matters while payments come out of savings before the retirement t
 ### B. Wealth — "does it dent me?"
 
 2. **% of net worth**, placed against the thresholds: 0.01% (daily noise), 0.1% (no discussion needed), 1%, 5% (car-rule territory).
-3. **Wealth earn-back time** — how long your savings plus investment returns take to earn it back: `X ÷ (annual savings + NW × r)` years, shown as hours/days/weeks. Recurring: the time each year to earn back a year's cost, with the share of yearly wealth growth alongside.
+3. **Wealth earn-back time** — how long your investment returns alone take to earn it back: `X ÷ (NW × r)` years, shown as hours/days/weeks. Savings are excluded here (they are already what the retirement-delay lens models). Recurring: the time each year to earn back a year's cost, with the share of yearly wealth growth alongside.
 
 ### C. Future — "what does it cost future me?"
 

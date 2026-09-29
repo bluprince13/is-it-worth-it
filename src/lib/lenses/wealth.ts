@@ -48,27 +48,26 @@ export const wealthEarnBack: Lens = {
 	id: 'wealth-earn-back',
 	title: 'Wealth earn-back',
 	group: 'wealth',
-	requires: ['netWorth', 'annualSavings', 'realReturn'],
+	requires: ['netWorth', 'realReturn'],
 	appliesTo: 'both',
 	compute({ profile, purchase, recurring }) {
-		const { netWorth, annualSavings, realReturn } = profile;
+		const { netWorth, realReturn } = profile;
 		const returns = netWorth! * realReturn;
-		const growth = annualSavings! + returns;
-		if (!(growth > 0)) return null;
+		if (!(returns > 0)) return null;
 
 		const cost = recurring ? annualCost(purchase) : purchase.amount;
-		const share = cost / growth;
+		const share = cost / returns;
 		const days = share * 365.25;
 		const working = [
-			`${formatMoney(annualSavings!)} saved + ${formatMoney(returns)} assumed investment returns = ${formatMoney(growth)} a year`,
-			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(growth)} × 365 days`
+			`Investment returns a year: ${formatMoney(netWorth!)} × ${formatPercent(realReturn)} = ${formatMoney(returns)}`,
+			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(returns)} × 365 = ${formatElapsed(days)}`
 		];
 		if (!recurring) {
 			return {
 				value: days,
 				headline: formatElapsed(days),
 				caption: 'for your investments to earn it back',
-				sentence: `On your figures, savings and investment returns add about ${formatMoney(growth)} a year.`,
+				sentence: `On your figures, investment returns add about ${formatMoney(returns)} a year.`,
 				working
 			};
 		}
@@ -76,7 +75,7 @@ export const wealthEarnBack: Lens = {
 			value: days,
 			headline: formatElapsed(days),
 			caption: 'each year for your investments to earn it back',
-			sentence: `${formatPercent(share)} of the ${formatMoney(growth)} they add each year.`,
+			sentence: `${formatPercent(share)} of the ${formatMoney(returns)} investment returns add each year.`,
 			working
 		};
 	}
