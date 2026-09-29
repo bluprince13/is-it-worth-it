@@ -1,42 +1,37 @@
-# sv
+# Is it worth it?
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A single-page app that shows what a purchase — one-off or recurring — costs you, measured in
+three ways: **time**, **wealth**, and **retirement**.
 
-## Creating a project
+- **Time** — hours, days, or weeks of work the purchase represents at your take-home hourly rate.
+- **Wealth** — the purchase as a share of your net worth, and how long your investment returns
+  alone take to earn it back.
+- **Future** — how many days later you reach your retirement target, and what the money would be
+  worth if invested instead.
 
-If you're seeing this, you've probably already done this step. Congrats!
+Enter a few figures (take-home pay, hours, savings, net worth, retirement target, assumed return)
+or leave them blank and typical UK figures are used as placeholders. Everything is calculated in
+your browser — nothing is sent to a server — and a share link carries exactly the figures you
+entered.
 
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.17.1 create --template minimal --types ts --add prettier vitest="usages:unit" tailwindcss="plugins:forms" sveltekit-adapter="adapter:static" --no-download-check --install npm .
-```
+It shows the working for every number and states its assumptions. It is for illustration only and
+is not financial advice.
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```bash
+npm install
+npm run dev       # dev server at localhost:5173
+npm test          # unit tests
+npm run check     # type-check
+npm run build     # static site into build/
 ```
 
-## Building
+## Stack
 
-To create a production version of your app:
+SvelteKit with `adapter-static`, Svelte 5 runes, TypeScript, Tailwind v4, Vitest. Charts are
+hand-written SVG.
 
-```sh
-npm run build
-```
+## License
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+[MIT](LICENSE)
