@@ -35,7 +35,7 @@ SvelteKit with `adapter-static` (prerendered, no server), Svelte 5 runes, TypeSc
 - **Retirement delay:** savings are added to net worth each month and grow at the return. A one-off comes out of today's net worth. A recurring cost comes out of monthly savings until the target is reached, or until a fixed duration ends. The crossing month is interpolated, so small purchases show hours or days.
 - **Recurring duration:** "For N years/months" or "Until I retire" (the default).
 - **Invested instead:** compounds either until retirement or for N years, chosen on the card.
-- **Placeholders:** an empty profile field uses the typical-UK figure in `TYPICAL_PROFILE`, shown as grey placeholder text and named in a note on the page.
+- **Placeholders:** an empty profile field uses the typical-UK figure in `TYPICAL_PROFILE`, shown as grey placeholder text and noted on the page.
 - **Invalid fields:** never replaced by a placeholder. Every card that uses the field shows an error with a link to the profile.
 
 ## Rules

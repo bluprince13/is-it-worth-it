@@ -171,7 +171,10 @@
 		<div class="mt-8 space-y-10">
 			{#if withTypical.defaulted.length > 0}
 				<p class="text-sm text-stone-500 dark:text-stone-400">
-					Using typical UK figures for your {listFields(withTypical.defaulted)}.
+					This uses estimates for {FIELD_LABELS[withTypical.defaulted[0]].toLowerCase()}{withTypical
+						.defaulted.length > 1
+						? ' and other input parameters'
+						: ''}.
 					<button
 						type="button"
 						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
