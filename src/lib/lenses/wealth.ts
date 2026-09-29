@@ -84,7 +84,7 @@ export const wealthEarnBack: Lens = {
 			value: days,
 			headline: formatElapsed(days),
 			caption: 'each year for your investments to earn it back',
-			sentence: `${formatPercent(share)} of the ${formatMoney(returns)} investment returns add each year.`,
+			sentence: `The yearly cost is ${formatPercent(share)} of the ${formatMoney(returns)} a year that investment returns add on your figures.`,
 			working
 		};
 	}
