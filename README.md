@@ -21,7 +21,7 @@ is not financial advice.
 
 ```bash
 npm install
-npm run dev       # dev server at localhost:5173
+npm run dev       # dev server at localhost:5173/apps/is-it-worth-it
 npm test          # unit tests
 npm run check     # type-check
 npm run build     # static site into build/

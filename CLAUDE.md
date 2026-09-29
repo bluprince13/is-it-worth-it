@@ -5,7 +5,7 @@ A single-page app that shows what one purchase (one-off or recurring) costs a pe
 ## Commands
 
 ```bash
-npm run dev      # dev server (also in .claude/launch.json as "dev", port 5173)
+npm run dev      # dev server (also in .claude/launch.json as "dev", port 5173, served under /apps/is-it-worth-it)
 npm test         # vitest, run once
 npm run check    # svelte-check / TypeScript
 npm run lint     # prettier --check

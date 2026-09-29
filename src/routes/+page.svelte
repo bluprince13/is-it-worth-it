@@ -265,8 +265,18 @@
 {/snippet}
 
 <footer class="mx-auto max-w-4xl px-4 pb-10 text-xs text-stone-500 dark:text-stone-400">
-	For illustration only, not financial advice. Results are calculations from the figures and
-	assumptions entered, not forecasts.
+	<p>
+		For illustration only, not financial advice. Results are calculations from the figures and
+		assumptions entered, not forecasts.
+	</p>
+	<p class="mt-2">
+		Created by
+		<a
+			href="https://bluprince13.com"
+			class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
+			>bluprince13</a
+		>
+	</p>
 </footer>
 
 <ProfilePanel bind:profile bind:open={profileOpen} />
