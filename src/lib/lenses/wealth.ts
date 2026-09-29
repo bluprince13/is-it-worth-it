@@ -26,6 +26,7 @@ export const netWorthShare: Lens = {
 				value: share,
 				headline: formatPercent(share),
 				caption: 'of your net worth',
+				summary: `is ${formatPercent(share)} of your net worth`,
 				sentence: netWorthBand(share),
 				severity: severity(share, THRESHOLDS.netWorthShare),
 				working: [`${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)}`]

@@ -18,6 +18,8 @@ export interface LensResult {
 	value: number;
 	headline: string;
 	caption: string;
+	/** Verb phrase for the summary sentence, e.g. "would delay retirement by 3 weeks". */
+	summary?: string;
 	sentence: string;
 	severity?: Severity;
 	working: string[];

@@ -58,6 +58,7 @@ export const retirementDelayLens: Lens = {
 				value: lostIncome,
 				headline: formatMoney(lostIncome),
 				caption: 'a year less to spend, for good',
+				summary: `would cut your safe spending by ${formatMoney(lostIncome)} a year`,
 				sentence:
 					"You're already financially independent, so this comes out of your safe spending instead.",
 				severity: severity(lostIncome / spend, THRESHOLDS.spendShare),
@@ -79,6 +80,7 @@ export const retirementDelayLens: Lens = {
 				value: Infinity,
 				headline: 'Out of reach',
 				caption: 'retirement with this cost',
+				summary: 'would put retirement out of reach',
 				sentence: `Without it you'd be financially independent in ${yearsText(baseline.fiMonth)}.`,
 				severity: 3,
 				working
@@ -89,6 +91,7 @@ export const retirementDelayLens: Lens = {
 			value: days,
 			headline: formatElapsed(days),
 			caption: 'later retirement',
+			summary: `would delay retirement by ${formatElapsed(days)}`,
 			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth),
 			severity: severity(days, THRESHOLDS.days),
 			working

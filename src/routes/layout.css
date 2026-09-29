@@ -1,6 +1,18 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 
+@theme {
+	--color-series-without: #2a78d6;
+	--color-series-with: #eb6834;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-series-without: #3987e5;
+		--color-series-with: #d95926;
+	}
+}
+
 @layer base {
 	html {
 		color-scheme: light dark;

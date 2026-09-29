@@ -23,6 +23,7 @@ function workTime(
 			value: hours,
 			headline: formatWorkTime(hours, hoursPerWeek),
 			caption: 'of work',
+			summary: `costs ${formatWorkTime(hours, hoursPerWeek)} of work`,
 			sentence: perHour,
 			severity: severity(hours, THRESHOLDS.workHours),
 			working
@@ -33,6 +34,7 @@ function workTime(
 		value: hours,
 		headline: formatWorkTime(hours, hoursPerWeek),
 		caption: `of work ${formatRecurrence(purchase.recurrence!)}`,
+		summary: `costs ${formatWorkTime(hours, hoursPerWeek)} of work ${formatRecurrence(purchase.recurrence!)}`,
 		sentence: `${formatWorkTime(yearlyHours, hoursPerWeek)} of work a year. ${perHour}`,
 		severity: severity(yearlyHours, THRESHOLDS.workHours),
 		working

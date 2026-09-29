@@ -179,7 +179,7 @@ interface LensResult {
 
 1. ✅ Scaffold SvelteKit + Tailwind + finance and recurrence helpers + tests.
 2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
-3. Retirement-delay card and chart, summary strip, severity chips.
+3. ✅ Retirement-delay chart (near-retirement and whole-path views), summary sentence, severity chips.
 4. Presets, URL sharing.
 5. Compare mode, polish (a11y, empty states).
 

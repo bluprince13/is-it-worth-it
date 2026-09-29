@@ -1,12 +1,14 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { Lens, LensResult, Severity } from '$lib/lenses';
 	import { SEVERITY_LABELS } from '$lib/lenses/thresholds';
 
 	let {
 		lens,
 		result,
-		featured = false
-	}: { lens: Lens; result: LensResult; featured?: boolean } = $props();
+		featured = false,
+		children
+	}: { lens: Lens; result: LensResult; featured?: boolean; children?: Snippet } = $props();
 
 	const SEVERITY_STYLES: Record<Severity, string> = {
 		0: 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300',
@@ -44,6 +46,8 @@
 	</p>
 
 	<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">{result.sentence}</p>
+
+	{@render children?.()}
 
 	{#if result.working.length > 0}
 		<details class="group mt-auto pt-3 text-sm">

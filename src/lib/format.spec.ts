@@ -3,6 +3,7 @@ import {
 	formatDuration,
 	formatElapsed,
 	formatMoney,
+	formatMoneyCompact,
 	formatPercent,
 	formatRecurrence,
 	formatWorkTime
@@ -62,5 +63,12 @@ describe('formatRecurrence / formatDuration', () => {
 		expect(formatDuration({ kind: 'fixed', months: 18 })).toBe('for 18 months');
 		expect(formatDuration({ kind: 'untilFI' })).toBe('until you retire');
 		expect(formatDuration({ kind: 'lifelong' })).toBe('for life');
+	});
+});
+
+describe('formatMoneyCompact', () => {
+	it('abbreviates thousands and millions', () => {
+		expect(formatMoneyCompact(750_000)).toBe('£750k');
+		expect(formatMoneyCompact(1_250_000)).toBe('£1.25m');
 	});
 });

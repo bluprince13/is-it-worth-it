@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Profile, Purchase } from '$lib/finance/types';
 import { evaluate } from './index';
+import { summarise } from './summary';
 
 const profile: Profile = {
 	takeHomePerYear: 42_000,
@@ -97,5 +98,26 @@ describe('recurring purchase', () => {
 		const totals = result(profile, netflix({ kind: 'fixed', months: 36 }), 'reframed-totals')!;
 		expect(totals.headline).toBe('£180');
 		expect(totals.sentence).toContain('£540 for 3 years');
+	});
+});
+
+describe('summarise', () => {
+	it('names the purchase and combines work time with retirement delay', () => {
+		const purchase = { ...netflix({ kind: 'lifelong' }), label: 'Netflix' };
+		const sentence = summarise(evaluate(profile, purchase).results, purchase);
+		expect(sentence).toMatch(
+			/^Netflix costs .+ of work a month and would delay retirement by .+\.$/
+		);
+	});
+
+	it('falls back to "This" and to what is available', () => {
+		const partial: Profile = { netWorth: 100_000, realReturn: 0.05, swr: 0.04 };
+		expect(summarise(evaluate(partial, bike).results, bike)).toBe(
+			'This is 1.2% of your net worth.'
+		);
+	});
+
+	it('is null when nothing can be said', () => {
+		expect(summarise(evaluate({ realReturn: 0.05, swr: 0.04 }, bike).results, bike)).toBeNull();
 	});
 });

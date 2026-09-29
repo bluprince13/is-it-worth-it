@@ -3,9 +3,12 @@
 	import LensCard from '$lib/components/LensCard.svelte';
 	import ProfilePanel from '$lib/components/ProfilePanel.svelte';
 	import PurchaseForm from '$lib/components/PurchaseForm.svelte';
+	import RetirementChart from '$lib/components/RetirementChart.svelte';
+	import { buildRetirementSeries } from '$lib/chart/retirementSeries';
 	import { DEFAULT_DRAFT, toPurchase } from '$lib/draft';
 	import type { Profile } from '$lib/finance/types';
 	import { evaluate, GROUP_TITLES, type Group } from '$lib/lenses';
+	import { summarise } from '$lib/lenses/summary';
 	import { DEFAULT_PROFILE, FIELD_LABELS, loadProfile, saveProfile } from '$lib/profile';
 
 	const FEATURED = 'retirement-delay';
@@ -32,7 +35,12 @@
 		swr: profile.swr ?? DEFAULT_PROFILE.swr
 	});
 
-	const evaluation = $derived(evaluate(effectiveProfile, toPurchase(draft)));
+	const purchase = $derived(toPurchase(draft));
+	const evaluation = $derived(evaluate(effectiveProfile, purchase));
+	const summary = $derived(summarise(evaluation.results, purchase));
+	const chartSeries = $derived(
+		evaluation.retirement ? buildRetirementSeries(evaluation.retirement) : null
+	);
 	const featured = $derived(evaluation.results.find((r) => r.lens.id === FEATURED));
 	const featuredLocked = $derived(evaluation.locked.find((l) => l.lens.id === FEATURED));
 	const groups = $derived(
@@ -85,8 +93,18 @@
 		</p>
 	{:else}
 		<div class="mt-8 space-y-10">
+			{#if summary}
+				<p class="text-xl leading-snug font-medium text-balance sm:text-2xl" aria-live="polite">
+					{summary}
+				</p>
+			{/if}
+
 			{#if featured}
-				<LensCard lens={featured.lens} result={featured.result} featured />
+				<LensCard lens={featured.lens} result={featured.result} featured>
+					{#if chartSeries}
+						<RetirementChart series={chartSeries} />
+					{/if}
+				</LensCard>
 			{:else if featuredLocked}
 				<button
 					type="button"

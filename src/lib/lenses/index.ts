@@ -1,4 +1,4 @@
-import { retirementDelay } from '$lib/finance/fi';
+import { retirementDelay, type RetirementDelay } from '$lib/finance/fi';
 import { annualSpend } from '$lib/finance/spend';
 import type { Profile, Purchase } from '$lib/finance/types';
 import { budgetLenses } from './budget';
@@ -55,10 +55,13 @@ export function buildContext(profile: Profile, purchase: Purchase): LensContext 
 	};
 }
 
-export function evaluate(
-	profile: Profile,
-	purchase: Purchase
-): { results: Evaluated[]; locked: Locked[] } {
+export interface Evaluation {
+	results: Evaluated[];
+	locked: Locked[];
+	retirement?: RetirementDelay;
+}
+
+export function evaluate(profile: Profile, purchase: Purchase): Evaluation {
 	const results: Evaluated[] = [];
 	const locked: Locked[] = [];
 	if (!(purchase.amount > 0)) return { results, locked };
@@ -75,5 +78,5 @@ export function evaluate(
 		const result = lens.compute(ctx);
 		if (result) results.push({ lens, result });
 	}
-	return { results, locked };
+	return { results, locked, retirement: ctx.retirement };
 }

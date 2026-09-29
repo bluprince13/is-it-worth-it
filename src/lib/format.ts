@@ -70,3 +70,14 @@ export function formatDuration(duration: Duration): string {
 				: `for ${quantity(duration.months, 'month')}`;
 	}
 }
+
+const compact = new Intl.NumberFormat('en-GB', {
+	style: 'currency',
+	currency: 'GBP',
+	notation: 'compact',
+	maximumSignificantDigits: 3
+});
+
+export function formatMoneyCompact(amount: number): string {
+	return compact.format(amount);
+}
