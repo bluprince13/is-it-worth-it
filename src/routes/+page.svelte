@@ -103,7 +103,7 @@
 	<title>Is it worth it?</title>
 	<meta
 		name="description"
-		content="See what a purchase really costs you: in hours of work, wealth and how much later you can retire."
+		content="See what a purchase costs you in hours of work, share of wealth and time to reach a retirement target."
 	/>
 </svelte:head>
 
@@ -112,7 +112,7 @@
 		<div>
 			<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Is it worth it?</h1>
 			<p class="mt-1 text-stone-600 dark:text-stone-400">
-				What a purchase really costs you, in time, wealth and retirement.
+				What a purchase costs you, measured in time, wealth and retirement.
 			</p>
 		</div>
 		<div class="flex shrink-0 gap-2">
@@ -177,7 +177,7 @@
 
 	{#if !hasAmount}
 		<p class="mt-10 text-center text-stone-500 dark:text-stone-400">
-			Enter an amount to see what it's really worth to you.
+			Enter an amount to see what it costs you in time, wealth and retirement.
 		</p>
 	{:else}
 		<div class="mt-8 space-y-10">
@@ -193,8 +193,8 @@
 					<button
 						type="button"
 						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
-						onclick={() => (profileOpen = true)}>Add your own</button
-					> for a truer picture.
+						onclick={() => (profileOpen = true)}>Add your own figures</button
+					> to use them instead.
 				</p>
 			{/if}
 
@@ -224,5 +224,10 @@
 		</div>
 	{/if}
 </div>
+
+<footer class="mx-auto max-w-4xl px-4 pb-10 text-xs text-stone-500 dark:text-stone-400">
+	For illustration only, not financial advice. Results are calculations from the figures and
+	assumptions entered, not forecasts.
+</footer>
 
 <ProfilePanel bind:profile bind:open={profileOpen} />

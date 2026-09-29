@@ -114,7 +114,7 @@
 			</li>
 			{#if series.sameTarget}
 				<li class="flex items-center gap-1.5">
-					<span class="w-4 border-t-2 border-dashed border-stone-400"></span>Target to retire
+					<span class="w-4 border-t-2 border-dashed border-stone-400"></span>Retirement target
 				</li>
 			{:else}
 				<li class="flex items-center gap-1.5">
@@ -271,7 +271,7 @@
 							<span class="h-0.5 w-3 rounded {row.cls}"></span>{row.label}
 						</dt>
 						<dd class="text-right font-semibold text-stone-900 tabular-nums dark:text-white">
-							{row.value === null ? 'Retired' : formatMoney(row.value)}
+							{row.value === null ? 'Target reached' : formatMoney(row.value)}
 						</dd>
 					{/each}
 					{#if series.sameTarget}
@@ -294,6 +294,6 @@
 		{/if}
 	</div>
 	<p class="mt-2 text-xs text-stone-500 dark:text-stone-400">
-		The shaded strip is the {formatElapsed(delayDays)} between the two retirement dates.
+		The shaded strip is the {formatElapsed(delayDays)} between the two dates the target is reached.
 	</p>
 </div>

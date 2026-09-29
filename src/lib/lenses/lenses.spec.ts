@@ -61,16 +61,16 @@ describe('one-off purchase', () => {
 		expect(earnBack.headline).toBe('3.7 weeks');
 	});
 
-	it('shows lost safe spending when already FI', () => {
+	it('shows lower yearly withdrawals when the target is already met', () => {
 		const rich = { ...profile, netWorth: 1_000_000 };
 		const delay = result(rich, bike, 'retirement-delay')!;
 		expect(delay.value).toBeCloseTo(48);
-		expect(delay.caption).toContain('less to spend');
+		expect(delay.caption).toContain('less to withdraw');
 	});
 
-	it('reports when FI is out of reach', () => {
+	it('reports when the target is not reached', () => {
 		const delay = result({ ...profile, annualSavings: 0, netWorth: 0 }, bike, 'retirement-delay')!;
-		expect(delay.headline).toBe('Out of reach');
+		expect(delay.headline).toBe('Not reached');
 	});
 });
 
@@ -110,7 +110,7 @@ describe('summarise', () => {
 		const purchase = { ...netflix({ kind: 'lifelong' }), label: 'Netflix' };
 		const sentence = summarise(evaluate(profile, purchase).results, purchase);
 		expect(sentence).toMatch(
-			/^Netflix costs .+ of work a year and would delay retirement by .+\.$/
+			/^Netflix costs .+ of work a year and would delay reaching your retirement target by .+\.$/
 		);
 	});
 

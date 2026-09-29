@@ -2,14 +2,6 @@ import { annualCost } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatPercent } from '$lib/format';
 import type { Lens } from './types';
 
-function netWorthBand(share: number): string {
-	if (share < 0.0001) return 'Under the 0.01% rule: daily noise for your wealth.';
-	if (share < 0.001) return 'Under 0.1%: small enough not to need a second thought.';
-	if (share < 0.01) return 'Between 0.1% and 1% of everything you own.';
-	if (share < 0.05) return 'Over 1% of everything you own.';
-	return 'Over 5%: the level rules of thumb reserve for buying a car.';
-}
-
 export const netWorthShare: Lens = {
 	id: 'net-worth-share',
 	title: 'Share of net worth',
@@ -26,7 +18,7 @@ export const netWorthShare: Lens = {
 				headline: formatPercent(share),
 				caption: 'of your net worth',
 				summary: `is ${formatPercent(share)} of your net worth`,
-				sentence: netWorthBand(share),
+				sentence: `${formatMoney(purchase.amount)} out of ${formatMoney(netWorth)}.`,
 				working: [`${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)}`]
 			};
 		}
@@ -36,8 +28,7 @@ export const netWorthShare: Lens = {
 			value: share,
 			headline: formatPercent(share),
 			caption: 'of your net worth every year',
-			sentence:
-				'The 0.01% rule is for occasional treats, not recurring costs, so this is judged per year.',
+			sentence: `${formatMoney(yearly)} a year out of ${formatMoney(netWorth)}.`,
 			working: [`${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)}`]
 		};
 	}
@@ -59,7 +50,7 @@ export const wealthEarnBack: Lens = {
 		const share = cost / growth;
 		const days = share * 365.25;
 		const working = [
-			`${formatMoney(annualSavings!)} saved + ${formatMoney(returns)} investment returns = ${formatMoney(growth)} a year`,
+			`${formatMoney(annualSavings!)} saved + ${formatMoney(returns)} assumed investment returns = ${formatMoney(growth)} a year`,
 			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(growth)} × 365 days`
 		];
 		if (!recurring) {
@@ -67,7 +58,7 @@ export const wealthEarnBack: Lens = {
 				value: days,
 				headline: formatElapsed(days),
 				caption: 'for your savings and investments to earn it back',
-				sentence: `Your savings and investments add about ${formatMoney(growth)} a year.`,
+				sentence: `On your figures, savings and investment returns add about ${formatMoney(growth)} a year.`,
 				working
 			};
 		}

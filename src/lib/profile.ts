@@ -68,13 +68,13 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 			{
 				key: 'realReturn',
 				label: 'Investment return',
-				hint: 'Per year, above inflation',
+				hint: 'Assumed, per year, above inflation',
 				kind: 'percent'
 			},
 			{
 				key: 'swr',
-				label: 'Safe withdrawal rate',
-				hint: 'Share of your pot you can spend each year in retirement',
+				label: 'Withdrawal rate',
+				hint: 'Assumed share of your investments withdrawn each year in retirement',
 				kind: 'percent'
 			}
 		]

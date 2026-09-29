@@ -22,8 +22,8 @@ function yearsText(months: number): string {
 function retirementSentence(before: number, after: number): string {
 	const [was, now] = [yearsText(before), yearsText(after)];
 	return was === now
-		? `Financially independent in ${now} either way, just a little later.`
-		: `Financially independent in ${now} instead of ${was}.`;
+		? `On these figures, net worth reaches the retirement target in about ${now} either way; the difference is under 0.1 years.`
+		: `On these figures, net worth reaches the retirement target in ${now} instead of ${was}.`;
 }
 
 function capitalAtRisk({ purchase, profile, recurring }: LensContext): number {
@@ -44,11 +44,13 @@ export const retirementDelayLens: Lens = {
 		const fiNumber = spend / profile.swr;
 		const working = [
 			`Spending: ${formatMoney(profile.takeHomePerYear!)} take-home − ${formatMoney(profile.annualSavings!)} saved = ${formatMoney(spend)} a year`,
-			`FI number: ${formatMoney(spend)} ÷ ${formatPercent(profile.swr)} = ${formatMoney(fiNumber)}`,
-			`Net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`
+			`Retirement target: ${formatMoney(spend)} ÷ ${formatPercent(profile.swr)} = ${formatMoney(fiNumber)}`,
+			`Assumes net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`
 		];
 		if (ctx.recurring) {
-			working.push(`With this cost the FI number starts at ${formatMoney(withPurchase.target[0])}`);
+			working.push(
+				`With this cost the retirement target starts at ${formatMoney(withPurchase.target[0])}`
+			);
 		}
 
 		if (baseline.fiMonth === 0) {
@@ -56,30 +58,29 @@ export const retirementDelayLens: Lens = {
 			return {
 				value: lostIncome,
 				headline: formatMoney(lostIncome),
-				caption: 'a year less to spend, for good',
-				summary: `would cut your safe spending by ${formatMoney(lostIncome)} a year`,
-				sentence:
-					"You're already financially independent, so this comes out of your safe spending instead.",
-				working: [...working, `Capital × ${formatPercent(profile.swr)} safe withdrawal rate`]
+				caption: 'a year less to withdraw in retirement',
+				summary: `would reduce yearly retirement withdrawals by ${formatMoney(lostIncome)}`,
+				sentence: `On these figures, net worth already meets the retirement target, so this is shown as lower yearly withdrawals at a ${formatPercent(profile.swr)} withdrawal rate.`,
+				working: [...working, `Capital × ${formatPercent(profile.swr)} withdrawal rate`]
 			};
 		}
 		if (baseline.fiMonth === null) {
 			return {
 				value: NaN,
-				headline: 'Out of reach',
-				caption: 'at your current savings rate',
+				headline: 'Not reached',
+				caption: 'within 80 years on these figures',
 				sentence:
-					"With these numbers you don't reach financial independence within 80 years, so there's no date to delay.",
+					"On these figures, net worth doesn't reach the retirement target within 80 years, so there are no dates to compare.",
 				working
 			};
 		}
 		if (withPurchase.fiMonth === null || delayMonths === null) {
 			return {
 				value: Infinity,
-				headline: 'Out of reach',
-				caption: 'retirement with this cost',
-				summary: 'would put retirement out of reach',
-				sentence: `Without it you'd be financially independent in ${yearsText(baseline.fiMonth)}.`,
+				headline: 'Not reached',
+				caption: 'retirement target within 80 years with this cost',
+				summary: 'would mean net worth doesn’t reach the retirement target within 80 years',
+				sentence: `Without it, net worth reaches the retirement target in ${yearsText(baseline.fiMonth)} on these figures.`,
 				working
 			};
 		}
@@ -87,8 +88,8 @@ export const retirementDelayLens: Lens = {
 		return {
 			value: days,
 			headline: formatElapsed(days),
-			caption: 'later retirement',
-			summary: `would delay retirement by ${formatElapsed(days)}`,
+			caption: 'later to reach your retirement target',
+			summary: `would delay reaching your retirement target by ${formatElapsed(days)}`,
 			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth),
 			working
 		};
@@ -111,8 +112,8 @@ export const futureValueLens: Lens = {
 			return {
 				value,
 				headline: formatMoney(value),
-				caption: `by the time you retire, in ${yearsText(fiMonth)}`,
-				sentence: `Invested at ${rate} a year above inflation, in today's money.`,
+				caption: `by your retirement target date, in ${yearsText(fiMonth)}`,
+				sentence: `If invested at an assumed ${rate} a year above inflation, in today's money.`,
 				working: [`${formatMoney(purchase.amount)} × (1 + ${rate})^${formatNumber(years)}`]
 			};
 		}
@@ -123,10 +124,10 @@ export const futureValueLens: Lens = {
 		return {
 			value,
 			headline: formatMoney(value),
-			caption: `by the time you retire, in ${yearsText(fiMonth)}`,
-			sentence: `The payments made before retirement, invested at ${rate} a year above inflation, in today's money.`,
+			caption: `by your retirement target date, in ${yearsText(fiMonth)}`,
+			sentence: `The payments made before that date, if invested at an assumed ${rate} a year above inflation, in today's money.`,
 			working: [
-				`${formatNumber(months)} monthly payments of ${formatMoney(payment)}, each compounded to retirement`
+				`${formatNumber(months)} monthly payments of ${formatMoney(payment)}, each compounded to the target date`
 			]
 		};
 	}
@@ -150,8 +151,8 @@ export const capitalNeeded: Lens = {
 			caption: `invested to pay for it ${formatDuration(duration)}`,
 			sentence:
 				duration.kind === 'lifelong'
-					? `${formatMoney(annualCost(purchase))} a year ÷ ${swr} safe withdrawal rate. This is what it adds to your FI number.`
-					: `Enough to cover every payment while drawing down at ${swr} a year.`,
+					? `${formatMoney(annualCost(purchase))} a year ÷ ${swr} withdrawal rate. This is what it adds to your retirement target.`
+					: `The sum that covers every payment when drawn down at ${swr} a year.`,
 			working: [
 				duration.kind === 'lifelong'
 					? `${formatMoney(annualCost(purchase))} ÷ ${swr}`

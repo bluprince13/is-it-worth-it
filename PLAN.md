@@ -66,7 +66,7 @@ Not doing (at least in v1): side-by-side comparison of purchases, budget lenses 
 
 - **Private by default.** Financial profile stays in `localStorage`; nothing is sent to a server. A share link carries everything entered, purchase and profile, and says so when copied. Opening a link shows its figures without overwriting the viewer's own saved profile unless they choose to keep them.
 - **Works with no setup.** Any empty profile field falls back to a typical UK full-time employee (£30,000 take-home, from the ONS April 2025 median of £39,039 gross; 37.5 hours; £3,000 saved; £20,000 invested), so every lens shows straight away. Defaults are shown as grey placeholders, never saved as the user's own, and a note under the summary names the fields still on defaults.
-- **Neutral, not preachy.** Every lens gets the same visual weight. The app shows scale, not a verdict.
+- **Factual, never advice.** Every lens gets the same visual weight. Text states calculations and names assumptions ("on these figures", "assumed 5% return"); it never judges a purchase (no "small enough not to worry"), never says what the user can or should do, and never states a modelled outcome as a fact about their life ("reaches the retirement target in 21 years", not "you'll be financially independent"). A footer says it's for illustration only and not financial advice.
 - **Show the working.** Each result expands to show the formula and inputs used.
 
 ### Screens / layout (single page)
