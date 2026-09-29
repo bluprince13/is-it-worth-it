@@ -3,6 +3,7 @@
 	import { annualCost } from '$lib/finance/recurrence';
 	import type { Duration, Unit } from '$lib/finance/types';
 	import { formatDuration, formatMoney } from '$lib/format';
+	import FormattedNumberInput from './FormattedNumberInput.svelte';
 	import Segmented from './Segmented.svelte';
 
 	let { draft = $bindable() }: { draft: PurchaseDraft } = $props();
@@ -66,19 +67,13 @@
 					: 'border-stone-300 focus-within:border-emerald-600 focus-within:ring-emerald-600 dark:border-stone-700'}"
 			>
 				<span class="pl-4 text-2xl text-stone-400">£</span>
-				<input
+				<FormattedNumberInput
 					id="amount"
-					type="number"
-					inputmode="decimal"
-					min="0"
-					step="any"
 					placeholder="0"
 					aria-invalid={errors.amount ? true : undefined}
 					aria-describedby={errors.amount ? 'amount-error' : undefined}
 					class="w-full min-w-0 border-0 bg-transparent py-2 pr-4 pl-1 text-3xl font-semibold tabular-nums focus:ring-0"
-					bind:value={
-						() => draft.amount, (v) => (draft.amount = v == null || Number.isNaN(v) ? undefined : v)
-					}
+					bind:value={() => draft.amount, (v) => (draft.amount = v)}
 				/>
 			</div>
 			{#if errors.amount}
@@ -126,15 +121,13 @@
 				{#if frequencyKey === 'custom'}
 					<div class="mt-3 flex items-center gap-2">
 						<span class="text-sm text-stone-600 dark:text-stone-300">Every</span>
-						<input
-							type="number"
-							min="1"
-							step="1"
+						<FormattedNumberInput
+							inputmode="numeric"
 							aria-label="Number of units between payments"
 							aria-invalid={errors.every ? true : undefined}
 							aria-describedby={errors.every ? 'every-error' : undefined}
 							class={smallInput(errors.every)}
-							bind:value={draft.every}
+							bind:value={() => draft.every, (v) => (draft.every = v ?? NaN)}
 						/>
 						<select
 							aria-label="Unit"
@@ -162,15 +155,13 @@
 				{#if draft.durationKind === 'fixed'}
 					<div class="mt-3 flex items-center gap-2">
 						<span class="text-sm text-stone-600 dark:text-stone-300">For</span>
-						<input
-							type="number"
-							min="1"
-							step="1"
+						<FormattedNumberInput
+							inputmode="numeric"
 							aria-label="Duration length"
 							aria-invalid={errors.durationCount ? true : undefined}
 							aria-describedby={errors.durationCount ? 'duration-error' : undefined}
 							class={smallInput(errors.durationCount)}
-							bind:value={draft.durationCount}
+							bind:value={() => draft.durationCount, (v) => (draft.durationCount = v ?? NaN)}
 						/>
 						<select
 							aria-label="Duration unit"

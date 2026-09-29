@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { groupNumberString } from '$lib/format';
+	import FormattedNumberInput from './FormattedNumberInput.svelte';
+
 	interface Props {
 		id: string;
 		label: string;
@@ -11,7 +14,6 @@
 		scale?: number;
 		prefix?: string;
 		suffix?: string;
-		step?: number | 'any';
 	}
 
 	let {
@@ -23,8 +25,7 @@
 		error,
 		scale = 1,
 		prefix,
-		suffix,
-		step = 'any'
+		suffix
 	}: Props = $props();
 
 	const toDisplay = (v: number | undefined) =>
@@ -34,6 +35,9 @@
 	);
 	const fromDisplay = (v: number | null | undefined) =>
 		v == null || Number.isNaN(v) ? undefined : v / scale;
+	const displayPlaceholder = $derived(
+		placeholder === undefined ? undefined : groupNumberString(String(toDisplay(placeholder)))
+	);
 </script>
 
 <div>
@@ -49,12 +53,9 @@
 			: 'border-stone-300 focus-within:border-emerald-600 focus-within:ring-emerald-600 dark:border-stone-700'}"
 	>
 		{#if prefix}<span class="pl-3 text-stone-500">{prefix}</span>{/if}
-		<input
+		<FormattedNumberInput
 			{id}
-			type="number"
-			inputmode="decimal"
-			{step}
-			placeholder={placeholder === undefined ? undefined : String(toDisplay(placeholder))}
+			placeholder={displayPlaceholder}
 			aria-describedby={describedBy}
 			aria-invalid={error ? true : undefined}
 			class="w-full min-w-0 border-0 bg-transparent px-3 py-2 tabular-nums focus:ring-0"

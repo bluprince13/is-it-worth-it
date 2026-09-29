@@ -5,7 +5,9 @@ import {
 	formatMoney,
 	formatMoneyCompact,
 	formatPercent,
-	formatWorkTime
+	formatWorkTime,
+	groupNumberString,
+	parseNumberString
 } from './format';
 
 describe('formatMoney', () => {
@@ -63,5 +65,34 @@ describe('formatMoneyCompact', () => {
 	it('abbreviates thousands and millions', () => {
 		expect(formatMoneyCompact(750_000)).toBe('£750k');
 		expect(formatMoneyCompact(1_250_000)).toBe('£1.25m');
+	});
+});
+
+describe('groupNumberString', () => {
+	it.each([
+		['', ''],
+		['1000', '1,000'],
+		['1000000', '1,000,000'],
+		['100000', '100,000'],
+		['12.5', '12.5'],
+		['12.', '12.'],
+		['1234.5', '1,234.5'],
+		['1234.56', '1,234.56']
+	])('%s → %s', (raw, expected) => {
+		expect(groupNumberString(raw)).toBe(expected);
+	});
+});
+
+describe('parseNumberString', () => {
+	it.each([
+		['', undefined],
+		['1000', 1000],
+		['1,000', 1000],
+		['1,000,000', 1_000_000],
+		['12.5', 12.5],
+		['12.', 12],
+		[' 1,000 ', 1000]
+	])('%s → %s', (raw, expected) => {
+		expect(parseNumberString(raw)).toBe(expected);
 	});
 });

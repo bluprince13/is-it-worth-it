@@ -25,6 +25,20 @@ export function formatNumber(value: number): string {
 	return Math.round(value).toLocaleString('en-GB');
 }
 
+/** Adds thousands separators to a numeric string, keeping any decimal part and a trailing point. */
+export function groupNumberString(raw: string): string {
+	const clean = raw.replace(/[^\d.]/g, '');
+	const [intPart, fracPart] = clean.split('.');
+	const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+	return clean.includes('.') ? `${grouped}.${fracPart ?? ''}` : grouped;
+}
+
+/** Parses a number from an input string, ignoring thousands separators and whitespace. */
+export function parseNumberString(raw: string): number | undefined {
+	const n = Number(raw.replace(/[,\s]/g, ''));
+	return raw.trim() === '' || Number.isNaN(n) ? undefined : n;
+}
+
 function quantity(value: number, unit: string): string {
 	const shown = formatNumber(value);
 	return `${shown} ${unit}${shown === '1' ? '' : 's'}`;

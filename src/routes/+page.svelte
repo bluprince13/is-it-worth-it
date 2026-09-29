@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { replaceState } from '$app/navigation';
+	import FormattedNumberInput from '$lib/components/FormattedNumberInput.svelte';
 	import LensCard from '$lib/components/LensCard.svelte';
 	import ProfilePanel from '$lib/components/ProfilePanel.svelte';
 	import PurchaseForm from '$lib/components/PurchaseForm.svelte';
@@ -246,17 +247,15 @@
 		/>
 		{#if draft.investHorizon === 'years'}
 			<div class="flex items-center gap-2 text-sm">
-				<input
-					type="number"
-					min="1"
-					step="1"
+				<FormattedNumberInput
+					inputmode="numeric"
 					aria-label="Number of years to invest"
 					aria-invalid={investYearsError ? true : undefined}
 					aria-describedby={investYearsError ? 'invest-years-error' : undefined}
 					class="w-20 rounded-lg bg-white py-1.5 tabular-nums dark:bg-stone-900 {investYearsError
 						? 'border-rose-500'
 						: 'border-stone-300 dark:border-stone-700'}"
-					bind:value={draft.investYears}
+					bind:value={() => draft.investYears, (v) => (draft.investYears = v ?? NaN)}
 				/>
 				<span class="text-stone-600 dark:text-stone-300">years</span>
 			</div>
