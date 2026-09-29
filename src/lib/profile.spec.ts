@@ -3,7 +3,7 @@ import { TYPICAL_PROFILE, validateProfile, withDefaults } from './profile';
 
 describe('withDefaults', () => {
 	it('fills every empty field with the typical value and reports it', () => {
-		const { profile, defaulted } = withDefaults({ realReturn: 0.05, swr: 0.04 });
+		const { profile, defaulted } = withDefaults({ realReturn: 0.05 });
 		expect(profile).toEqual(TYPICAL_PROFILE);
 		expect(defaulted).toEqual([
 			'takeHomePerYear',
@@ -18,8 +18,7 @@ describe('withDefaults', () => {
 		const { profile, defaulted } = withDefaults({
 			netWorth: 0,
 			takeHomePerYear: 50_000,
-			realReturn: 0.03,
-			swr: 0.035
+			realReturn: 0.03
 		});
 		expect(profile.netWorth).toBe(0);
 		expect(profile.takeHomePerYear).toBe(50_000);
@@ -28,9 +27,7 @@ describe('withDefaults', () => {
 	});
 
 	it('treats a cleared field as empty', () => {
-		const cleared = { realReturn: undefined, swr: 0.04 } as unknown as Parameters<
-			typeof withDefaults
-		>[0];
+		const cleared = { realReturn: undefined } as unknown as Parameters<typeof withDefaults>[0];
 		expect(withDefaults(cleared).defaulted).toContain('realReturn');
 	});
 });
@@ -64,9 +61,7 @@ describe('validateProfile', () => {
 		['netWorth', -1],
 		['retirementTarget', 0],
 		['realReturn', 1.01],
-		['realReturn', -0.01],
-		['swr', 0],
-		['swr', 0.2]
+		['realReturn', -0.01]
 	] as const)('rejects %s = %d', (key, value) => {
 		expect(validateProfile({ ...valid, [key]: value })[key]).toBeDefined();
 	});

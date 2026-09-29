@@ -2,6 +2,11 @@ import { annualCost } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatPercent } from '$lib/format';
 import type { Lens } from './types';
 
+/** Attributed reference point only: states the rule and the user's figure, not a verdict. */
+function ruleReference(netWorth: number): string {
+	return `For reference, Nick Maggiulli's "0.01% rule" describes daily spending of up to 0.01% of net worth (${formatMoney(netWorth * 0.0001)} for you) as not noticeably affecting wealth.`;
+}
+
 export const netWorthShare: Lens = {
 	id: 'net-worth-share',
 	title: 'Share of net worth',
@@ -18,7 +23,7 @@ export const netWorthShare: Lens = {
 				headline: formatPercent(share),
 				caption: 'of your net worth',
 				summary: `is ${formatPercent(share)} of your net worth`,
-				sentence: `${formatMoney(purchase.amount)} out of ${formatMoney(netWorth)}.`,
+				sentence: `${formatMoney(purchase.amount)} out of ${formatMoney(netWorth)}. ${ruleReference(netWorth)}`,
 				working: [`${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)}`]
 			};
 		}
@@ -28,7 +33,7 @@ export const netWorthShare: Lens = {
 			value: share,
 			headline: formatPercent(share),
 			caption: 'of your net worth every year',
-			sentence: `${formatMoney(yearly)} a year out of ${formatMoney(netWorth)}.`,
+			sentence: `${formatMoney(yearly)} a year out of ${formatMoney(netWorth)}, or ${formatMoney(yearly / 365.25)} a day. ${ruleReference(netWorth)}`,
 			working: [`${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)}`]
 		};
 	}

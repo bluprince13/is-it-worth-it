@@ -22,5 +22,4 @@ export interface Profile {
 	annualSavings?: number;
 	retirementTarget?: number;
 	realReturn: number;
-	swr: number;
 }

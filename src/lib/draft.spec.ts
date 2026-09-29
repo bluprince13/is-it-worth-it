@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EXAMPLES, toPurchase, validateDraft } from './draft';
+import { EXAMPLES, investYearsOption, toPurchase, validateDraft } from './draft';
 
 describe('EXAMPLES', () => {
 	it('each converts to a valid purchase', () => {
@@ -45,5 +45,18 @@ describe('validateDraft', () => {
 
 	it('ignores recurrence fields for a one-off', () => {
 		expect(validateDraft({ ...recurring, recurring: false, every: 0 })).toEqual({});
+	});
+});
+
+describe('investment horizon', () => {
+	it('is the target date by default', () => {
+		expect(investYearsOption(EXAMPLES[0])).toBeNull();
+	});
+
+	it('uses whole years when chosen, and rejects anything else', () => {
+		const years = { ...EXAMPLES[0], investHorizon: 'years' as const, investYears: 15 };
+		expect(investYearsOption(years)).toBe(15);
+		expect(investYearsOption({ ...years, investYears: 0 })).toBeUndefined();
+		expect(validateDraft({ ...years, investYears: 2.5 }).investYears).toBeDefined();
 	});
 });

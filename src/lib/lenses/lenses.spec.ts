@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Profile, Purchase } from '$lib/finance/types';
+import { futureValue, futureValueOfMonthlySeries } from '$lib/finance/growth';
 import { evaluate } from './index';
 import { summarise } from './summary';
 
@@ -9,8 +10,7 @@ const profile: Profile = {
 	netWorth: 100_000,
 	annualSavings: 12_000,
 	retirementTarget: 750_000,
-	realReturn: 0.05,
-	swr: 0.04
+	realReturn: 0.05
 };
 
 const bike: Purchase = { amount: 1_200 };
@@ -30,7 +30,7 @@ describe('evaluate', () => {
 	});
 
 	it('blocks lenses whose profile fields are missing', () => {
-		const { results, blocked } = evaluate({ realReturn: 0.05, swr: 0.04 }, bike);
+		const { results, blocked } = evaluate({ realReturn: 0.05 }, bike);
 		expect(results).toEqual([]);
 		expect(blocked.find((b) => b.lens.id === 'work-hours')?.invalid).toEqual([
 			'takeHomePerYear',
@@ -46,17 +46,6 @@ describe('evaluate', () => {
 			'wealth-earn-back'
 		]);
 		expect(results.map((r) => r.lens.id)).toEqual(['work-hours', 'net-worth-share']);
-	});
-
-	it('blocks capital-to-fund when the withdrawal rate is invalid', () => {
-		const purchase = netflix({ kind: 'lifelong' });
-		const { blocked } = evaluate({ ...profile, swr: NaN }, purchase);
-		expect(blocked.find((b) => b.lens.id === 'capital-needed')?.invalid).toEqual(['swr']);
-	});
-
-	it('skips recurring-only lenses for a one-off', () => {
-		const ids = evaluate(profile, bike).results.map((r) => r.lens.id);
-		expect(ids).not.toContain('capital-needed');
 	});
 });
 
@@ -93,21 +82,11 @@ describe('one-off purchase', () => {
 });
 
 describe('recurring purchase', () => {
-	it('prices the capital to fund it for life', () => {
-		expect(result(profile, netflix({ kind: 'lifelong' }), 'capital-needed')!.value).toBeCloseTo(
-			4_500
-		);
-	});
-
-	it('has no capital figure when it stops at retirement', () => {
-		expect(result(profile, netflix({ kind: 'untilFI' }), 'capital-needed')).toBeUndefined();
-	});
-
-	it('delays retirement more when lifelong than until FI', () => {
+	it('delays retirement the same whether lifelong or until the target', () => {
 		const lifelong = result(profile, netflix({ kind: 'lifelong' }), 'retirement-delay')!;
 		const untilFI = result(profile, netflix({ kind: 'untilFI' }), 'retirement-delay')!;
 		expect(untilFI.value).toBeGreaterThan(0);
-		expect(lifelong.value).toBeGreaterThan(untilFI.value);
+		expect(lifelong.value).toBeCloseTo(untilFI.value);
 	});
 
 	it('shows hours of work per year', () => {
@@ -133,13 +112,46 @@ describe('summarise', () => {
 	});
 
 	it('falls back to "This" and to what is available', () => {
-		const partial: Profile = { netWorth: 100_000, realReturn: 0.05, swr: 0.04 };
+		const partial: Profile = { netWorth: 100_000, realReturn: 0.05 };
 		expect(summarise(evaluate(partial, bike).results, bike)).toBe(
 			'This is 1.2% of your net worth.'
 		);
 	});
 
 	it('is null when nothing can be said', () => {
-		expect(summarise(evaluate({ realReturn: 0.05, swr: 0.04 }, bike).results, bike)).toBeNull();
+		expect(summarise(evaluate({ realReturn: 0.05 }, bike).results, bike)).toBeNull();
+	});
+});
+
+describe('invested instead', () => {
+	const years = { investYears: 10 };
+
+	it('compounds a one-off over a chosen number of years', () => {
+		const fv = evaluate(profile, bike, years).results.find((r) => r.lens.id === 'future-value')!;
+		expect(fv.result.value).toBeCloseTo(futureValue(1_200, 0.05, 10));
+		expect(fv.result.caption).toBe('after 10 years');
+	});
+
+	it('needs only the return when a number of years is chosen', () => {
+		const partial: Profile = { realReturn: 0.05 };
+		const ids = evaluate(partial, bike, years).results.map((r) => r.lens.id);
+		expect(ids).toEqual(['future-value']);
+	});
+
+	it('keeps compounding after a fixed duration ends', () => {
+		const threeYears = netflix({ kind: 'fixed', months: 36 });
+		const fv = evaluate(profile, threeYears, years).results.find(
+			(r) => r.lens.id === 'future-value'
+		)!;
+		const expected = futureValueOfMonthlySeries(15, 0.05, 36) * futureValue(1, 0.05, 7);
+		expect(fv.result.value).toBeCloseTo(expected);
+	});
+
+	it('stops until-retirement payments at the target date but not lifelong ones', () => {
+		const long = { investYears: 60 };
+		const value = (duration: Purchase['duration']) =>
+			evaluate(profile, netflix(duration), long).results.find((r) => r.lens.id === 'future-value')!
+				.result.value;
+		expect(value({ kind: 'lifelong' })).toBeGreaterThan(value({ kind: 'untilFI' }));
 	});
 });

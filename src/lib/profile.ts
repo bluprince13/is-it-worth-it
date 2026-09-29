@@ -3,7 +3,7 @@ import { formatMoney } from './format';
 
 const STORAGE_KEY = 'is-it-worth-it:profile';
 
-export const DEFAULT_PROFILE: Profile = { realReturn: 0.05, swr: 0.04 };
+export const DEFAULT_PROFILE: Profile = { realReturn: 0.05 };
 
 /**
  * Typical UK full-time employee, used for any field left empty. Take-home is the
@@ -26,7 +26,7 @@ const isNumber = (value: unknown): value is number =>
 
 export function validateProfile(profile: Profile): ProfileErrors {
 	const errors: ProfileErrors = {};
-	const { takeHomePerYear: pay, hoursPerWeek, annualSavings, netWorth, realReturn, swr } = profile;
+	const { takeHomePerYear: pay, hoursPerWeek, annualSavings, netWorth, realReturn } = profile;
 
 	if (isNumber(pay) && pay <= 0) errors.takeHomePerYear = 'Must be more than £0';
 	if (isNumber(hoursPerWeek) && (hoursPerWeek <= 0 || hoursPerWeek > 100)) {
@@ -46,9 +46,6 @@ export function validateProfile(profile: Profile): ProfileErrors {
 	}
 	if (isNumber(realReturn) && (realReturn < 0 || realReturn > 1)) {
 		errors.realReturn = 'Must be between 0% and 100%';
-	}
-	if (isNumber(swr) && (swr <= 0 || swr > 0.1)) {
-		errors.swr = 'Must be more than 0% and at most 10%';
 	}
 	return errors;
 }
@@ -90,13 +87,13 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 			{
 				key: 'takeHomePerYear',
 				label: 'Take-home pay per year',
-				hint: 'After tax, NI and pension',
 				kind: 'money'
 			},
 			{ key: 'hoursPerWeek', label: 'Hours worked per week', kind: 'hours' },
 			{
 				key: 'annualSavings',
 				label: 'Savings per year',
+				hint: 'Invested, and added to your net worth each year',
 				kind: 'money'
 			}
 		]
@@ -104,7 +101,7 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 	{
 		title: 'Wealth',
 		fields: [
-			{ key: 'netWorth', label: 'Net worth', hint: 'Invested or investable', kind: 'money' },
+			{ key: 'netWorth', label: 'Net worth', hint: 'Investable', kind: 'money' },
 			{
 				key: 'retirementTarget',
 				label: 'Retirement target',
@@ -120,12 +117,6 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 				key: 'realReturn',
 				label: 'Investment return',
 				hint: 'Assumed, per year, above inflation',
-				kind: 'percent'
-			},
-			{
-				key: 'swr',
-				label: 'Withdrawal rate',
-				hint: 'Assumed share of investments withdrawn each year in retirement. Used to price recurring costs that continue past your retirement target',
 				kind: 'percent'
 			}
 		]

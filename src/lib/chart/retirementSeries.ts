@@ -8,9 +8,7 @@ export interface Point {
 export interface RetirementSeries {
 	without: Point[];
 	with: Point[];
-	targetWithout: Point[];
-	targetWith: Point[];
-	sameTarget: boolean;
+	target: number;
 	fiWithout: number;
 	fiWith: number;
 	end: number;
@@ -25,36 +23,26 @@ export function valueAt(series: number[], month: number): number {
 }
 
 /** Net worth month by month, ending exactly where it meets the target. */
-function pathToFI(result: FIResult, fiMonth: number): Point[] {
+function pathToTarget(result: FIResult, fiMonth: number, target: number): Point[] {
 	const whole = Math.floor(fiMonth);
 	const points = result.netWorth.slice(0, whole + 1).map((value, month) => ({ month, value }));
-	if (fiMonth > whole) points.push({ month: fiMonth, value: valueAt(result.target, fiMonth) });
+	if (fiMonth > whole) points.push({ month: fiMonth, value: target });
 	return points;
 }
 
-function targetLine(result: FIResult, end: number): Point[] {
-	const points = result.target.map((value, month) => ({ month, value }));
-	points.push({ month: end, value: result.target.at(-1)! });
-	return points;
-}
-
-/** Null unless both paths reach FI in the future, which is the only case with a delay to draw. */
+/** Null unless both paths reach the target in the future, which is the only case with a delay to draw. */
 export function buildRetirementSeries(retirement: RetirementDelay): RetirementSeries | null {
-	const { baseline, withPurchase } = retirement;
+	const { baseline, withPurchase, target } = retirement;
 	const fiWithout = baseline.fiMonth;
 	const fiWith = withPurchase.fiMonth;
 	if (!fiWithout || fiWith === null) return null;
 
-	const end = Math.max(fiWith, fiWithout) + TAIL_MONTHS;
-	const sameTarget = withPurchase.target.every((t) => Math.abs(t - baseline.target[0]) < 0.5);
 	return {
-		without: pathToFI(baseline, fiWithout),
-		with: pathToFI(withPurchase, fiWith),
-		targetWithout: targetLine(baseline, end),
-		targetWith: targetLine(withPurchase, end),
-		sameTarget,
+		without: pathToTarget(baseline, fiWithout, target),
+		with: pathToTarget(withPurchase, fiWith, target),
+		target,
 		fiWithout,
 		fiWith,
-		end
+		end: Math.max(fiWith, fiWithout) + TAIL_MONTHS
 	};
 }

@@ -10,6 +10,8 @@ export interface PurchaseDraft {
 	durationKind: Duration['kind'];
 	durationCount: number;
 	durationUnit: 'year' | 'month';
+	investHorizon: 'target' | 'years';
+	investYears: number;
 }
 
 export const DEFAULT_DRAFT: PurchaseDraft = {
@@ -20,7 +22,9 @@ export const DEFAULT_DRAFT: PurchaseDraft = {
 	unit: 'month',
 	durationKind: 'lifelong',
 	durationCount: 3,
-	durationUnit: 'year'
+	durationUnit: 'year',
+	investHorizon: 'target',
+	investYears: 10
 };
 
 export const FREQUENCY_PRESETS: { label: string; recurrence: Recurrence }[] = [
@@ -64,7 +68,9 @@ export const EXAMPLES: PurchaseDraft[] = [
 	example('New car', 25_000)
 ];
 
-export type DraftErrors = Partial<Record<'amount' | 'every' | 'durationCount', string>>;
+export type DraftErrors = Partial<
+	Record<'amount' | 'every' | 'durationCount' | 'investYears', string>
+>;
 
 const WHOLE_NUMBER = 'Must be a whole number, 1 or more';
 
@@ -79,5 +85,14 @@ export function validateDraft(draft: PurchaseDraft): DraftErrors {
 	if (draft.recurring && draft.durationKind === 'fixed' && !isPositiveInt(draft.durationCount)) {
 		errors.durationCount = WHOLE_NUMBER;
 	}
+	if (draft.investHorizon === 'years' && !isPositiveInt(draft.investYears)) {
+		errors.investYears = WHOLE_NUMBER;
+	}
 	return errors;
+}
+
+/** The horizon for "Invested instead", or undefined if the entered years aren't valid. */
+export function investYearsOption(draft: PurchaseDraft): number | null | undefined {
+	if (draft.investHorizon === 'target') return null;
+	return isPositiveInt(draft.investYears) ? draft.investYears : undefined;
 }

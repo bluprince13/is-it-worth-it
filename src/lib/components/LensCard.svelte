@@ -22,6 +22,7 @@
 
 	{#if error}
 		<div class="mt-2 text-sm text-rose-700 dark:text-rose-400">{@render error()}</div>
+		{@render children?.()}
 	{:else if result}
 		<p class="mt-2 leading-tight">
 			<span
@@ -34,7 +35,9 @@
 			>
 		</p>
 
-		<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">{result.sentence}</p>
+		{#if result.sentence}
+			<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">{result.sentence}</p>
+		{/if}
 
 		{@render children?.()}
 

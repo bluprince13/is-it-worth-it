@@ -12,11 +12,10 @@ const PROFILE_PARAMS: { param: string; key: keyof Profile; percent?: boolean }[]
 	{ param: 'sav', key: 'annualSavings' },
 	{ param: 'nw', key: 'netWorth' },
 	{ param: 'tgt', key: 'retirementTarget' },
-	{ param: 'ret', key: 'realReturn', percent: true },
-	{ param: 'swr', key: 'swr', percent: true }
+	{ param: 'ret', key: 'realReturn', percent: true }
 ];
 
-const PURCHASE_PARAMS = ['amt', 'for', 'every', 'dur'];
+const PURCHASE_PARAMS = ['amt', 'for', 'every', 'dur', 'inv'];
 
 export interface SharedState {
 	draft?: PurchaseDraft;
@@ -44,6 +43,7 @@ export function encodeShare(draft: PurchaseDraft, profile: Profile): string {
 					: `${draft.durationCount}${draft.durationUnit === 'year' ? 'y' : 'm'}`
 		);
 	}
+	if (draft.investHorizon === 'years') params.set('inv', String(draft.investYears));
 	for (const { param, key, percent } of PROFILE_PARAMS) {
 		const value = profile[key];
 		if (value === undefined) continue;
@@ -74,6 +74,11 @@ function decodeDraft(params: URLSearchParams): PurchaseDraft | undefined {
 		draft.durationKind = 'fixed';
 		draft.durationCount = Number(fixed[1]);
 		draft.durationUnit = fixed[2] === 'y' ? 'year' : 'month';
+	}
+	const inv = number(params.get('inv'));
+	if (inv !== undefined && Number.isInteger(inv) && inv >= 1) {
+		draft.investHorizon = 'years';
+		draft.investYears = inv;
 	}
 	return draft;
 }

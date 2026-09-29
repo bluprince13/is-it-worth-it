@@ -7,7 +7,14 @@
 	import RetirementChart from '$lib/components/RetirementChart.svelte';
 	import ShareButton from '$lib/components/ShareButton.svelte';
 	import { buildRetirementSeries } from '$lib/chart/retirementSeries';
-	import { DEFAULT_DRAFT, EXAMPLES, toPurchase } from '$lib/draft';
+	import {
+		DEFAULT_DRAFT,
+		EXAMPLES,
+		investYearsOption,
+		toPurchase,
+		validateDraft
+	} from '$lib/draft';
+	import Segmented from '$lib/components/Segmented.svelte';
 	import type { Profile } from '$lib/finance/types';
 	import {
 		evaluate,
@@ -68,7 +75,13 @@
 	const withTypical = $derived(withDefaults(profile));
 
 	const purchase = $derived(toPurchase(draft));
-	const evaluation = $derived(evaluate(withTypical.profile, purchase));
+	const investYears = $derived(investYearsOption(draft));
+	const evaluation = $derived(
+		evaluate(withTypical.profile, purchase, {
+			investYears: investYears === undefined ? NaN : investYears
+		})
+	);
+	const investYearsError = $derived(validateDraft(draft).investYears);
 	const summary = $derived(summarise(evaluation.results, purchase));
 	const chartSeries = $derived(
 		evaluation.retirement ? buildRetirementSeries(evaluation.retirement) : null
@@ -203,9 +216,15 @@
 			{#if isFeatured && chartSeries}
 				<RetirementChart series={chartSeries} />
 			{/if}
+			{#if item.lens.id === 'future-value'}
+				{@render investHorizon()}
+			{/if}
 		</LensCard>
 	{:else}
 		<LensCard lens={item.lens} featured={isFeatured}>
+			{#if item.lens.id === 'future-value'}
+				{@render investHorizon()}
+			{/if}
 			{#snippet error()}
 				Can't be calculated because your {listFields(item.invalid)}
 				{item.invalid.length === 1 ? "isn't" : "aren't"} valid.
@@ -217,6 +236,41 @@
 			{/snippet}
 		</LensCard>
 	{/if}
+{/snippet}
+
+{#snippet investHorizon()}
+	<div class="mt-4 space-y-2">
+		<Segmented
+			label="Invest until"
+			options={[
+				{ value: 'target', label: 'Until target' },
+				{ value: 'years', label: 'For N years' }
+			]}
+			bind:value={draft.investHorizon}
+		/>
+		{#if draft.investHorizon === 'years'}
+			<div class="flex items-center gap-2 text-sm">
+				<input
+					type="number"
+					min="1"
+					step="1"
+					aria-label="Number of years to invest"
+					aria-invalid={investYearsError ? true : undefined}
+					aria-describedby={investYearsError ? 'invest-years-error' : undefined}
+					class="w-20 rounded-lg bg-white py-1.5 tabular-nums dark:bg-stone-900 {investYearsError
+						? 'border-rose-500'
+						: 'border-stone-300 dark:border-stone-700'}"
+					bind:value={draft.investYears}
+				/>
+				<span class="text-stone-600 dark:text-stone-300">years</span>
+			</div>
+			{#if investYearsError}
+				<p id="invest-years-error" class="text-xs text-rose-700 dark:text-rose-400">
+					{investYearsError}
+				</p>
+			{/if}
+		{/if}
+	</div>
 {/snippet}
 
 <footer class="mx-auto max-w-4xl px-4 pb-10 text-xs text-stone-500 dark:text-stone-400">

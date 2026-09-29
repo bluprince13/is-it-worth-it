@@ -19,8 +19,7 @@
 	const clipId = $props.id();
 
 	const yDomain = $derived.by(() => {
-		const targets = [...series.targetWithout, ...series.targetWith].map((p) => p.value);
-		const top = Math.max(...targets);
+		const top = series.target;
 		if (view === 'whole') return [Math.min(0, ...series.with.map((p) => p.value)), top * 1.05];
 		const lows = [...series.with, ...series.without]
 			.filter((p) => p.month >= x0)
@@ -85,15 +84,7 @@
 		return {
 			month: m,
 			without: netWorthAt(series.without, series.fiWithout, m),
-			with: netWorthAt(series.with, series.fiWith, m),
-			targetWith: valueAt(
-				series.targetWith.map((p) => p.value),
-				m
-			),
-			targetWithout: valueAt(
-				series.targetWithout.map((p) => p.value),
-				m
-			)
+			with: netWorthAt(series.with, series.fiWith, m)
 		};
 	});
 
@@ -112,18 +103,9 @@
 			<li class="flex items-center gap-1.5">
 				<span class="h-0.5 w-4 rounded bg-series-with"></span>With it
 			</li>
-			{#if series.sameTarget}
-				<li class="flex items-center gap-1.5">
-					<span class="w-4 border-t-2 border-dashed border-stone-400"></span>Retirement target
-				</li>
-			{:else}
-				<li class="flex items-center gap-1.5">
-					<span class="w-4 border-t-2 border-dashed border-series-without"></span>Target without
-				</li>
-				<li class="flex items-center gap-1.5">
-					<span class="w-4 border-t-2 border-dashed border-series-with"></span>Target with it
-				</li>
-			{/if}
+			<li class="flex items-center gap-1.5">
+				<span class="w-4 border-t-2 border-dashed border-stone-400"></span>Retirement target
+			</li>
 		</ul>
 		<Segmented
 			label="Chart range"
@@ -187,30 +169,15 @@
 					class="fill-series-with opacity-10"
 				/>
 
-				{#if series.sameTarget}
-					<path
-						d={path(series.targetWith)}
-						fill="none"
-						stroke-width="1.5"
-						stroke-dasharray="4 4"
-						class="stroke-stone-400"
-					/>
-				{:else}
-					<path
-						d={path(series.targetWithout)}
-						fill="none"
-						stroke-width="1.5"
-						stroke-dasharray="4 4"
-						class="stroke-series-without opacity-70"
-					/>
-					<path
-						d={path(series.targetWith)}
-						fill="none"
-						stroke-width="1.5"
-						stroke-dasharray="4 4"
-						class="stroke-series-with opacity-70"
-					/>
-				{/if}
+				<line
+					x1={x(x0)}
+					x2={x(x1)}
+					y1={y(series.target)}
+					y2={y(series.target)}
+					stroke-width="1.5"
+					stroke-dasharray="4 4"
+					class="stroke-stone-400"
+				/>
 
 				<path
 					d={path(series.without)}
@@ -274,21 +241,10 @@
 							{row.value === null ? 'Target reached' : formatMoney(row.value)}
 						</dd>
 					{/each}
-					{#if series.sameTarget}
-						<dt class="text-stone-500 dark:text-stone-400">Target</dt>
-						<dd class="text-right text-stone-700 tabular-nums dark:text-stone-300">
-							{formatMoney(tooltip.targetWith)}
-						</dd>
-					{:else}
-						<dt class="text-stone-500 dark:text-stone-400">Target with it</dt>
-						<dd class="text-right text-stone-700 tabular-nums dark:text-stone-300">
-							{formatMoney(tooltip.targetWith)}
-						</dd>
-						<dt class="text-stone-500 dark:text-stone-400">Target without</dt>
-						<dd class="text-right text-stone-700 tabular-nums dark:text-stone-300">
-							{formatMoney(tooltip.targetWithout)}
-						</dd>
-					{/if}
+					<dt class="text-stone-500 dark:text-stone-400">Target</dt>
+					<dd class="text-right text-stone-700 tabular-nums dark:text-stone-300">
+						{formatMoney(series.target)}
+					</dd>
 				</dl>
 			</div>
 		{/if}

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	capitalToFund,
-	futureValue,
-	futureValueOfMonthlySeries,
-	monthlyGrowthRate
-} from './growth';
+import { futureValue, futureValueOfMonthlySeries, monthlyGrowthRate } from './growth';
 
 describe('monthlyGrowthRate', () => {
 	it('compounds back to the annual rate', () => {
@@ -28,25 +23,5 @@ describe('futureValueOfMonthlySeries', () => {
 		let balance = 0;
 		for (let m = 0; m < 120; m++) balance = balance * (1 + i) + 100;
 		expect(futureValueOfMonthlySeries(100, 0.05, 120)).toBeCloseTo(balance, 6);
-	});
-});
-
-describe('capitalToFund', () => {
-	it('is annual cost ÷ SWR when lifelong', () => {
-		expect(capitalToFund(15, 0.04, Infinity)).toBeCloseTo(4500, 6);
-	});
-
-	it('converges to the lifelong figure for long durations', () => {
-		const long = capitalToFund(15, 0.04, 100 * 12);
-		expect(long).toBeLessThan(4500);
-		expect(long).toBeGreaterThan(4500 * 0.95);
-	});
-
-	it('is the plain sum at 0% SWR', () => {
-		expect(capitalToFund(15, 0, 12)).toBe(180);
-	});
-
-	it('is zero with nothing left to pay', () => {
-		expect(capitalToFund(15, 0.04, 0)).toBe(0);
 	});
 });

@@ -2,10 +2,10 @@ import { retirementDelay, type RetirementDelay } from '$lib/finance/fi';
 import type { Profile, Purchase } from '$lib/finance/types';
 import { futureLenses } from './future';
 import { timeLenses } from './time';
-import type { Group, Lens, LensContext, LensResult } from './types';
+import type { Group, Lens, LensContext, LensOptions, LensResult } from './types';
 import { wealthLenses } from './wealth';
 
-export type { Group, Lens, LensResult } from './types';
+export type { Group, Lens, LensOptions, LensResult } from './types';
 
 export const LENSES: Lens[] = [...futureLenses, ...timeLenses, ...wealthLenses];
 
@@ -30,15 +30,20 @@ function isSet(value: unknown): boolean {
 	return typeof value === 'number' && Number.isFinite(value);
 }
 
-export function buildContext(profile: Profile, purchase: Purchase): LensContext {
-	const { netWorth, annualSavings, retirementTarget, realReturn, swr } = profile;
+const DEFAULT_OPTIONS: LensOptions = { investYears: null };
+
+export function buildContext(
+	profile: Profile,
+	purchase: Purchase,
+	options: LensOptions = DEFAULT_OPTIONS
+): LensContext {
+	const { netWorth, annualSavings, retirementTarget, realReturn } = profile;
 	const canSimulate =
-		[netWorth, annualSavings, retirementTarget, realReturn, swr].every(isSet) &&
-		retirementTarget! > 0 &&
-		swr > 0;
+		[netWorth, annualSavings, retirementTarget, realReturn].every(isSet) && retirementTarget! > 0;
 	return {
 		profile,
 		purchase,
+		options,
 		recurring: purchase.recurrence !== undefined,
 		retirement: canSimulate
 			? retirementDelay(
@@ -46,8 +51,7 @@ export function buildContext(profile: Profile, purchase: Purchase): LensContext 
 						netWorth: netWorth!,
 						annualSavings: annualSavings!,
 						target: retirementTarget!,
-						realReturn,
-						swr
+						realReturn
 					},
 					purchase
 				)
@@ -61,16 +65,21 @@ export interface Evaluation {
 	retirement?: RetirementDelay;
 }
 
-export function evaluate(profile: Profile, purchase: Purchase): Evaluation {
+export function evaluate(
+	profile: Profile,
+	purchase: Purchase,
+	options: LensOptions = DEFAULT_OPTIONS
+): Evaluation {
 	const results: Evaluated[] = [];
 	const blocked: Blocked[] = [];
 	if (!(purchase.amount > 0)) return { results, blocked };
 
-	const ctx = buildContext(profile, purchase);
+	const ctx = buildContext(profile, purchase, options);
 	for (const lens of LENSES) {
 		if (lens.appliesTo === 'once' && ctx.recurring) continue;
 		if (lens.appliesTo === 'recurring' && !ctx.recurring) continue;
-		const invalid = lens.requires.filter((key) => !isSet(profile[key]));
+		const requires = typeof lens.requires === 'function' ? lens.requires(options) : lens.requires;
+		const invalid = requires.filter((key) => !isSet(profile[key]));
 		if (invalid.length > 0) {
 			blocked.push({ lens, invalid });
 			continue;

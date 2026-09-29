@@ -9,8 +9,7 @@ const profile: Profile = {
 	annualSavings: 12_000,
 	netWorth: 100_000,
 	retirementTarget: 600_000,
-	realReturn: 0.05,
-	swr: 0.035
+	realReturn: 0.05
 };
 
 const netflix: PurchaseDraft = {
@@ -26,13 +25,13 @@ const netflix: PurchaseDraft = {
 describe('encodeShare', () => {
 	it('writes compact params for purchase and profile', () => {
 		expect(encodeShare(netflix, profile)).toBe(
-			'amt=15&for=Netflix+%26+chill&every=1m&dur=life&pay=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5&swr=3.5'
+			'amt=15&for=Netflix+%26+chill&every=1m&dur=life&pay=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5'
 		);
 	});
 
 	it('omits recurrence for a one-off and unset profile fields', () => {
-		expect(encodeShare({ ...DEFAULT_DRAFT, amount: 1200 }, { realReturn: 0.05, swr: 0.04 })).toBe(
-			'amt=1200&ret=5&swr=4'
+		expect(encodeShare({ ...DEFAULT_DRAFT, amount: 1200 }, { realReturn: 0.05 })).toBe(
+			'amt=1200&ret=5'
 		);
 	});
 });
@@ -50,6 +49,12 @@ describe('decodeShare', () => {
 		const decoded = decodeShare(encodeShare(fixed, profile));
 		expect(decoded.draft).toEqual(fixed);
 		expect(decoded.profile).toEqual(profile);
+	});
+
+	it('round-trips an investment horizon in years', () => {
+		const withYears = { ...netflix, investHorizon: 'years' as const, investYears: 15 };
+		expect(encodeShare(withYears, profile)).toContain('inv=15');
+		expect(decodeShare(encodeShare(withYears, profile)).draft).toEqual(withYears);
 	});
 
 	it('round-trips until-retirement', () => {

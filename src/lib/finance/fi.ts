@@ -1,16 +1,15 @@
-import { capitalToFund, monthlyGrowthRate } from './growth';
-import { monthlyCost, remainingMonths } from './recurrence';
-import type { Duration, Purchase } from './types';
+import { monthlyGrowthRate } from './growth';
+import { monthlyCost } from './recurrence';
+import type { Purchase } from './types';
 
 export const MAX_MONTHS = 80 * 12;
 
 export interface FIInputs {
 	netWorth: number;
 	annualSavings: number;
-	/** Net worth needed to retire, before any recurring cost that continues past it. */
+	/** Net worth needed to retire, in today's money. */
 	target: number;
 	realReturn: number;
-	swr: number;
 }
 
 export interface FIResult {
@@ -20,54 +19,39 @@ export interface FIResult {
 	 */
 	fiMonth: number | null;
 	netWorth: number[];
-	target: number[];
 }
 
 export interface RetirementDelay {
+	target: number;
 	baseline: FIResult;
 	withPurchase: FIResult;
 	delayMonths: number | null;
 }
 
-const LIFELONG: Duration = { kind: 'lifelong' };
-
-/** Capital that would cover the purchase from `fromMonth` on, if FI is reached that month. */
-export function fundingCapital(purchase: Purchase, swr: number, fromMonth = 0): number {
-	if (!purchase.recurrence) return purchase.amount;
-	const duration = purchase.duration ?? LIFELONG;
-	return capitalToFund(monthlyCost(purchase), swr, remainingMonths(duration, fromMonth, fromMonth));
-}
-
 export function simulateToFI(inputs: FIInputs, purchase?: Purchase): FIResult {
 	const growth = monthlyGrowthRate(inputs.realReturn);
 	const monthlySavings = inputs.annualSavings / 12;
-	const baseTarget = inputs.target;
 	const recurring = purchase?.recurrence !== undefined;
-	const payment = purchase && recurring ? monthlyCost(purchase) : 0;
-	const duration = purchase?.duration ?? LIFELONG;
+	const payment = recurring ? monthlyCost(purchase!) : 0;
+	const payingMonths = purchase?.duration?.kind === 'fixed' ? purchase.duration.months : Infinity;
 
 	let nw = inputs.netWorth - (purchase && !recurring ? purchase.amount : 0);
 	const netWorth: number[] = [];
-	const target: number[] = [];
 
 	for (let month = 0; month <= MAX_MONTHS; month++) {
-		const monthTarget = baseTarget + (recurring ? fundingCapital(purchase!, inputs.swr, month) : 0);
 		netWorth.push(nw);
-		target.push(monthTarget);
-		if (nw >= monthTarget) {
-			return { fiMonth: interpolateCrossing(netWorth, target, month), netWorth, target };
+		if (nw >= inputs.target) {
+			return { fiMonth: interpolateCrossing(netWorth, inputs.target, month), netWorth };
 		}
-
-		const paying = recurring && (duration.kind !== 'fixed' || month < duration.months);
-		nw = nw * (1 + growth) + monthlySavings - (paying ? payment : 0);
+		nw = nw * (1 + growth) + monthlySavings - (month < payingMonths ? payment : 0);
 	}
-	return { fiMonth: null, netWorth, target };
+	return { fiMonth: null, netWorth };
 }
 
-function interpolateCrossing(netWorth: number[], target: number[], month: number): number {
+function interpolateCrossing(netWorth: number[], target: number, month: number): number {
 	if (month === 0) return 0;
-	const gapBefore = netWorth[month - 1] - target[month - 1];
-	const gapAfter = netWorth[month] - target[month];
+	const gapBefore = netWorth[month - 1] - target;
+	const gapAfter = netWorth[month] - target;
 	return month - 1 + gapBefore / (gapBefore - gapAfter);
 }
 
@@ -78,5 +62,5 @@ export function retirementDelay(inputs: FIInputs, purchase: Purchase): Retiremen
 		baseline.fiMonth === null || withPurchase.fiMonth === null
 			? null
 			: withPurchase.fiMonth - baseline.fiMonth;
-	return { baseline, withPurchase, delayMonths };
+	return { target: inputs.target, baseline, withPurchase, delayMonths };
 }
