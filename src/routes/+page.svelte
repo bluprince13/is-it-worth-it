@@ -167,11 +167,7 @@
 
 	<PurchaseForm bind:draft />
 
-	{#if !hasAmount}
-		<p class="mt-10 text-center text-stone-500 dark:text-stone-400">
-			Enter an amount to see what it costs you in time, wealth and retirement.
-		</p>
-	{:else}
+	{#if hasAmount}
 		<div class="mt-8 space-y-10">
 			{#if withTypical.defaulted.length > 0}
 				<p class="text-sm text-stone-500 dark:text-stone-400">
