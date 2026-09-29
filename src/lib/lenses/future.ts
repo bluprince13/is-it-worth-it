@@ -1,7 +1,6 @@
 import { fundingCapital } from '$lib/finance/fi';
 import { futureValue, futureValueOfMonthlySeries } from '$lib/finance/growth';
 import { annualCost, monthlyCost } from '$lib/finance/recurrence';
-import { annualSpend } from '$lib/finance/spend';
 import {
 	formatDuration,
 	formatElapsed,
@@ -13,7 +12,7 @@ import type { Lens, LensContext } from './types';
 
 const DAYS_PER_MONTH = 365.25 / 12;
 
-const RETIREMENT_FIELDS: Lens['requires'] = ['takeHomePerYear', 'netWorth', 'annualSavings'];
+const RETIREMENT_FIELDS: Lens['requires'] = ['netWorth', 'annualSavings', 'retirementTarget'];
 
 function yearsText(months: number): string {
 	return `${(months / 12).toFixed(1)} years`;
@@ -36,16 +35,13 @@ export const retirementDelayLens: Lens = {
 		const { retirement, profile } = ctx;
 		if (!retirement) return null;
 		const { baseline, withPurchase, delayMonths } = retirement;
-		const spend = annualSpend(profile)!;
-		const fiNumber = spend / profile.swr;
 		const working = [
-			`Spending: ${formatMoney(profile.takeHomePerYear!)} take-home − ${formatMoney(profile.annualSavings!)} saved = ${formatMoney(spend)} a year`,
-			`Retirement target: ${formatMoney(spend)} ÷ ${formatPercent(profile.swr)} = ${formatMoney(fiNumber)}`,
+			`Retirement target: ${formatMoney(profile.retirementTarget!)}`,
 			`Assumes net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`
 		];
 		if (ctx.recurring) {
 			working.push(
-				`With this cost the retirement target starts at ${formatMoney(withPurchase.target[0])}`
+				`With this cost the target starts at ${formatMoney(withPurchase.target[0])}: the capital to fund it after the target date, at a ${formatPercent(profile.swr)} withdrawal rate, is added`
 			);
 		}
 

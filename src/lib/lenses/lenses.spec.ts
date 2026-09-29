@@ -8,6 +8,7 @@ const profile: Profile = {
 	hoursPerWeek: 40,
 	netWorth: 100_000,
 	annualSavings: 12_000,
+	retirementTarget: 750_000,
 	realReturn: 0.05,
 	swr: 0.04
 };

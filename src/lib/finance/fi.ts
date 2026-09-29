@@ -7,7 +7,8 @@ export const MAX_MONTHS = 80 * 12;
 export interface FIInputs {
 	netWorth: number;
 	annualSavings: number;
-	annualSpend: number;
+	/** Net worth needed to retire, before any recurring cost that continues past it. */
+	target: number;
 	realReturn: number;
 	swr: number;
 }
@@ -40,7 +41,7 @@ export function fundingCapital(purchase: Purchase, swr: number, fromMonth = 0): 
 export function simulateToFI(inputs: FIInputs, purchase?: Purchase): FIResult {
 	const growth = monthlyGrowthRate(inputs.realReturn);
 	const monthlySavings = inputs.annualSavings / 12;
-	const baseTarget = inputs.annualSpend / inputs.swr;
+	const baseTarget = inputs.target;
 	const recurring = purchase?.recurrence !== undefined;
 	const payment = purchase && recurring ? monthlyCost(purchase) : 0;
 	const duration = purchase?.duration ?? LIFELONG;

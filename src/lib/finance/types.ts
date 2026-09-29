@@ -20,6 +20,7 @@ export interface Profile {
 	hoursPerWeek?: number;
 	netWorth?: number;
 	annualSavings?: number;
+	retirementTarget?: number;
 	realReturn: number;
 	swr: number;
 }

@@ -11,6 +11,7 @@ const PROFILE_PARAMS: { param: string; key: keyof Profile; percent?: boolean }[]
 	{ param: 'hrs', key: 'hoursPerWeek' },
 	{ param: 'sav', key: 'annualSavings' },
 	{ param: 'nw', key: 'netWorth' },
+	{ param: 'tgt', key: 'retirementTarget' },
 	{ param: 'ret', key: 'realReturn', percent: true },
 	{ param: 'swr', key: 'swr', percent: true }
 ];

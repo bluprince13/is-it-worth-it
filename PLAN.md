@@ -49,10 +49,10 @@ Duration decides how hard a recurring cost hits retirement:
 
 ### C. Future — "what does it cost future me?"
 
-4. **Retirement delay** (headline lens) — simulate net worth month by month to the FI number (`annual spend ÷ SWR`, where annual spend = take-home pay − savings), with and without the purchase, and report the difference in days/weeks/months.
+4. **Retirement delay** (headline lens) — simulate net worth month by month to the user's **retirement target** (a profile input, in today's money), with and without the purchase, and report the difference in days/weeks/months.
    - One-off: lowers today's net worth.
    - Recurring: applies the frequency and duration rules above, so a lifelong subscription shows the double hit.
-   - Already FI: nothing to delay, so show the drop in safe annual spending instead (`lost capital × SWR`).
+   - Already at or above the target: the card shows N/A ("net worth already meets the retirement target") and the summary leaves retirement out.
 5. **Future value** — what the money would be worth at your FI date if invested instead: `X(1+r)^n`. Recurring: future value of the payments made before FI (the latte factor).
 6. **Capital needed to fund it** (recurring only) — `c ÷ SWR` if lifelong, otherwise the present value of the remaining payments. "£15/month Netflix for life needs £4,500 invested to pay for it forever."
 
@@ -65,7 +65,7 @@ Not doing (at least in v1): side-by-side comparison of purchases, budget lenses 
 ### Principles
 
 - **Private by default.** Financial profile stays in `localStorage`; nothing is sent to a server. A share link carries everything entered, purchase and profile, and says so when copied. Opening a link shows its figures without overwriting the viewer's own saved profile unless they choose to keep them.
-- **Works with no setup.** Any empty profile field falls back to a typical UK full-time employee (£30,000 take-home, from the ONS April 2025 median of £39,039 gross; 37.5 hours; £3,000 saved; £20,000 invested), so every lens shows straight away. Defaults are shown as grey placeholders, never saved as the user's own, and a note under the summary names the fields still on defaults.
+- **Works with no setup.** Any empty profile field falls back to a typical UK full-time employee (£30,000 take-home, from the ONS April 2025 median of £39,039 gross; 37.5 hours; £3,000 saved; £20,000 invested; £675,000 retirement target, i.e. 25 × the £27,000 left after saving), so every lens shows straight away. Defaults are shown as grey placeholders, never saved as the user's own, and a note under the summary names the fields still on defaults.
 - **Factual, never advice.** Every lens gets the same visual weight. Text states calculations and names assumptions ("on these figures", "assumed 5% return"); it never judges a purchase (no "small enough not to worry"), never says what the user can or should do, and never states a modelled outcome as a fact about their life ("reaches the retirement target in 21 years", not "you'll be financially independent"). A footer says it's for illustration only and not financial advice.
 - **Show the working.** Each result expands to show the formula and inputs used.
 
@@ -94,9 +94,9 @@ Not doing (at least in v1): side-by-side comparison of purchases, budget lenses 
   - A live line under the inputs: "= £180/year, £2,700 until FI, lifelong".
 - **Summary strip**: the 3 most telling lenses in one sentence, always including the retirement delay when the profile allows it. No overall score.
 - **Lens cards**: headline number, one-line sentence, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line. For a lifelong cost the chart shows the FI line moving up as well as the path moving down.
-- **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, plus two assumptions (real return, SWR) with defaults. Spending is derived as take-home − savings. £ throughout; no tax inputs.
+- **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, retirement target, plus two assumptions (real return, withdrawal rate) with defaults. The withdrawal rate is only used to price recurring costs that continue past the target date (`c ÷ SWR`). £ throughout; no tax inputs.
 - **Reset**: a Reset button in the profile panel footer clears every entered figure (placeholders apply again; return and withdrawal rate go back to 5% and 4%). It asks for confirmation inline and is disabled when there's nothing to clear.
-- **Validation**: take-home pay > £0; hours per week > 0 and ≤ 100; savings ≥ £0 and < take-home pay (or the placeholder pay if empty); net worth ≥ £0; investment return 0–100%; withdrawal rate > 0% and ≤ 10%; amount > £0; "every N" and "for N" whole numbers ≥ 1. Invalid figures show an inline error, are saved as typed, and are replaced by the placeholder in the calculation, with a note on the page naming them.
+- **Validation**: take-home pay > £0; retirement target > £0; hours per week > 0 and ≤ 100; savings ≥ £0 and < take-home pay (or the placeholder pay if empty); net worth ≥ £0; investment return 0–100%; withdrawal rate > 0% and ≤ 10%; amount > £0; "every N" and "for N" whole numbers ≥ 1. Invalid figures show an inline error, are saved as typed, and are replaced by the placeholder in the calculation, with a note on the page naming them.
 - **Share feedback**: a small popover under the header buttons says "Link copied" (and that the link includes profile figures), fading after 4 seconds; the button itself never changes. If the clipboard is blocked, the popover shows the link to copy by hand, with a close button.
 - **Presets** (nice to have): coffee, Netflix, holiday, car, extension — useful for exploring and for the demo.
 
@@ -122,6 +122,7 @@ interface Profile {
 	hoursPerWeek?: number;
 	netWorth?: number;
 	annualSavings?: number;
+	retirementTarget?: number;
 	realReturn: number;
 	swr: number;
 }
@@ -151,7 +152,7 @@ interface LensResult {
   src/lib/components/  # AmountInput, FrequencyToggle, LensCard, SummaryStrip, ProfileDrawer, charts
   src/routes/+page.svelte
   ```
-- **Retirement simulation**: monthly steps, `NW ← NW × (1+r)^(1/12) + monthlySavings − purchasePaymentsThisMonth`; FI when `NW ≥ target`. Baseline target = `annualSpend ÷ SWR`. With the purchase, target += `c ÷ SWR` if lifelong, or the present value at the FI month of payments still due if it's a fixed duration that outlasts FI; "until FI" adds nothing. Because the target depends on the FI month, iterate by checking each month's `NW` against that month's target. Cap at 80 years and report "not reachable" rather than looping. The crossing is interpolated within the month, so a £4 coffee still shows a delay in hours or days rather than rounding to zero.
+- **Retirement simulation**: monthly steps, `NW ← NW × (1+r)^(1/12) + monthlySavings − purchasePaymentsThisMonth`; FI when `NW ≥ target`. Baseline target = the profile's retirement target. With the purchase, target += `c ÷ SWR` if lifelong, or the present value at the FI month of payments still due if it's a fixed duration that outlasts FI; "until FI" adds nothing. Because the target depends on the FI month, iterate by checking each month's `NW` against that month's target. Cap at 80 years and report "not reachable" rather than looping. The crossing is interpolated within the month, so a £4 coffee still shows a delay in hours or days rather than rounding to zero.
 - **Recurrence helpers**: `paymentsPerYear`, `annualCost`, `monthlyCost` (every frequency is averaged into a monthly cost, so the simulation stays monthly), `remainingMonths(duration, elapsed, fiMonth)`.
 - **Tests**: unit tests for every lens and finance helper (known-answer cases, edge cases: zero net worth, already FI, no salary, 0% return, a fixed duration that ends exactly at FI, lifelong vs until-FI).
 - **Share links**: `?amt=15&for=Netflix&every=1m&dur=life&pay=42000&hrs=40&sav=12000&nw=100000&ret=5&swr=4` (return and SWR as percentages). Read on load, then removed from the address bar so later edits and refreshes aren't confused with the link.

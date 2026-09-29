@@ -8,12 +8,14 @@ export const DEFAULT_PROFILE: Profile = { realReturn: 0.05, swr: 0.04 };
 /**
  * Typical UK full-time employee, used for any field left empty. Take-home is the
  * ONS April 2025 median full-time salary (£39,039) after tax, NI and 5% pension.
+ * The target is 25× the £27,000 left after saving, the conventional 4% rule.
  */
 export const TYPICAL_PROFILE: Required<Profile> = {
 	takeHomePerYear: 30_000,
 	hoursPerWeek: 37.5,
 	annualSavings: 3_000,
 	netWorth: 20_000,
+	retirementTarget: 675_000,
 	...DEFAULT_PROFILE
 };
 
@@ -31,6 +33,9 @@ export function validateProfile(profile: Profile): ProfileErrors {
 		errors.hoursPerWeek = 'Must be more than 0 and at most 100';
 	}
 	if (isNumber(netWorth) && netWorth < 0) errors.netWorth = 'Must be £0 or more';
+	if (isNumber(profile.retirementTarget) && profile.retirementTarget <= 0) {
+		errors.retirementTarget = 'Must be more than £0';
+	}
 	if (isNumber(annualSavings)) {
 		const effectivePay =
 			isNumber(pay) && !errors.takeHomePerYear ? pay : TYPICAL_PROFILE.takeHomePerYear;
@@ -88,14 +93,21 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 			{
 				key: 'annualSavings',
 				label: 'Savings per year',
-				hint: 'Whatever you take home and don’t save counts as spending',
 				kind: 'money'
 			}
 		]
 	},
 	{
 		title: 'Wealth',
-		fields: [{ key: 'netWorth', label: 'Net worth', hint: 'Invested or investable', kind: 'money' }]
+		fields: [
+			{ key: 'netWorth', label: 'Net worth', hint: 'Invested or investable', kind: 'money' },
+			{
+				key: 'retirementTarget',
+				label: 'Retirement target',
+				hint: 'Net worth you plan to retire on, in today’s money',
+				kind: 'money'
+			}
+		]
 	},
 	{
 		title: 'Assumptions',
@@ -109,7 +121,7 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 			{
 				key: 'swr',
 				label: 'Withdrawal rate',
-				hint: 'Assumed share of your investments withdrawn each year in retirement',
+				hint: 'Assumed share of investments withdrawn each year in retirement. Used to price recurring costs that continue past your retirement target',
 				kind: 'percent'
 			}
 		]

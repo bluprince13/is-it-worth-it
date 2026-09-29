@@ -8,6 +8,7 @@ const profile: Profile = {
 	hoursPerWeek: 37.5,
 	annualSavings: 12_000,
 	netWorth: 100_000,
+	retirementTarget: 600_000,
 	realReturn: 0.05,
 	swr: 0.035
 };
@@ -25,7 +26,7 @@ const netflix: PurchaseDraft = {
 describe('encodeShare', () => {
 	it('writes compact params for purchase and profile', () => {
 		expect(encodeShare(netflix, profile)).toBe(
-			'amt=15&for=Netflix+%26+chill&every=1m&dur=life&pay=42000&hrs=37.5&sav=12000&nw=100000&ret=5&swr=3.5'
+			'amt=15&for=Netflix+%26+chill&every=1m&dur=life&pay=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5&swr=3.5'
 		);
 	});
 

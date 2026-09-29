@@ -5,7 +5,13 @@ describe('withDefaults', () => {
 	it('fills every empty field with the typical value and reports it', () => {
 		const { profile, defaulted } = withDefaults({ realReturn: 0.05, swr: 0.04 });
 		expect(profile).toEqual(TYPICAL_PROFILE);
-		expect(defaulted).toEqual(['takeHomePerYear', 'hoursPerWeek', 'annualSavings', 'netWorth']);
+		expect(defaulted).toEqual([
+			'takeHomePerYear',
+			'hoursPerWeek',
+			'annualSavings',
+			'netWorth',
+			'retirementTarget'
+		]);
 	});
 
 	it('keeps entered values, including zero', () => {
@@ -18,7 +24,7 @@ describe('withDefaults', () => {
 		expect(profile.netWorth).toBe(0);
 		expect(profile.takeHomePerYear).toBe(50_000);
 		expect(profile.realReturn).toBe(0.03);
-		expect(defaulted).toEqual(['hoursPerWeek', 'annualSavings']);
+		expect(defaulted).toEqual(['hoursPerWeek', 'annualSavings', 'retirementTarget']);
 	});
 
 	it('treats a cleared field as empty', () => {
@@ -56,6 +62,7 @@ describe('validateProfile', () => {
 		['hoursPerWeek', 101],
 		['annualSavings', -1],
 		['netWorth', -1],
+		['retirementTarget', 0],
 		['realReturn', 1.01],
 		['realReturn', -0.01],
 		['swr', 0],

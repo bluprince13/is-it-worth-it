@@ -5,7 +5,7 @@ import { buildRetirementSeries, valueAt } from './retirementSeries';
 const flat: FIInputs = {
 	netWorth: 0,
 	annualSavings: 12_000,
-	annualSpend: 4_000,
+	target: 100_000,
 	realReturn: 0,
 	swr: 0.04
 };

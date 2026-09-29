@@ -6,7 +6,7 @@ import type { Purchase } from './types';
 const flat: FIInputs = {
 	netWorth: 0,
 	annualSavings: 12_000,
-	annualSpend: 4_000,
+	target: 100_000,
 	realReturn: 0,
 	swr: 0.04
 };
@@ -69,7 +69,7 @@ describe('retirementDelay', () => {
 	});
 
 	it('shows a sub-month delay for a small one-off with growth', () => {
-		const inputs = { ...flat, netWorth: 50_000, realReturn: 0.05, annualSpend: 30_000 };
+		const inputs = { ...flat, netWorth: 50_000, realReturn: 0.05, target: 750_000 };
 		const delay = retirementDelay(inputs, { amount: 4 }).delayMonths!;
 		expect(delay).toBeGreaterThan(0);
 		expect(delay).toBeLessThan(0.1);
