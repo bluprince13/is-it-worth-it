@@ -108,6 +108,11 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 				key: 'retirementTarget',
 				label: 'Retirement target',
 				hint: 'Net worth you plan to retire on, in today’s money',
+				info: {
+					linkText: 'Retirement Calculators’ FIRE number calculator',
+					href: 'https://retirementcalculators.uk/calculators/fire-number-calculator/',
+					text: 'can help you estimate the retirement target.'
+				},
 				kind: 'money'
 			}
 		]

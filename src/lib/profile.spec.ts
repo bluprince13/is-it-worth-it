@@ -86,4 +86,14 @@ describe('PROFILE_SECTIONS', () => {
 		expect(field?.info?.text).toContain('5.2% for world equities');
 		expect(field?.info?.text).toContain('The figure used here is 5%');
 	});
+
+	it('links to a pot-sizing calculator behind the retirement target info note', () => {
+		const field = PROFILE_SECTIONS.flatMap((s) => s.fields).find(
+			(f) => f.key === 'retirementTarget'
+		);
+		expect(field?.info?.href).toBe(
+			'https://retirementcalculators.uk/calculators/fire-number-calculator/'
+		);
+		expect(field?.info?.text).toBe('can help you estimate the retirement target.');
+	});
 });
