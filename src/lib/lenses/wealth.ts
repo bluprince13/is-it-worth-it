@@ -1,6 +1,6 @@
 import { annualCost } from '$lib/finance/recurrence';
 import { formatElapsed, formatMoney, formatPercent } from '$lib/format';
-import { annualCostLine } from './cost';
+import { annualCostStep } from './cost';
 import type { Lens, LensResult } from './types';
 
 /** Attributed reference point only: states the rule and the user's figure, not a verdict. */
@@ -29,7 +29,13 @@ export const netWorthShare: Lens = {
 				caption: 'of your net worth',
 				sentence: `${formatMoney(purchase.amount)} out of ${formatMoney(netWorth)}.`,
 				info: ruleInfo(netWorth),
-				working: [`${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)}`]
+				working: [
+					{
+						label: 'Share',
+						expr: `${formatMoney(purchase.amount)} ÷ ${formatMoney(netWorth)} net worth`,
+						result: formatPercent(share)
+					}
+				]
 			};
 		}
 		const yearly = annualCost(purchase);
@@ -41,8 +47,12 @@ export const netWorthShare: Lens = {
 			sentence: `${formatMoney(yearly)} a year out of ${formatMoney(netWorth)}, or ${formatMoney(yearly / 365.25)} a day.`,
 			info: ruleInfo(netWorth),
 			working: [
-				annualCostLine(purchase),
-				`${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)}`
+				annualCostStep(purchase),
+				{
+					label: 'Share a year',
+					expr: `${formatMoney(yearly)} a year ÷ ${formatMoney(netWorth)} net worth`,
+					result: formatPercent(share)
+				}
 			]
 		};
 	}
@@ -57,14 +67,18 @@ export const wealthEarnBack: Lens = {
 	compute({ profile, purchase, recurring }) {
 		const { netWorth, realReturn } = profile;
 		const returns = netWorth! * realReturn;
-		const returnsLine = `Investment returns a year: ${formatMoney(netWorth!)} × ${formatPercent(realReturn)} = ${formatMoney(returns)}`;
+		const returnsStep = {
+			label: 'Investment returns a year',
+			expr: `${formatMoney(netWorth!)} net worth × ${formatPercent(realReturn)} return`,
+			result: formatMoney(returns)
+		};
 		if (!(returns > 0)) {
 			return {
 				value: NaN,
 				headline: 'N/A',
 				caption: `investment returns are ${formatMoney(0)} on these figures`,
 				sentence: '',
-				working: [returnsLine]
+				working: [returnsStep]
 			};
 		}
 
@@ -72,9 +86,13 @@ export const wealthEarnBack: Lens = {
 		const share = cost / returns;
 		const days = share * 365.25;
 		const working = [
-			...(recurring ? [annualCostLine(purchase)] : []),
-			returnsLine,
-			`${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(returns)} × 365.25 = ${formatElapsed(days)}`
+			...(recurring ? [annualCostStep(purchase)] : []),
+			returnsStep,
+			{
+				label: recurring ? 'Earn-back a year' : 'Earn-back',
+				expr: `${formatMoney(cost)}${recurring ? ' a year' : ''} ÷ ${formatMoney(returns)} × 365.25 days`,
+				result: formatElapsed(days)
+			}
 		];
 		if (!recurring) {
 			return {

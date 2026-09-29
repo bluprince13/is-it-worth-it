@@ -7,9 +7,9 @@ import {
 	formatNumber,
 	formatPercent
 } from '$lib/format';
-import { annualCostLine, decimals, monthlyCostLine } from './cost';
+import { annualCostStep, decimals, monthlyCostStep } from './cost';
 import type { Profile, Purchase } from '$lib/finance/types';
-import type { Lens } from './types';
+import type { Lens, Step } from './types';
 
 const DAYS_PER_MONTH = 365.25 / 12;
 
@@ -31,19 +31,28 @@ function retirementSentence(before: number, after: number): string {
 		: `On these figures, net worth reaches the retirement target in ${now} instead of ${was}.`;
 }
 
-function purchaseLines(purchase: Purchase, netWorth: number, annualSavings: number): string[] {
+function purchaseSteps(purchase: Purchase, netWorth: number, annualSavings: number): Step[] {
 	if (!purchase.recurrence) {
 		return [
-			`Net worth today: ${formatMoney(netWorth)} − ${formatMoney(purchase.amount)} = ${formatMoney(netWorth - purchase.amount)}`
+			{
+				label: 'Net worth today',
+				expr: `${formatMoney(netWorth)} − ${formatMoney(purchase.amount)}`,
+				result: formatMoney(netWorth - purchase.amount)
+			}
 		];
 	}
 	const duration = purchase.duration ?? { kind: 'untilFI' };
 	const saved = annualSavings / 12;
 	const payment = monthlyCost(purchase);
 	return [
-		annualCostLine(purchase),
-		monthlyCostLine(purchase),
-		`Saved a month: ${formatMoney(saved)} − ${formatMoney(payment)} = ${formatMoney(saved - payment)}, ${duration.kind === 'fixed' ? formatDuration(duration) : 'until net worth reaches the retirement target'}`
+		{ label: 'Net worth today', result: formatMoney(netWorth) },
+		annualCostStep(purchase),
+		monthlyCostStep(purchase),
+		{
+			label: 'Saved a month',
+			expr: `${formatMoney(annualSavings)} a year ÷ 12 − ${formatMoney(payment)} a month`,
+			result: `${formatMoney(saved - payment)}, ${duration.kind === 'fixed' ? formatDuration(duration) : 'until net worth reaches the retirement target'}`
+		}
 	];
 }
 
@@ -57,10 +66,14 @@ export const retirementDelayLens: Lens = {
 		const { retirement, profile } = ctx;
 		if (!retirement) return null;
 		const { baseline, withPurchase, delayMonths } = retirement;
-		const working = [
-			`Retirement target: ${formatMoney(profile.retirementTarget!)}`,
-			`Assumes net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`,
-			...purchaseLines(ctx.purchase, profile.netWorth!, profile.annualSavings!)
+		const working: Step[] = [
+			{ label: 'Retirement target', result: formatMoney(profile.retirementTarget!) },
+			{
+				label: 'Return',
+				result: `${formatPercent(profile.realReturn)} a year above inflation`
+			},
+			{ label: 'Saved a year', result: formatMoney(profile.annualSavings!) },
+			...purchaseSteps(ctx.purchase, profile.netWorth!, profile.annualSavings!)
 		];
 
 		if (baseline.fiMonth === 0) {
@@ -97,7 +110,24 @@ export const retirementDelayLens: Lens = {
 			headline: formatElapsed(days),
 			caption: 'later to reach your retirement target',
 			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth),
-			working
+			working: [
+				...working,
+				{
+					label: 'Without it',
+					expr: 'months to retirement target, simulated',
+					result: `${decimals(baseline.fiMonth)} months`
+				},
+				{
+					label: 'With it',
+					expr: 'months to retirement target, simulated',
+					result: `${decimals(withPurchase.fiMonth)} months`
+				},
+				{
+					label: 'Delay',
+					expr: `(${decimals(withPurchase.fiMonth)} − ${decimals(baseline.fiMonth)}) months × ${decimals(DAYS_PER_MONTH)} days a month`,
+					result: formatElapsed(days)
+				}
+			]
 		};
 	}
 };
@@ -127,15 +157,33 @@ export const futureValueLens: Lens = {
 			options.investYears === null
 				? `by your retirement target date, in ${yearsText(horizon)}`
 				: `after ${formatNumber(options.investYears)} ${options.investYears === 1 ? 'year' : 'years'}`;
+		const returnStep: Step = {
+			label: 'Return',
+			result: `${rate} a year above inflation`
+		};
+		const simulated = options.investYears === null;
 		if (!recurring) {
-			const value = futureValue(purchase.amount, profile.realReturn, horizon / 12);
+			const years = horizon / 12;
+			const value = futureValue(purchase.amount, profile.realReturn, years);
 			return {
 				value,
 				headline: formatMoney(value),
 				caption,
 				sentence: `Assuming a ${rate} return a year above inflation.`,
 				working: [
-					`${formatMoney(purchase.amount)} × (1 + ${rate})^${decimals(horizon / 12)} = ${formatMoney(value)}`
+					returnStep,
+					simulated
+						? {
+								label: 'Years invested',
+								expr: 'years to retirement target, simulated',
+								result: `${decimals(years)} years`
+							}
+						: { label: 'Years invested', result: `${decimals(years)} years` },
+					{
+						label: 'Value',
+						expr: `${formatMoney(purchase.amount)} × (1 + ${rate})^${decimals(years)}`,
+						result: formatMoney(value)
+					}
 				]
 			};
 		}
@@ -148,27 +196,64 @@ export const futureValueLens: Lens = {
 		const monthlyRate = `${(i * 100).toFixed(3)}%`;
 		const atLastPayment = futureValueOfMonthlySeries(payment, profile.realReturn, paying);
 		const value = futureValue(atLastPayment, profile.realReturn, (horizon - paying) / 12);
-		const payingReason =
-			paying < remainingMonths(duration, 0, fiMonth ?? Infinity)
-				? `up to the ${formatNumber(horizon / 12)}-year horizon`
-				: duration.kind === 'fixed'
-					? formatDuration(duration)
-					: 'to the retirement target date';
-		const working = [
-			annualCostLine(purchase),
-			monthlyCostLine(purchase),
-			`Months paid: ${decimals(paying)}, ${payingReason}`,
-			...(i === 0
-				? [`${formatMoney(payment)} × ${decimals(paying)} months = ${formatMoney(atLastPayment)}`]
-				: [
-						`Monthly return: (1 + ${rate})^(1/12) − 1 = ${monthlyRate}`,
-						`${formatMoney(payment)} × ((1 + ${monthlyRate})^${decimals(paying)} − 1) ÷ ${monthlyRate} = ${formatMoney(atLastPayment)}`
-					])
+		const stopsEarly = paying < horizon;
+		const [H, P] = [decimals(horizon), decimals(paying)];
+		const working: Step[] = [
+			returnStep,
+			annualCostStep(purchase),
+			monthlyCostStep(purchase),
+			simulated
+				? {
+						label: 'Months invested',
+						expr: 'months to retirement target, simulated',
+						result: `${H} months`
+					}
+				: {
+						label: 'Months invested',
+						expr: `${formatNumber(options.investYears!)} years × 12`,
+						result: `${H} months`
+					}
 		];
-		if (horizon > paying) {
+		if (stopsEarly) {
 			working.push(
-				`${formatMoney(atLastPayment)} × (1 + ${rate})^${decimals((horizon - paying) / 12)} = ${formatMoney(value)}`
+				duration.kind === 'untilFI'
+					? {
+							label: 'Months paid',
+							expr: 'months to retirement target, simulated',
+							result: `${P} months`
+						}
+					: duration.months % 12 === 0
+						? {
+								label: 'Months paid',
+								expr: `${duration.months / 12} years × 12`,
+								result: `${P} months`
+							}
+						: { label: 'Months paid', result: `${P} months` }
 			);
+		}
+		const paidLabel = stopsEarly ? 'Value at last payment' : 'Value';
+		if (i === 0) {
+			working.push({
+				label: paidLabel,
+				expr: `${formatMoney(payment)} × ${P} months`,
+				result: formatMoney(atLastPayment)
+			});
+		} else {
+			working.push(
+				{ label: 'Monthly return', expr: `(1 + ${rate})^(1/12) − 1`, result: monthlyRate },
+				{
+					label: paidLabel,
+					expr: `${formatMoney(payment)} × ((1 + ${monthlyRate})^${P} − 1) ÷ ${monthlyRate}`,
+					result: formatMoney(atLastPayment)
+				}
+			);
+		}
+		if (stopsEarly) {
+			working.push({
+				label: simulated ? 'Value at retirement target' : 'Value at end',
+				expr: `${formatMoney(atLastPayment)} × (1 + ${rate})^((${H} − ${P}) ÷ 12)`,
+				result: formatMoney(value)
+			});
 		}
 		return {
 			value,

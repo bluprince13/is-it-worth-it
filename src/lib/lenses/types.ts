@@ -17,6 +17,13 @@ export interface LensContext {
 	retirement?: RetirementDelay;
 }
 
+/** One line of "How it's calculated": label = expr = result, or label = result for an input. */
+export interface Step {
+	label: string;
+	expr?: string;
+	result: string;
+}
+
 export interface LensResult {
 	value: number;
 	headline: string;
@@ -24,7 +31,7 @@ export interface LensResult {
 	sentence: string;
 	/** Extra context behind an info button, e.g. an attributed rule of thumb. */
 	info?: { text: string; href: string; linkText: string };
-	working: string[];
+	working: Step[];
 }
 
 export interface Lens {

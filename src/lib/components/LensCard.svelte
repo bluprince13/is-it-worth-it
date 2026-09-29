@@ -87,13 +87,25 @@
 				>
 					How it's calculated
 				</summary>
-				<ul
-					class="mt-2 space-y-1 rounded-lg bg-stone-50 p-3 font-mono text-xs text-stone-700 dark:bg-stone-950 dark:text-stone-300"
+				<div
+					class="mt-2 grid grid-cols-[fit-content(40%)_auto_minmax(0,1fr)] gap-x-2 gap-y-2 rounded-lg bg-stone-50 p-3 font-mono text-xs text-stone-700 dark:bg-stone-950 dark:text-stone-300"
 				>
-					{#each result.working as line, i (i)}
-						<li>{line}</li>
+					{#each result.working as step, i (i)}
+						<p class="col-span-3 grid grid-cols-subgrid gap-y-0.5">
+							<span class="text-stone-500 dark:text-stone-400">{step.label}</span>
+							<span>=</span>
+							{#if step.expr}
+								<span>{step.expr}</span>
+								<span class="col-start-2">=</span>
+							{/if}
+							<span
+								class={i === result.working.length - 1
+									? 'font-semibold text-stone-900 dark:text-white'
+									: ''}>{step.result}</span
+							>
+						</p>
 					{/each}
-				</ul>
+				</div>
 			</details>
 		{/if}
 	{/if}
