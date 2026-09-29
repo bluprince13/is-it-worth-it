@@ -4,6 +4,8 @@
 		label: string;
 		hint?: string;
 		value: number | undefined;
+		/** Shown greyed out when empty; in stored units, like value. */
+		placeholder?: number;
 		/** Displayed value = stored value × scale (e.g. 100 for percentages). */
 		scale?: number;
 		prefix?: string;
@@ -16,6 +18,7 @@
 		label,
 		hint,
 		value = $bindable(),
+		placeholder,
 		scale = 1,
 		prefix,
 		suffix,
@@ -45,6 +48,7 @@
 			inputmode="decimal"
 			min="0"
 			{step}
+			placeholder={placeholder === undefined ? undefined : String(toDisplay(placeholder))}
 			aria-describedby={hint ? `${id}-hint` : undefined}
 			class="w-full min-w-0 border-0 bg-transparent px-3 py-2 tabular-nums focus:ring-0"
 			bind:value={() => toDisplay(value), (v) => (value = fromDisplay(v))}

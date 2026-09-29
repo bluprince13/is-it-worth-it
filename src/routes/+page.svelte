@@ -10,7 +10,13 @@
 	import type { Profile } from '$lib/finance/types';
 	import { evaluate, GROUP_TITLES, type Group } from '$lib/lenses';
 	import { summarise } from '$lib/lenses/summary';
-	import { DEFAULT_PROFILE, FIELD_LABELS, loadProfile, saveProfile } from '$lib/profile';
+	import {
+		DEFAULT_PROFILE,
+		FIELD_LABELS,
+		loadProfile,
+		saveProfile,
+		withDefaults
+	} from '$lib/profile';
 	import { decodeShare, encodeShare } from '$lib/share';
 
 	const FEATURED = 'retirement-delay';
@@ -65,27 +71,21 @@
 		}
 	}
 
-	const effectiveProfile = $derived<Profile>({
-		...profile,
-		realReturn: profile.realReturn ?? DEFAULT_PROFILE.realReturn,
-		swr: profile.swr ?? DEFAULT_PROFILE.swr
-	});
+	const withTypical = $derived(withDefaults(profile));
 
 	const purchase = $derived(toPurchase(draft));
-	const evaluation = $derived(evaluate(effectiveProfile, purchase));
+	const evaluation = $derived(evaluate(withTypical.profile, purchase));
 	const summary = $derived(summarise(evaluation.results, purchase));
 	const chartSeries = $derived(
 		evaluation.retirement ? buildRetirementSeries(evaluation.retirement) : null
 	);
 	const featured = $derived(evaluation.results.find((r) => r.lens.id === FEATURED));
-	const featuredLocked = $derived(evaluation.locked.find((l) => l.lens.id === FEATURED));
 	const groups = $derived(
 		GROUP_ORDER.map((group) => ({
 			group,
 			items: evaluation.results.filter((r) => r.lens.group === group && r.lens.id !== FEATURED)
 		})).filter((g) => g.items.length > 0)
 	);
-	const missingFields = $derived([...new Set(evaluation.locked.flatMap((l) => l.missing))]);
 	const hasAmount = $derived((draft.amount ?? 0) > 0);
 
 	const headerButton =
@@ -187,23 +187,23 @@
 				</p>
 			{/if}
 
+			{#if withTypical.defaulted.length > 0}
+				<p class="-mt-6 text-sm text-stone-500 dark:text-stone-400">
+					Using typical UK figures for your {listFields(withTypical.defaulted)}.
+					<button
+						type="button"
+						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
+						onclick={() => (profileOpen = true)}>Add your own</button
+					> for a truer picture.
+				</p>
+			{/if}
+
 			{#if featured}
 				<LensCard lens={featured.lens} result={featured.result} featured>
 					{#if chartSeries}
 						<RetirementChart series={chartSeries} />
 					{/if}
 				</LensCard>
-			{:else if featuredLocked}
-				<button
-					type="button"
-					class="w-full rounded-2xl border-2 border-dashed border-stone-300 p-6 text-left hover:border-emerald-600 dark:border-stone-700"
-					onclick={() => (profileOpen = true)}
-				>
-					<span class="block font-medium">How much later could you retire?</span>
-					<span class="mt-1 block text-sm text-stone-600 dark:text-stone-400">
-						Add your {listFields(featuredLocked.missing)} to see.
-					</span>
-				</button>
 			{/if}
 
 			{#each groups as { group, items } (group)}
@@ -221,18 +221,6 @@
 					</div>
 				</section>
 			{/each}
-
-			{#if missingFields.length > 0}
-				<p class="text-center text-sm text-stone-500 dark:text-stone-400">
-					{evaluation.locked.length} more
-					{evaluation.locked.length === 1 ? 'view' : 'views'} available.
-					<button
-						type="button"
-						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
-						onclick={() => (profileOpen = true)}>Add your {listFields(missingFields)}</button
-					>
-				</p>
-			{/if}
 		</div>
 	{/if}
 </div>

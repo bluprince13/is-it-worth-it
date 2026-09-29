@@ -61,7 +61,7 @@ Duration decides how hard a recurring cost hits retirement:
 7. **Days of living costs** — `X ÷ (annual spend ÷ 365)`, with annual spend = take-home pay − savings.
 8. **Reframed totals** (recurring) — per day, per year, and in total over the chosen duration. Show both directions honestly: per-day makes it feel small, lifetime makes it feel big.
 
-Not doing (at least in v1): value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
+Not doing (at least in v1): side-by-side comparison of purchases, value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
 
 ---
 
@@ -70,7 +70,7 @@ Not doing (at least in v1): value lenses that need extra inputs per purchase (co
 ### Principles
 
 - **Private by default.** Financial profile stays in `localStorage`; nothing is sent to a server. A share link carries everything entered, purchase and profile, and says so when copied. Opening a link shows its figures without overwriting the viewer's own saved profile unless they choose to keep them.
-- **Progressive disclosure.** Amount + take-home pay is enough to start. Each extra profile field unlocks more lenses ("Add net worth to unlock 3 more views").
+- **Works with no setup.** Any empty profile field falls back to a typical UK full-time employee (£30,000 take-home, from the ONS April 2025 median of £39,039 gross; 37.5 hours; £3,000 saved; £20,000 invested), so every lens shows straight away. Defaults are shown as grey placeholders, never saved as the user's own, and a note under the summary names the fields still on defaults.
 - **Neutral, not preachy.** Every lens gets the same visual weight. The app shows scale, not a verdict.
 - **Show the working.** Each result expands to show the formula and inputs used.
 
@@ -102,7 +102,6 @@ Not doing (at least in v1): value lenses that need extra inputs per purchase (co
 - **Summary strip**: the 3 most telling lenses in one sentence, always including the retirement delay when the profile allows it. No overall score.
 - **Lens cards**: headline number, one-line sentence, a severity chip (trivial / noticeable / significant / major) for that lens only, and an expandable "how it's calculated". The retirement delay card is first and largest, with a chart of net worth with vs without the purchase and the FI line. For a lifelong cost the chart shows the FI line moving up as well as the path moving down.
 - **Profile drawer**: only the inputs the maths needs: take-home pay per year, hours worked per week, savings per year, net worth, plus two assumptions (real return, SWR) with defaults. Spending is derived as take-home − savings. £ throughout; no tax inputs.
-- **Compare mode** (v2): two or three purchases side by side, e.g. "gym £40/month vs home rower £900".
 - **Presets** (nice to have): coffee, Netflix, holiday, car, extension — useful for exploring and for the demo.
 
 ### Severity chips
@@ -180,7 +179,7 @@ interface LensResult {
 2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
 3. ✅ Retirement-delay chart (near-retirement and whole-path views), summary sentence, severity chips.
 4. ✅ Example presets, share links carrying purchase and profile.
-5. Compare mode, polish (a11y, empty states).
+5. Polish (a11y, empty states).
 
 ---
 

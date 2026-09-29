@@ -4,6 +4,32 @@ const STORAGE_KEY = 'is-it-worth-it:profile';
 
 export const DEFAULT_PROFILE: Profile = { realReturn: 0.05, swr: 0.04 };
 
+/**
+ * Typical UK full-time employee, used for any field left empty. Take-home is the
+ * ONS April 2025 median full-time salary (£39,039) after tax, NI and 5% pension.
+ */
+export const TYPICAL_PROFILE: Required<Profile> = {
+	takeHomePerYear: 30_000,
+	hoursPerWeek: 37.5,
+	annualSavings: 3_000,
+	netWorth: 20_000,
+	...DEFAULT_PROFILE
+};
+
+export function withDefaults(profile: Profile): {
+	profile: Required<Profile>;
+	defaulted: (keyof Profile)[];
+} {
+	const merged = { ...TYPICAL_PROFILE };
+	const defaulted: (keyof Profile)[] = [];
+	for (const key of Object.keys(TYPICAL_PROFILE) as (keyof Profile)[]) {
+		const value = profile[key];
+		if (typeof value === 'number' && Number.isFinite(value)) merged[key] = value;
+		else defaulted.push(key);
+	}
+	return { profile: merged, defaulted };
+}
+
 export type FieldKind = 'money' | 'hours' | 'percent';
 
 export interface FieldSpec {

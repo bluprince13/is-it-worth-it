@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Profile } from '$lib/finance/types';
-	import { PROFILE_SECTIONS, type FieldKind } from '$lib/profile';
+	import { PROFILE_SECTIONS, TYPICAL_PROFILE, type FieldKind } from '$lib/profile';
 	import NumberField from './NumberField.svelte';
 
 	let { profile = $bindable(), open = $bindable() }: { profile: Profile; open: boolean } = $props();
@@ -33,7 +33,8 @@
 			<div>
 				<h2 id="profile-title" class="text-lg font-semibold">Your profile</h2>
 				<p class="text-xs text-stone-500 dark:text-stone-400">
-					Saved in this browser only. Fill in as much as you like.
+					Saved in this browser only. Grey figures are typical UK values, used until you enter your
+					own.
 				</p>
 			</div>
 			<button
@@ -58,6 +59,7 @@
 								label={field.label}
 								hint={field.hint}
 								{...FIELD_FORMAT[field.kind]}
+								placeholder={TYPICAL_PROFILE[field.key]}
 								bind:value={profile[field.key]}
 							/>
 						{/each}
