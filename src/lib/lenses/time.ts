@@ -39,19 +39,21 @@ function hoursSteps(
 	return steps;
 }
 
-/** Months of payments, or null when they run to a retirement date the profile can't give. */
+/**
+ * Months of payments, or null when they run to a retirement date the profile can't give.
+ * "Until I retire" runs to the date with the cost, matching the retirement simulation.
+ */
 function payingMonths({ purchase, retirement }: LensContext): number | null {
 	const duration = purchase.duration ?? { kind: 'untilFI' };
 	if (duration.kind === 'fixed') return duration.months;
-	const fiMonth = retirement?.baseline.fiMonth;
-	return fiMonth ? fiMonth : null;
+	return retirement?.withPurchase.fiMonth ?? null;
 }
 
 function yearsPaidStep({ purchase }: LensContext, years: number): Step {
 	const duration = purchase.duration ?? { kind: 'untilFI' };
 	const result = `${decimals(years)} years`;
 	if (duration.kind === 'untilFI') {
-		return { label: 'Years paid', expr: 'years to retirement target, simulated', result };
+		return { label: 'Years paid', expr: 'years to retirement target with it, simulated', result };
 	}
 	return duration.months % 12 === 0
 		? { label: 'Years paid', result }
@@ -77,6 +79,9 @@ function workTime(ctx: LensContext, wage: number, wageSteps: Step[]): LensResult
 			]
 		};
 	}
+
+	const untilFI = (purchase.duration ?? { kind: 'untilFI' }).kind === 'untilFI';
+	if (untilFI && ctx.retirement?.baseline.fiMonth === 0) return null;
 
 	const yearly = annualCost(purchase);
 	const yearlyHours = yearly / wage;

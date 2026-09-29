@@ -23,9 +23,14 @@ describe('formatMoney', () => {
 });
 
 describe('formatPercent', () => {
-	it('keeps two significant figures', () => {
+	it('keeps two decimal places at most', () => {
+		expect(formatPercent(0.125)).toBe('12.5%');
+		expect(formatPercent(0.052549)).toBe('5.25%');
+		expect(formatPercent(0.05)).toBe('5%');
+	});
+
+	it('keeps two significant figures for tiny shares', () => {
 		expect(formatPercent(0.00018)).toBe('0.018%');
-		expect(formatPercent(0.123)).toBe('12%');
 	});
 });
 

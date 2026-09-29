@@ -109,11 +109,16 @@ describe('one-off purchase', () => {
 		]);
 	});
 
-	it('shows N/A when the target is already met', () => {
+	it('hides the retirement cards when the target is already met', () => {
 		const rich = { ...profile, netWorth: 1_000_000 };
-		const delay = result(rich, bike, 'retirement-delay')!;
-		expect(delay.headline).toBe('N/A');
-		expect(delay.caption).toBe('net worth already meets the retirement target');
+		expect(result(rich, bike, 'retirement-delay')).toBeUndefined();
+		expect(result(rich, bike, 'future-value')).toBeUndefined();
+		expect(result(rich, bike, 'work-hours')).toBeDefined();
+	});
+
+	it('shows a return with up to two decimal places in the working', () => {
+		const fv = result({ ...profile, realReturn: 0.125 }, bike, 'future-value')!;
+		expect(fv.working.at(-1)?.expr).toMatch(/^£1,200 × \(1 \+ 12\.5%\)\^/);
 	});
 
 	it('takes a one-off from net worth today', () => {
@@ -161,15 +166,34 @@ describe('recurring purchase', () => {
 		});
 	});
 
-	it('totals hours of work up to the retirement target date', () => {
+	it('totals hours of work up to the retirement target date with the cost', () => {
 		const purchase = netflix({ kind: 'untilFI' });
 		const { retirement, results } = evaluate(profile, purchase);
 		const work = results.find((r) => r.lens.id === 'work-hours')!.result;
-		const years = retirement!.baseline.fiMonth! / 12;
+		const years = retirement!.withPurchase.fiMonth! / 12;
+		expect(years).toBeGreaterThan(retirement!.baseline.fiMonth! / 12);
 		expect(work.value).toBeCloseTo((180 * years) / wage);
 		expect(work.caption).toBe(
 			`in total, paid for ${years.toFixed(1)} years, to your retirement target date`
 		);
+	});
+
+	it('hides the until-retirement cards when the target is already met', () => {
+		const rich = { ...profile, netWorth: 1_000_000 };
+		const purchase = netflix({ kind: 'untilFI' });
+		for (const id of ['retirement-delay', 'future-value', 'work-hours']) {
+			expect(result(rich, purchase, id)).toBeUndefined();
+		}
+		const tenYears = evaluate(rich, purchase, { investYears: 10 }).results;
+		expect(tenYears.find((r) => r.lens.id === 'future-value')).toBeUndefined();
+	});
+
+	it('keeps fixed-duration cards when the target is already met', () => {
+		const rich = { ...profile, netWorth: 1_000_000 };
+		const purchase = netflix({ kind: 'fixed', months: 36 });
+		expect(result(rich, purchase, 'work-hours')).toBeDefined();
+		const tenYears = evaluate(rich, purchase, { investYears: 10 }).results;
+		expect(tenYears.find((r) => r.lens.id === 'future-value')).toBeDefined();
 	});
 
 	it('shows hours of work per year when the retirement date is unknown', () => {
@@ -255,10 +279,10 @@ describe('invested instead', () => {
 		expect(fv.working.slice(3)).toEqual([
 			{ label: 'Months invested', expr: '10 years × 12', result: '120 months' },
 			{ label: 'Months paid', expr: '3 years × 12', result: '36 months' },
-			{ label: 'Monthly return', expr: '(1 + 5%)^(1/12) − 1', result: '0.407%' },
+			{ label: 'Monthly return', expr: '(1 + 5%)^(1/12) − 1', result: '0.41%' },
 			{
 				label: 'Value at last payment',
-				expr: '£15 × ((1 + 0.407%)^36 − 1) ÷ 0.407%',
+				expr: '£15 × ((1 + 0.41%)^36 − 1) ÷ 0.41%',
 				result: expect.stringMatching(/^£/)
 			},
 			{

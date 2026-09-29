@@ -76,15 +76,7 @@ export const retirementDelayLens: Lens = {
 			...purchaseSteps(ctx.purchase, profile.netWorth!, profile.annualSavings!)
 		];
 
-		if (baseline.fiMonth === 0) {
-			return {
-				value: NaN,
-				headline: 'N/A',
-				caption: 'net worth already meets the retirement target',
-				sentence: 'On these figures, there is no retirement date to delay.',
-				working
-			};
-		}
+		if (baseline.fiMonth === 0) return null;
 		if (baseline.fiMonth === null) {
 			return {
 				value: NaN,
@@ -149,6 +141,8 @@ export const futureValueLens: Lens = {
 			};
 		}
 		const fiMonth = retirement?.baseline.fiMonth ?? null;
+		const duration = purchase.duration ?? { kind: 'untilFI' };
+		if (fiMonth === 0 && recurring && duration.kind === 'untilFI') return null;
 		const horizon = options.investYears === null ? fiMonth : options.investYears * 12;
 		if (!horizon) return null;
 
@@ -189,11 +183,10 @@ export const futureValueLens: Lens = {
 		}
 
 		// Payments stop at the end of their duration but keep compounding to the horizon.
-		const duration = purchase.duration ?? { kind: 'untilFI' };
 		const paying = Math.min(horizon, remainingMonths(duration, 0, fiMonth ?? horizon));
 		const payment = monthlyCost(purchase);
 		const i = monthlyGrowthRate(profile.realReturn);
-		const monthlyRate = `${(i * 100).toFixed(3)}%`;
+		const monthlyRate = formatPercent(i);
 		const atLastPayment = futureValueOfMonthlySeries(payment, profile.realReturn, paying);
 		const value = futureValue(atLastPayment, profile.realReturn, (horizon - paying) / 12);
 		const stopsEarly = paying < horizon;

@@ -9,7 +9,13 @@ const pounds = (fractionDigits: number) =>
 	});
 const wholePounds = pounds(0);
 const pence = pounds(2);
-const percent = new Intl.NumberFormat('en-GB', { style: 'percent', maximumSignificantDigits: 2 });
+// Two decimal places at most, except that tiny shares keep two significant figures instead of showing 0%.
+const percent = new Intl.NumberFormat('en-GB', {
+	style: 'percent',
+	maximumFractionDigits: 2,
+	maximumSignificantDigits: 2,
+	roundingPriority: 'morePrecision'
+});
 
 export function formatMoney(amount: number): string {
 	if (!Number.isFinite(amount)) return '∞';

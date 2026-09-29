@@ -5,6 +5,7 @@
 		PROFILE_SECTIONS,
 		TYPICAL_PROFILE,
 		validateProfile,
+		withDefaults,
 		type FieldKind
 	} from '$lib/profile';
 	import NumberField from './NumberField.svelte';
@@ -14,6 +15,10 @@
 	let dialog: HTMLDialogElement;
 
 	const errors = $derived(validateProfile(profile));
+	const targetMet = $derived.by(() => {
+		const { netWorth, retirementTarget } = withDefaults(profile).profile;
+		return netWorth >= retirementTarget;
+	});
 
 	let confirmingReset = $state(false);
 	const isDefault = $derived(
@@ -86,6 +91,15 @@
 								bind:value={profile[field.key]}
 							/>
 						{/each}
+						{#if section.title === 'Wealth' && targetMet}
+							<p
+								role="status"
+								class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+							>
+								Net worth already meets the retirement target, so the cards based on the retirement
+								date are hidden.
+							</p>
+						{/if}
 					</div>
 				</section>
 			{/each}
