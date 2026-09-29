@@ -76,9 +76,10 @@ describe('validateProfile', () => {
 		expect(validateProfile({ ...valid, realReturn: 1 })).toEqual({});
 	});
 
-	it('leaves invalid fields out of the calculation', () => {
-		const { profile, defaulted } = withDefaults({ ...valid, annualSavings: 40_000 });
-		expect(profile.annualSavings).toBe(TYPICAL_PROFILE.annualSavings);
-		expect(defaulted).toEqual(['annualSavings']);
+	it('marks invalid fields unusable instead of using a placeholder', () => {
+		const { profile, defaulted, errors } = withDefaults({ ...valid, annualSavings: 40_000 });
+		expect(profile.annualSavings).toBeNaN();
+		expect(defaulted).toEqual([]);
+		expect(errors.annualSavings).toBeDefined();
 	});
 });

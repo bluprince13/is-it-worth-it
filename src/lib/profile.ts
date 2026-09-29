@@ -53,7 +53,10 @@ export function validateProfile(profile: Profile): ProfileErrors {
 	return errors;
 }
 
-/** Fills empty or invalid fields from TYPICAL_PROFILE and reports which ones. */
+/**
+ * Fills empty fields from TYPICAL_PROFILE. Invalid fields become NaN rather than a
+ * placeholder, so lenses that need them report an error instead of a result.
+ */
 export function withDefaults(profile: Profile): {
 	profile: Required<Profile>;
 	defaulted: (keyof Profile)[];
@@ -64,7 +67,8 @@ export function withDefaults(profile: Profile): {
 	const defaulted: (keyof Profile)[] = [];
 	for (const key of Object.keys(TYPICAL_PROFILE) as (keyof Profile)[]) {
 		const value = profile[key];
-		if (isNumber(value) && !errors[key]) merged[key] = value;
+		if (errors[key]) merged[key] = NaN;
+		else if (isNumber(value)) merged[key] = value;
 		else defaulted.push(key);
 	}
 	return { profile: merged, defaulted, errors };

@@ -9,7 +9,14 @@
 	import { buildRetirementSeries } from '$lib/chart/retirementSeries';
 	import { DEFAULT_DRAFT, EXAMPLES, toPurchase } from '$lib/draft';
 	import type { Profile } from '$lib/finance/types';
-	import { evaluate, GROUP_TITLES, type Group } from '$lib/lenses';
+	import {
+		evaluate,
+		GROUP_TITLES,
+		LENSES,
+		type Blocked,
+		type Evaluated,
+		type Group
+	} from '$lib/lenses';
 	import { summarise } from '$lib/lenses/summary';
 	import {
 		DEFAULT_PROFILE,
@@ -59,8 +66,6 @@
 	}
 
 	const withTypical = $derived(withDefaults(profile));
-	const invalidFields = $derived(Object.keys(withTypical.errors) as (keyof Profile)[]);
-	const emptyFields = $derived(withTypical.defaulted.filter((k) => !withTypical.errors[k]));
 
 	const purchase = $derived(toPurchase(draft));
 	const evaluation = $derived(evaluate(withTypical.profile, purchase));
@@ -68,11 +73,16 @@
 	const chartSeries = $derived(
 		evaluation.retirement ? buildRetirementSeries(evaluation.retirement) : null
 	);
-	const featured = $derived(evaluation.results.find((r) => r.lens.id === FEATURED));
+	const cards = $derived(
+		[...evaluation.results, ...evaluation.blocked].sort(
+			(a, b) => LENSES.indexOf(a.lens) - LENSES.indexOf(b.lens)
+		)
+	);
+	const featured = $derived(cards.find((c) => c.lens.id === FEATURED));
 	const groups = $derived(
 		GROUP_ORDER.map((group) => ({
 			group,
-			items: evaluation.results.filter((r) => r.lens.group === group && r.lens.id !== FEATURED)
+			items: cards.filter((c) => c.lens.group === group && c.lens.id !== FEATURED)
 		})).filter((g) => g.items.length > 0)
 	);
 	const hasAmount = $derived((draft.amount ?? 0) > 0);
@@ -153,20 +163,9 @@
 				</p>
 			{/if}
 
-			{#if invalidFields.length > 0}
-				<p class="-mt-6 text-sm text-rose-700 dark:text-rose-400">
-					Your {listFields(invalidFields)}
-					{invalidFields.length === 1 ? "isn't" : "aren't"} valid, so typical UK figures are used instead.
-					<button
-						type="button"
-						class="font-medium underline underline-offset-2"
-						onclick={() => (profileOpen = true)}>Review your profile</button
-					>
-				</p>
-			{/if}
-			{#if emptyFields.length > 0}
+			{#if withTypical.defaulted.length > 0}
 				<p class="-mt-6 text-sm text-stone-500 dark:text-stone-400">
-					Using typical UK figures for your {listFields(emptyFields)}.
+					Using typical UK figures for your {listFields(withTypical.defaulted)}.
 					<button
 						type="button"
 						class="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
@@ -176,11 +175,7 @@
 			{/if}
 
 			{#if featured}
-				<LensCard lens={featured.lens} result={featured.result} featured>
-					{#if chartSeries}
-						<RetirementChart series={chartSeries} />
-					{/if}
-				</LensCard>
+				{@render card(featured, true)}
 			{/if}
 
 			{#each groups as { group, items } (group)}
@@ -192,8 +187,8 @@
 						{GROUP_TITLES[group]}
 					</h2>
 					<div class="grid gap-4 sm:grid-cols-2">
-						{#each items as { lens, result } (lens.id)}
-							<LensCard {lens} {result} />
+						{#each items as item (item.lens.id)}
+							{@render card(item)}
 						{/each}
 					</div>
 				</section>
@@ -201,6 +196,28 @@
 		</div>
 	{/if}
 </div>
+
+{#snippet card(item: Evaluated | Blocked, isFeatured = false)}
+	{#if 'result' in item}
+		<LensCard lens={item.lens} result={item.result} featured={isFeatured}>
+			{#if isFeatured && chartSeries}
+				<RetirementChart series={chartSeries} />
+			{/if}
+		</LensCard>
+	{:else}
+		<LensCard lens={item.lens} featured={isFeatured}>
+			{#snippet error()}
+				Can't be calculated because your {listFields(item.invalid)}
+				{item.invalid.length === 1 ? "isn't" : "aren't"} valid.
+				<button
+					type="button"
+					class="font-medium underline underline-offset-2"
+					onclick={() => (profileOpen = true)}>Fix in your profile</button
+				>
+			{/snippet}
+		</LensCard>
+	{/if}
+{/snippet}
 
 <footer class="mx-auto max-w-4xl px-4 pb-10 text-xs text-stone-500 dark:text-stone-400">
 	For illustration only, not financial advice. Results are calculations from the figures and

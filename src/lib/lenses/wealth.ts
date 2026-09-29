@@ -38,7 +38,7 @@ export const wealthEarnBack: Lens = {
 	id: 'wealth-earn-back',
 	title: 'Wealth earn-back',
 	group: 'wealth',
-	requires: ['netWorth', 'annualSavings'],
+	requires: ['netWorth', 'annualSavings', 'realReturn'],
 	appliesTo: 'both',
 	compute({ profile, purchase, recurring }) {
 		const { netWorth, annualSavings, realReturn } = profile;

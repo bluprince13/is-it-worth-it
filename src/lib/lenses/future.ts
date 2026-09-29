@@ -12,7 +12,13 @@ import type { Lens, LensContext } from './types';
 
 const DAYS_PER_MONTH = 365.25 / 12;
 
-const RETIREMENT_FIELDS: Lens['requires'] = ['netWorth', 'annualSavings', 'retirementTarget'];
+const RETIREMENT_FIELDS: Lens['requires'] = [
+	'netWorth',
+	'annualSavings',
+	'retirementTarget',
+	'realReturn',
+	'swr'
+];
 
 function yearsText(months: number): string {
 	return `${(months / 12).toFixed(1)} years`;
@@ -127,7 +133,7 @@ export const capitalNeeded: Lens = {
 	id: 'capital-needed',
 	title: 'Capital to fund it',
 	group: 'future',
-	requires: [],
+	requires: ['swr'],
 	appliesTo: 'recurring',
 	compute(ctx) {
 		const { purchase, profile } = ctx;

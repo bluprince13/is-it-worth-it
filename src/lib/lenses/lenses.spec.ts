@@ -26,16 +26,32 @@ function result(profile: Profile, purchase: Purchase, id: string) {
 
 describe('evaluate', () => {
 	it('returns nothing for a zero amount', () => {
-		expect(evaluate(profile, { amount: 0 })).toEqual({ results: [], locked: [] });
+		expect(evaluate(profile, { amount: 0 })).toEqual({ results: [], blocked: [] });
 	});
 
-	it('locks lenses whose profile fields are missing', () => {
-		const { results, locked } = evaluate({ realReturn: 0.05, swr: 0.04 }, bike);
+	it('blocks lenses whose profile fields are missing', () => {
+		const { results, blocked } = evaluate({ realReturn: 0.05, swr: 0.04 }, bike);
 		expect(results).toEqual([]);
-		expect(locked.find((l) => l.lens.id === 'work-hours')?.missing).toEqual([
+		expect(blocked.find((b) => b.lens.id === 'work-hours')?.invalid).toEqual([
 			'takeHomePerYear',
 			'hoursPerWeek'
 		]);
+	});
+
+	it('blocks only the lenses that use an invalid field', () => {
+		const { results, blocked } = evaluate({ ...profile, annualSavings: NaN }, bike);
+		expect(blocked.map((b) => b.lens.id).sort()).toEqual([
+			'future-value',
+			'retirement-delay',
+			'wealth-earn-back'
+		]);
+		expect(results.map((r) => r.lens.id)).toEqual(['work-hours', 'net-worth-share']);
+	});
+
+	it('blocks capital-to-fund when the withdrawal rate is invalid', () => {
+		const purchase = netflix({ kind: 'lifelong' });
+		const { blocked } = evaluate({ ...profile, swr: NaN }, purchase);
+		expect(blocked.find((b) => b.lens.id === 'capital-needed')?.invalid).toEqual(['swr']);
 	});
 
 	it('skips recurring-only lenses for a one-off', () => {

@@ -20,9 +20,10 @@ export interface Evaluated {
 	result: LensResult;
 }
 
-export interface Locked {
+export interface Blocked {
 	lens: Lens;
-	missing: (keyof Profile)[];
+	/** Profile fields the lens needs that are missing or invalid. */
+	invalid: (keyof Profile)[];
 }
 
 function isSet(value: unknown): boolean {
@@ -32,7 +33,9 @@ function isSet(value: unknown): boolean {
 export function buildContext(profile: Profile, purchase: Purchase): LensContext {
 	const { netWorth, annualSavings, retirementTarget, realReturn, swr } = profile;
 	const canSimulate =
-		[netWorth, annualSavings, retirementTarget].every(isSet) && retirementTarget! > 0 && swr > 0;
+		[netWorth, annualSavings, retirementTarget, realReturn, swr].every(isSet) &&
+		retirementTarget! > 0 &&
+		swr > 0;
 	return {
 		profile,
 		purchase,
@@ -54,26 +57,26 @@ export function buildContext(profile: Profile, purchase: Purchase): LensContext 
 
 export interface Evaluation {
 	results: Evaluated[];
-	locked: Locked[];
+	blocked: Blocked[];
 	retirement?: RetirementDelay;
 }
 
 export function evaluate(profile: Profile, purchase: Purchase): Evaluation {
 	const results: Evaluated[] = [];
-	const locked: Locked[] = [];
-	if (!(purchase.amount > 0)) return { results, locked };
+	const blocked: Blocked[] = [];
+	if (!(purchase.amount > 0)) return { results, blocked };
 
 	const ctx = buildContext(profile, purchase);
 	for (const lens of LENSES) {
 		if (lens.appliesTo === 'once' && ctx.recurring) continue;
 		if (lens.appliesTo === 'recurring' && !ctx.recurring) continue;
-		const missing = lens.requires.filter((key) => !isSet(profile[key]));
-		if (missing.length > 0) {
-			locked.push({ lens, missing });
+		const invalid = lens.requires.filter((key) => !isSet(profile[key]));
+		if (invalid.length > 0) {
+			blocked.push({ lens, invalid });
 			continue;
 		}
 		const result = lens.compute(ctx);
 		if (result) results.push({ lens, result });
 	}
-	return { results, locked, retirement: ctx.retirement };
+	return { results, blocked, retirement: ctx.retirement };
 }
