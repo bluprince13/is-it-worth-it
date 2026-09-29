@@ -25,6 +25,7 @@ export interface Profile {
 	netWorth?: number;
 	annualSavings?: number;
 	annualSpend?: number;
+	monthlyFunBudget?: number;
 	age?: number;
 	realReturn: number;
 	swr: number;

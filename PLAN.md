@@ -193,7 +193,7 @@ interface LensResult {
 ### Milestones
 
 1. ✅ Scaffold SvelteKit + Tailwind + finance and recurrence helpers + tests.
-2. Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
+2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
 3. Retirement-delay card and chart, summary strip, severity chips.
 4. Value lenses (E), presets, URL sharing.
 5. Compare mode, tangible anchors, polish (dark mode, mobile, a11y).
