@@ -122,14 +122,14 @@
 </svelte:head>
 
 <div class="mx-auto max-w-4xl px-4 pt-8 pb-16 sm:pt-12">
-	<header class="mb-8 flex items-start justify-between gap-4">
+	<header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 		<div>
 			<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Is it worth it?</h1>
 			<p class="mt-1 text-stone-600 dark:text-stone-400">
 				What a purchase costs you, measured in time, wealth and retirement.
 			</p>
 		</div>
-		<div class="relative flex shrink-0 gap-2">
+		<div class="relative flex shrink-0 gap-2 self-end sm:self-auto">
 			<ThemeToggle class={iconButton} />
 			<ShareButton
 				class={headerButton}
