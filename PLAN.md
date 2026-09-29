@@ -34,7 +34,7 @@ Every lens that handles recurring costs uses the same two inputs:
 
 Duration only matters while payments come out of savings before the retirement target is reached: the target itself is the user's own figure and never changes. A fixed period differs from "until I retire" only if it ends before the target date. In "Invested instead" over N years, "until I retire" payments stop at the target date and the total keeps compounding to year N. (A separate "lifelong" option was removed: with a fixed target it gave the same retirement delay.)
 
-### A. Time — "what did I trade for it?"
+### A. Income — "what did I trade for it?"
 
 1. **Hours of work** — `X ÷ take-home hourly wage`. Also shown as days/weeks of work. Recurring: headline is hours of work per year, with hours per payment alongside.
 
@@ -73,7 +73,7 @@ Not doing (at least in v1): a summary sentence above the cards (it repeated the 
 │  for ( [ 3 ] years | until I retire )         │
 │  for [ Netflix            ]  [ ⚙ Profile ]    │
 ├──────────────────────────────────────────────┤
-│  TIME       │  WEALTH       │  FUTURE        │  ← grouped cards
+│  INCOME     │  WEALTH       │  FUTURE        │  ← grouped cards
 │  58 hours   │  0.3% of NW   │  +9 days to FI │
 │  of work    │  earned back  │  £4,100 at 60  │
 │  ▸ how      │  in 11 days   │  ▸ chart       │
@@ -119,7 +119,7 @@ interface Profile {
 
 interface Lens {
 	id: string;
-	group: 'time' | 'wealth' | 'future';
+	group: 'income' | 'wealth' | 'future';
 	requires: (keyof Profile | keyof Purchase)[];
 	appliesTo: 'once' | 'recurring' | 'both';
 	compute(p: Profile, x: Purchase): LensResult | null;

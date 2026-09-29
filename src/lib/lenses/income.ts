@@ -83,7 +83,7 @@ function workTime(ctx: LensContext, wage: number, wageSteps: Step[]): LensResult
 export const workHours: Lens = {
 	id: 'work-hours',
 	title: 'Hours of work',
-	group: 'time',
+	group: 'income',
 	requires: ['takeHomePerYear', 'hoursPerWeek'],
 	appliesTo: 'both',
 	compute(ctx) {
@@ -104,4 +104,4 @@ export const workHours: Lens = {
 	}
 };
 
-export const timeLenses = [workHours];
+export const incomeLenses = [workHours];

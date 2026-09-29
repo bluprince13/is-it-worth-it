@@ -1,17 +1,17 @@
 import { retirementDelay, type RetirementDelay } from '$lib/finance/fi';
 import type { Profile, Purchase } from '$lib/finance/types';
 import { futureLenses } from './future';
-import { timeLenses } from './time';
+import { incomeLenses } from './income';
 import type { Group, Lens, LensContext, LensOptions, LensResult } from './types';
 import { wealthLenses } from './wealth';
 
 export type { Group, Lens, LensOptions, LensResult } from './types';
 
-export const LENSES: Lens[] = [...futureLenses, ...timeLenses, ...wealthLenses];
+export const LENSES: Lens[] = [...futureLenses, ...incomeLenses, ...wealthLenses];
 
 export const GROUP_TITLES: Record<Group, string> = {
 	future: 'Future',
-	time: 'Time',
+	income: 'Income',
 	wealth: 'Wealth'
 };
 
