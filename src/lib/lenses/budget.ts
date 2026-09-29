@@ -1,11 +1,6 @@
 import { annualCost, monthlyCost, totalCost } from '$lib/finance/recurrence';
-import {
-	formatDuration,
-	formatElapsed,
-	formatMoney,
-	formatNumber,
-	formatPercent
-} from '$lib/format';
+import { formatDuration, formatElapsed, formatMoney, formatPercent } from '$lib/format';
+import { annualSpend } from '$lib/finance/spend';
 import { severity, THRESHOLDS } from './thresholds';
 import type { Lens } from './types';
 
@@ -13,10 +8,10 @@ export const livingCosts: Lens = {
 	id: 'living-costs',
 	title: 'Living costs',
 	group: 'budget',
-	requires: ['annualSpend'],
+	requires: ['takeHomePerYear', 'annualSavings'],
 	appliesTo: 'both',
 	compute({ profile, purchase, recurring }) {
-		const spend = profile.annualSpend!;
+		const spend = annualSpend(profile)!;
 		if (!(spend > 0)) return null;
 		if (!recurring) {
 			const days = (purchase.amount / spend) * 365.25;
@@ -24,7 +19,7 @@ export const livingCosts: Lens = {
 				value: days,
 				headline: formatElapsed(days),
 				caption: 'of all your living costs',
-				sentence: `You spend about ${formatMoney(spend / 365.25)} a day on everything.`,
+				sentence: `You spend about ${formatMoney(spend / 365.25)} a day: take-home pay minus savings.`,
 				severity: severity(days, THRESHOLDS.days),
 				working: [`${formatMoney(purchase.amount)} ÷ (${formatMoney(spend)} ÷ 365 days)`]
 			};
@@ -38,33 +33,6 @@ export const livingCosts: Lens = {
 			sentence: `${formatMoney(yearly)} a year on top of ${formatMoney(spend)}.`,
 			severity: severity(share, THRESHOLDS.spendShare),
 			working: [`${formatMoney(yearly)} ÷ ${formatMoney(spend)}`]
-		};
-	}
-};
-
-export const funBudget: Lens = {
-	id: 'fun-budget',
-	title: 'Fun money',
-	group: 'budget',
-	requires: ['monthlyFunBudget'],
-	appliesTo: 'both',
-	compute({ profile, purchase, recurring }) {
-		const budget = profile.monthlyFunBudget!;
-		if (!(budget > 0)) return null;
-		const monthly = recurring ? monthlyCost(purchase) : purchase.amount;
-		const share = monthly / budget;
-		const months = !recurring && share >= 1;
-		return {
-			value: share,
-			headline: months ? `${formatNumber(share)} months` : formatPercent(share),
-			caption: recurring
-				? 'of your fun money, every month'
-				: months
-					? 'of your fun money'
-					: 'of your monthly fun money',
-			sentence: `Your guilt-free budget is ${formatMoney(budget)} a month.`,
-			severity: severity(share, THRESHOLDS.funBudgetShare),
-			working: [`${formatMoney(monthly)} ÷ ${formatMoney(budget)}`]
 		};
 	}
 };
@@ -93,4 +61,4 @@ export const reframedTotals: Lens = {
 	}
 };
 
-export const budgetLenses = [livingCosts, funBudget, reframedTotals];
+export const budgetLenses = [livingCosts, reframedTotals];

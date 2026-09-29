@@ -15,8 +15,7 @@
 	const FIELD_FORMAT: Record<FieldKind, { scale?: number; prefix?: string; suffix?: string }> = {
 		money: { prefix: '£' },
 		hours: { suffix: 'hours' },
-		percent: { scale: 100, suffix: '%' },
-		years: { suffix: 'years' }
+		percent: { scale: 100, suffix: '%' }
 	};
 </script>
 

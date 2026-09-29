@@ -20,13 +20,8 @@ export interface Purchase {
 export interface Profile {
 	takeHomePerYear?: number;
 	hoursPerWeek?: number;
-	commuteHoursPerWeek?: number;
-	workCostsPerYear?: number;
 	netWorth?: number;
 	annualSavings?: number;
-	annualSpend?: number;
-	monthlyFunBudget?: number;
-	age?: number;
 	realReturn: number;
 	swr: number;
 }

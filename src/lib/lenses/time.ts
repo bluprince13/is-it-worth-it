@@ -1,5 +1,5 @@
 import { annualCost } from '$lib/finance/recurrence';
-import { hourlyWage, realHourlyWage, WORKING_WEEKS_PER_YEAR } from '$lib/finance/wage';
+import { hourlyWage, WORKING_WEEKS_PER_YEAR } from '$lib/finance/wage';
 import { formatMoney, formatRecurrence, formatWorkTime } from '$lib/format';
 import { severity, THRESHOLDS } from './thresholds';
 import type { Lens, LensContext, LensResult } from './types';
@@ -54,34 +54,4 @@ export const workHours: Lens = {
 	}
 };
 
-export const realWorkHours: Lens = {
-	id: 'real-work-hours',
-	title: 'Real hours of work',
-	group: 'time',
-	requires: ['takeHomePerYear', 'hoursPerWeek', 'commuteHoursPerWeek'],
-	appliesTo: 'both',
-	compute(ctx) {
-		const {
-			takeHomePerYear,
-			hoursPerWeek,
-			commuteHoursPerWeek,
-			workCostsPerYear = 0
-		} = ctx.profile;
-		const wage = realHourlyWage(
-			takeHomePerYear!,
-			hoursPerWeek!,
-			commuteHoursPerWeek,
-			workCostsPerYear
-		);
-		const result = workTime(ctx, wage, [
-			`(${formatMoney(takeHomePerYear!)} − ${formatMoney(workCostsPerYear)} work costs) ÷ ((${hoursPerWeek} + ${commuteHoursPerWeek} commute) h/week × ${WORKING_WEEKS_PER_YEAR} weeks) = ${formatMoney(wage)}/hour`
-		]);
-		if (!result) return null;
-		return {
-			...result,
-			sentence: `${result.sentence} Counts commuting and the cost of going to work.`
-		};
-	}
-};
-
-export const timeLenses = [workHours, realWorkHours];
+export const timeLenses = [workHours];

@@ -1,4 +1,5 @@
 import { retirementDelay } from '$lib/finance/fi';
+import { annualSpend } from '$lib/finance/spend';
 import type { Profile, Purchase } from '$lib/finance/types';
 import { budgetLenses } from './budget';
 import { futureLenses } from './future';
@@ -32,8 +33,9 @@ function isSet(value: unknown): boolean {
 }
 
 export function buildContext(profile: Profile, purchase: Purchase): LensContext {
-	const { netWorth, annualSavings, annualSpend, realReturn, swr } = profile;
-	const canSimulate = [netWorth, annualSavings, annualSpend].every(isSet) && swr > 0;
+	const { netWorth, annualSavings, realReturn, swr } = profile;
+	const spend = annualSpend(profile);
+	const canSimulate = isSet(netWorth) && isSet(spend) && spend! > 0 && swr > 0;
 	return {
 		profile,
 		purchase,
@@ -43,7 +45,7 @@ export function buildContext(profile: Profile, purchase: Purchase): LensContext 
 					{
 						netWorth: netWorth!,
 						annualSavings: annualSavings!,
-						annualSpend: annualSpend!,
+						annualSpend: spend!,
 						realReturn,
 						swr
 					},

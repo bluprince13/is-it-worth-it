@@ -4,7 +4,7 @@ const STORAGE_KEY = 'is-it-worth-it:profile';
 
 export const DEFAULT_PROFILE: Profile = { realReturn: 0.05, swr: 0.04 };
 
-export type FieldKind = 'money' | 'hours' | 'percent' | 'years';
+export type FieldKind = 'money' | 'hours' | 'percent';
 
 export interface FieldSpec {
 	key: keyof Profile;
@@ -15,7 +15,7 @@ export interface FieldSpec {
 
 export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 	{
-		title: 'Work',
+		title: 'Income',
 		fields: [
 			{
 				key: 'takeHomePerYear',
@@ -25,38 +25,16 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 			},
 			{ key: 'hoursPerWeek', label: 'Hours worked per week', kind: 'hours' },
 			{
-				key: 'commuteHoursPerWeek',
-				label: 'Commute hours per week',
-				hint: 'Optional, for your real hourly wage',
-				kind: 'hours'
-			},
-			{
-				key: 'workCostsPerYear',
-				label: 'Cost of going to work per year',
-				hint: 'Travel, lunches, work clothes',
+				key: 'annualSavings',
+				label: 'Savings per year',
+				hint: 'Whatever you take home and don’t save counts as spending',
 				kind: 'money'
 			}
 		]
 	},
 	{
-		title: 'Money',
-		fields: [
-			{ key: 'netWorth', label: 'Net worth', hint: 'Invested or investable', kind: 'money' },
-			{ key: 'annualSavings', label: 'Savings per year', kind: 'money' },
-			{ key: 'annualSpend', label: 'Spending per year', hint: 'Everything, all in', kind: 'money' },
-			{
-				key: 'monthlyFunBudget',
-				label: 'Fun money per month',
-				hint: 'Your guilt-free budget',
-				kind: 'money'
-			},
-			{
-				key: 'age',
-				label: 'Age',
-				hint: 'Optional, to show the age you could retire',
-				kind: 'years'
-			}
-		]
+		title: 'Wealth',
+		fields: [{ key: 'netWorth', label: 'Net worth', hint: 'Invested or investable', kind: 'money' }]
 	},
 	{
 		title: 'Assumptions',

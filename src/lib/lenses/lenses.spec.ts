@@ -3,12 +3,10 @@ import type { Profile, Purchase } from '$lib/finance/types';
 import { evaluate } from './index';
 
 const profile: Profile = {
-	takeHomePerYear: 40_000,
+	takeHomePerYear: 42_000,
 	hoursPerWeek: 40,
 	netWorth: 100_000,
 	annualSavings: 12_000,
-	annualSpend: 30_000,
-	monthlyFunBudget: 300,
 	realReturn: 0.05,
 	swr: 0.04
 };
@@ -48,8 +46,8 @@ describe('evaluate', () => {
 describe('one-off purchase', () => {
 	it('converts to hours of work', () => {
 		const work = result(profile, bike, 'work-hours')!;
-		expect(work.value).toBeCloseTo(1_200 / (40_000 / (40 * 46.4)));
-		expect(work.headline).toBe('1.4 working weeks');
+		expect(work.value).toBeCloseTo(1_200 / (42_000 / (40 * 46.4)));
+		expect(work.headline).toBe('1.3 working weeks');
 		expect(work.severity).toBe(3);
 	});
 
@@ -99,9 +97,5 @@ describe('recurring purchase', () => {
 		const totals = result(profile, netflix({ kind: 'fixed', months: 36 }), 'reframed-totals')!;
 		expect(totals.headline).toBe('£180');
 		expect(totals.sentence).toContain('£540 for 3 years');
-	});
-
-	it('shows share of fun money per month', () => {
-		expect(result(profile, netflix({ kind: 'lifelong' }), 'fun-budget')!.headline).toBe('5%');
 	});
 });

@@ -1,6 +1,7 @@
 import { fundingCapital } from '$lib/finance/fi';
 import { futureValue, futureValueOfMonthlySeries } from '$lib/finance/growth';
 import { annualCost, monthlyCost } from '$lib/finance/recurrence';
+import { annualSpend } from '$lib/finance/spend';
 import {
 	formatDuration,
 	formatElapsed,
@@ -13,20 +14,17 @@ import type { Lens, LensContext } from './types';
 
 const DAYS_PER_MONTH = 365.25 / 12;
 
-function fiPoint(months: number, age: number | undefined): string {
-	const years = months / 12;
-	return age === undefined ? `${years.toFixed(1)} years` : (age + years).toFixed(1);
+const RETIREMENT_FIELDS: Lens['requires'] = ['takeHomePerYear', 'netWorth', 'annualSavings'];
+
+function yearsText(months: number): string {
+	return `${(months / 12).toFixed(1)} years`;
 }
 
-function when(months: number, age: number | undefined): string {
-	return `${age === undefined ? 'in' : 'at'} ${fiPoint(months, age)}`;
-}
-
-function retirementSentence(before: number, after: number, age: number | undefined): string {
-	const [was, now] = [fiPoint(before, age), fiPoint(after, age)];
+function retirementSentence(before: number, after: number): string {
+	const [was, now] = [yearsText(before), yearsText(after)];
 	return was === now
-		? `Financially independent ${when(after, age)} either way, just a little later.`
-		: `Financially independent ${when(after, age)} instead of ${was}.`;
+		? `Financially independent in ${now} either way, just a little later.`
+		: `Financially independent in ${now} instead of ${was}.`;
 }
 
 function capitalAtRisk({ purchase, profile, recurring }: LensContext): number {
@@ -37,15 +35,17 @@ export const retirementDelayLens: Lens = {
 	id: 'retirement-delay',
 	title: 'Retirement delay',
 	group: 'future',
-	requires: ['netWorth', 'annualSavings', 'annualSpend'],
+	requires: RETIREMENT_FIELDS,
 	appliesTo: 'both',
 	compute(ctx) {
 		const { retirement, profile } = ctx;
 		if (!retirement) return null;
 		const { baseline, withPurchase, delayMonths } = retirement;
-		const fiNumber = profile.annualSpend! / profile.swr;
+		const spend = annualSpend(profile)!;
+		const fiNumber = spend / profile.swr;
 		const working = [
-			`FI number: ${formatMoney(profile.annualSpend!)} spending ÷ ${formatPercent(profile.swr)} = ${formatMoney(fiNumber)}`,
+			`Spending: ${formatMoney(profile.takeHomePerYear!)} take-home − ${formatMoney(profile.annualSavings!)} saved = ${formatMoney(spend)} a year`,
+			`FI number: ${formatMoney(spend)} ÷ ${formatPercent(profile.swr)} = ${formatMoney(fiNumber)}`,
 			`Net worth grows ${formatPercent(profile.realReturn)} a year above inflation, plus ${formatMoney(profile.annualSavings!)} saved a year`
 		];
 		if (ctx.recurring) {
@@ -60,7 +60,7 @@ export const retirementDelayLens: Lens = {
 				caption: 'a year less to spend, for good',
 				sentence:
 					"You're already financially independent, so this comes out of your safe spending instead.",
-				severity: severity(lostIncome / profile.annualSpend!, THRESHOLDS.spendShare),
+				severity: severity(lostIncome / spend, THRESHOLDS.spendShare),
 				working: [...working, `Capital × ${formatPercent(profile.swr)} safe withdrawal rate`]
 			};
 		}
@@ -79,7 +79,7 @@ export const retirementDelayLens: Lens = {
 				value: Infinity,
 				headline: 'Out of reach',
 				caption: 'retirement with this cost',
-				sentence: `Without it you'd be financially independent ${when(baseline.fiMonth, profile.age)}.`,
+				sentence: `Without it you'd be financially independent in ${yearsText(baseline.fiMonth)}.`,
 				severity: 3,
 				working
 			};
@@ -89,7 +89,7 @@ export const retirementDelayLens: Lens = {
 			value: days,
 			headline: formatElapsed(days),
 			caption: 'later retirement',
-			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth, profile.age),
+			sentence: retirementSentence(baseline.fiMonth, withPurchase.fiMonth),
 			severity: severity(days, THRESHOLDS.days),
 			working
 		};
@@ -100,7 +100,7 @@ export const futureValueLens: Lens = {
 	id: 'future-value',
 	title: 'Invested instead',
 	group: 'future',
-	requires: ['netWorth', 'annualSavings', 'annualSpend'],
+	requires: RETIREMENT_FIELDS,
 	appliesTo: 'both',
 	compute({ retirement, purchase, profile, recurring }) {
 		const fiMonth = retirement?.baseline.fiMonth;
@@ -112,7 +112,7 @@ export const futureValueLens: Lens = {
 			return {
 				value,
 				headline: formatMoney(value),
-				caption: `by the time you retire, ${when(fiMonth, profile.age)}`,
+				caption: `by the time you retire, in ${yearsText(fiMonth)}`,
 				sentence: `Invested at ${rate} a year above inflation, in today's money.`,
 				working: [`${formatMoney(purchase.amount)} × (1 + ${rate})^${formatNumber(years)}`]
 			};
@@ -124,7 +124,7 @@ export const futureValueLens: Lens = {
 		return {
 			value,
 			headline: formatMoney(value),
-			caption: `by the time you retire, ${when(fiMonth, profile.age)}`,
+			caption: `by the time you retire, in ${yearsText(fiMonth)}`,
 			sentence: `The payments made before retirement, invested at ${rate} a year above inflation, in today's money.`,
 			working: [
 				`${formatNumber(months)} monthly payments of ${formatMoney(payment)}, each compounded to retirement`
