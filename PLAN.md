@@ -14,7 +14,7 @@ Goal: take one expense (one-off or recurring) and show, through several lenses, 
 | **Net-worth rules for big items** — car ≤ 5% of net worth or 10% of income                                                                         | [Financial Samurai](https://www.financialsamurai.com/net-worth-rule-for-car-buying-guideline/), [Bogleheads](https://www.bogleheads.org/forum/viewtopic.php?t=351985)                                                                     | Thresholds for the "major purchase" end of the scale                                          |
 | **Latte factor / opportunity cost** — the real cost is the forgone compounding                                                                     | [Financial Mentor latte calculator](https://www.financialmentor.com/calculator/latte-factor-calculator)                                                                                                                                   | Future-value lens                                                                             |
 | **FIRE maths** — FI number = annual spend ÷ SWR (4% → ×25); spending changes delay FI                                                              | FIRE calculators ([Engaging Data](https://engaging-data.com/fire-calculator/), [WalletBurst](https://walletburst.com/tools/fire-calculator/))                                                                                             | Retirement-delay and "capital needed to fund this forever" lenses                             |
-| **Buying time promotes happiness**; experiences beat things                                                                                        | Whillans, Dunn, Norton et al., [PNAS 2017](https://www.pnas.org/doi/10.1073/pnas.1706541114); _Happy Money_ ([Kitces](https://www.kitces.com/blog/happy-money-and-the-science-of-spending-how-money-really-can-sometimes-buy-happiness/)) | Value-side lenses: cost per hour saved / per use                                              |
+| **Buying time promotes happiness**; experiences beat things                                                                                        | Whillans, Dunn, Norton et al., [PNAS 2017](https://www.pnas.org/doi/10.1073/pnas.1706541114); _Happy Money_ ([Kitces](https://www.kitces.com/blog/happy-money-and-the-science-of-spending-how-money-really-can-sometimes-buy-happiness/)) | Value-side lenses (dropped to keep inputs minimal)                                            |     |
 | **Memory dividends, net fulfilment over net worth**                                                                                                | Bill Perkins, [_Die With Zero_](https://diewithzerobook.com/)                                                                                                                                                                             | Counterweight: the app must not only say "don't spend"                                        |
 
 Takeaway: existing tools each do **one** lens (hours of work, or latte factor, or FIRE). Nobody puts them side by side, and almost none handle one-off vs recurring properly. That's the gap.
@@ -62,16 +62,7 @@ Duration decides how hard a recurring cost hits retirement:
 8. **Days of living costs** — `X ÷ (annual spend ÷ 365)`, with annual spend = take-home pay − savings.
 9. **Reframed totals** (recurring) — per day, per year, and in total over the chosen duration. Show both directions honestly: per-day makes it feel small, lifetime makes it feel big.
 
-### E. Value — "what do I get for it?" (needs a little input about the purchase)
-
-10. **Cost per use / per hour of enjoyment** — `X ÷ expected uses` (or hours). Compare with anchors (e.g. cinema ≈ £5/hour, streaming ≈ £0.20/hour).
-11. **Price of time bought** — for time-saving purchases (cleaner, taxi, dishwasher): `X ÷ hours saved`, compared with your hourly wage. If it's cheaper than your wage, the research says it's likely a good buy.
-
-### F. Tangible anchors (fun, low priority)
-
-12. **"That's the same as…"** — user-defined anchors (a month of groceries, a weekend away, council tax).
-
-Not doing (at least in v1): extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
+Not doing (at least in v1): value lenses that need extra inputs per purchase (cost per use, price of time bought, "that's the same as…" anchors), extra profile inputs that aren't essential to the maths (commute, work costs, fun budget, age, separate spending figure), income tax (everything uses take-home pay), tax on investment returns (assume ISA/pension wrapper), a fixed-retirement-age mode, inflation-adjusted salary growth, Monte Carlo returns.
 
 ---
 
@@ -81,7 +72,7 @@ Not doing (at least in v1): extra profile inputs that aren't essential to the ma
 
 - **Private by default.** Financial profile stays in `localStorage`; nothing is sent anywhere. Share links carry the purchase only, never the profile.
 - **Progressive disclosure.** Amount + take-home pay is enough to start. Each extra profile field unlocks more lenses ("Add net worth to unlock 3 more views").
-- **Neutral, not preachy.** Every lens gets the same visual weight. The app shows scale, not a verdict. It includes the value lenses (E) so it isn't only an argument for not spending.
+- **Neutral, not preachy.** Every lens gets the same visual weight. The app shows scale, not a verdict.
 - **Show the working.** Each result expands to show the formula and inputs used.
 
 ### Screens / layout (single page)
@@ -101,7 +92,7 @@ Not doing (at least in v1): extra profile inputs that aren't essential to the ma
 │  of work    │  earned back  │  £4,100 at 60  │
 │  ▸ how      │  in 11 days   │  ▸ chart       │
 ├──────────────────────────────────────────────┤
-│  BUDGET     │  VALUE (optional inputs)       │
+│  BUDGET                                      │
 └──────────────────────────────────────────────┘
 ```
 
@@ -143,8 +134,6 @@ interface Purchase {
 	recurrence?: Recurrence;
 	duration?: Duration;
 	label?: string;
-	uses?: number;
-	hoursSaved?: number;
 }
 interface Profile {
 	takeHomePerYear?: number;
@@ -191,8 +180,8 @@ interface LensResult {
 1. ✅ Scaffold SvelteKit + Tailwind + finance and recurrence helpers + tests.
 2. ✅ Purchase input (frequency and duration), lenses A–D with the card UI, profile drawer (localStorage).
 3. Retirement-delay card and chart, summary strip, severity chips.
-4. Value lenses (E), presets, URL sharing.
-5. Compare mode, tangible anchors, polish (dark mode, mobile, a11y).
+4. Presets, URL sharing.
+5. Compare mode, polish (a11y, empty states).
 
 ---
 

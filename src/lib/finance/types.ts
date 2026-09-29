@@ -13,8 +13,6 @@ export interface Purchase {
 	recurrence?: Recurrence;
 	duration?: Duration;
 	label?: string;
-	uses?: number;
-	hoursSaved?: number;
 }
 
 export interface Profile {
