@@ -81,7 +81,10 @@ describe('one-off purchase', () => {
 	it("puts the 0.01% rule behind an info link with the user's figure", () => {
 		const share = result(profile, bike, 'net-worth-share')!;
 		expect(share.sentence).toBe('£1,200 out of £100,000.');
-		expect(share.info?.text).toContain('(£10 for you)');
+		expect(share.info?.text).toContain(
+			'a single purchase of up to 0.01% of net worth (£10 for you)'
+		);
+		expect(share.info?.text).not.toContain('recurring');
 		expect(share.info?.linkText).toBe('Nick Maggiulli\'s "0.01% rule"');
 		expect(share.info?.href).toBe('https://ofdollarsanddata.com/climbing-the-wealth-ladder/');
 	});
@@ -168,6 +171,9 @@ describe('recurring purchase', () => {
 			expect(share.caption).toBe('of your current net worth a year');
 			expect(share.sentence).toBe(
 				'The yearly cost of £180 is 0.18% of your current net worth of £100,000.'
+			);
+			expect(share.info?.text).toMatch(
+				/The rule is stated for single purchases, not recurring costs\.$/
 			);
 			const earnBack = result(profile, purchase, 'wealth-earn-back')!;
 			expect(earnBack.caption).toBe('for your investments to earn back one year of the cost');

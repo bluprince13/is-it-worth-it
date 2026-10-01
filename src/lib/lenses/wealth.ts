@@ -4,11 +4,12 @@ import { annualCostStep } from './cost';
 import type { Lens, LensResult } from './types';
 
 /** Attributed reference point only: states the rule and the user's figure, not a verdict. */
-function ruleInfo(netWorth: number): LensResult['info'] {
+function ruleInfo(netWorth: number, recurring: boolean): LensResult['info'] {
+	const scope = recurring ? ' The rule is stated for single purchases, not recurring costs.' : '';
 	return {
 		linkText: `Nick Maggiulli's "0.01% rule"`,
 		href: 'https://ofdollarsanddata.com/climbing-the-wealth-ladder/',
-		text: `describes spending of up to 0.01% of net worth a day (${formatMoney(netWorth * 0.0001)} for you) as not noticeably affecting wealth.`
+		text: `describes a single purchase of up to 0.01% of net worth (${formatMoney(netWorth * 0.0001)} for you) as not noticeably affecting wealth.${scope}`
 	};
 }
 
@@ -28,7 +29,7 @@ export const netWorthShare: Lens = {
 				headline: formatPercent(share),
 				caption: 'of your net worth',
 				sentence: `${formatMoney(purchase.amount)} out of ${formatMoney(netWorth)}.`,
-				info: ruleInfo(netWorth),
+				info: ruleInfo(netWorth, false),
 				working: [
 					{
 						label: 'Share',
@@ -45,7 +46,7 @@ export const netWorthShare: Lens = {
 			headline: formatPercent(share),
 			caption: 'of your current net worth a year',
 			sentence: `The yearly cost of ${formatMoney(yearly)} is ${formatPercent(share)} of your current net worth of ${formatMoney(netWorth)}.`,
-			info: ruleInfo(netWorth),
+			info: ruleInfo(netWorth, true),
 			working: [
 				annualCostStep(purchase),
 				{
