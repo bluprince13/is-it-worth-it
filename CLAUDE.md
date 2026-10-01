@@ -1,6 +1,6 @@
 # Is it worth it?
 
-A single-page app that shows what one purchase (one-off or recurring) costs a person, measured in time, wealth and retirement. UK-focused, £ only. Unreleased. [PLAN.md](PLAN.md) has the research, design and decision history.
+A single-page app that shows what one purchase (one-off or recurring) costs a person based on their income, wealth and retirement target. UK-focused, £ only. Unreleased. [PLAN.md](PLAN.md) has the research, design and decision history.
 
 ## Commands
 

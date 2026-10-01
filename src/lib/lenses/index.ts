@@ -10,7 +10,7 @@ export type { Group, Lens, LensOptions, LensResult } from './types';
 export const LENSES: Lens[] = [...futureLenses, ...incomeLenses, ...wealthLenses];
 
 export const GROUP_TITLES: Record<Group, string> = {
-	future: 'Future',
+	retirement: 'Retirement',
 	income: 'Income',
 	wealth: 'Wealth'
 };

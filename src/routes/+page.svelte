@@ -36,7 +36,7 @@
 	import { decodeShare, encodeShare } from '$lib/share';
 
 	const FEATURED = 'retirement-delay';
-	const GROUP_ORDER: Group[] = ['income', 'wealth', 'future'];
+	const GROUP_ORDER: Group[] = ['income', 'wealth', 'retirement'];
 
 	let draft = $state({ ...INITIAL_DRAFT });
 	let profile = $state<Profile>({ ...DEFAULT_PROFILE });
@@ -96,7 +96,7 @@
 		GROUP_ORDER.map((group) => ({
 			group,
 			items: cards.filter((c) => c.lens.group === group && c.lens.id !== FEATURED)
-		})).filter((g) => g.items.length > 0)
+		})).filter((g) => g.items.length > 0 || g.group === featured?.lens.group)
 	);
 	const hasAmount = $derived((draft.amount ?? 0) > 0);
 
@@ -126,7 +126,7 @@
 		<div>
 			<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Is it worth it?</h1>
 			<p class="mt-1 text-stone-600 dark:text-stone-400">
-				What a purchase costs you, measured in time, wealth and retirement.
+				What a purchase costs you based on your income, wealth and retirement target.
 			</p>
 		</div>
 		<div class="relative flex shrink-0 gap-2 self-end sm:self-auto">
@@ -183,10 +183,6 @@
 				</p>
 			{/if}
 
-			{#if featured}
-				{@render card(featured, true)}
-			{/if}
-
 			{#each groups as { group, items } (group)}
 				<section aria-labelledby="group-{group}">
 					<h2
@@ -195,6 +191,9 @@
 					>
 						{GROUP_TITLES[group]}
 					</h2>
+					{#if featured && group === featured.lens.group}
+						<div class="mb-4">{@render card(featured, true)}</div>
+					{/if}
 					<div class="grid gap-4 sm:grid-cols-2">
 						{#each items as item (item.lens.id)}
 							{@render card(item)}

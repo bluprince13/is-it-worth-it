@@ -59,7 +59,7 @@ function purchaseSteps(purchase: Purchase, netWorth: number, annualSavings: numb
 export const retirementDelayLens: Lens = {
 	id: 'retirement-delay',
 	title: 'Retirement delay',
-	group: 'future',
+	group: 'retirement',
 	requires: RETIREMENT_FIELDS,
 	appliesTo: 'both',
 	compute(ctx) {
@@ -127,7 +127,7 @@ export const retirementDelayLens: Lens = {
 export const futureValueLens: Lens = {
 	id: 'future-value',
 	title: 'Invested instead',
-	group: 'future',
+	group: 'retirement',
 	requires: ({ investYears }) => (investYears === null ? RETIREMENT_FIELDS : ['realReturn']),
 	appliesTo: 'both',
 	compute({ retirement, purchase, profile, recurring, options }) {

@@ -2,7 +2,7 @@ import type { InfoNote } from '$lib/info';
 import type { RetirementDelay } from '$lib/finance/fi';
 import type { Profile, Purchase } from '$lib/finance/types';
 
-export type Group = 'income' | 'wealth' | 'future';
+export type Group = 'income' | 'wealth' | 'retirement';
 
 export interface LensOptions {
 	/** Years to compound "Invested instead" over; null means until the retirement target date. */
