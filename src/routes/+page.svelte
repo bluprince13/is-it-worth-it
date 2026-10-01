@@ -35,6 +35,10 @@
 	} from '$lib/profile';
 	import { decodeShare, encodeShare } from '$lib/share';
 
+	// Link-preview crawlers need absolute URLs.
+	const SITE_URL = 'https://bluprince13.com/apps/is-it-worth-it';
+	const DESCRIPTION =
+		'What a purchase costs you based on your income, wealth and retirement target.';
 	const FEATURED = 'retirement-delay';
 	const GROUP_ORDER: Group[] = ['income', 'wealth', 'retirement'];
 
@@ -115,19 +119,25 @@
 
 <svelte:head>
 	<title>Is it worth it?</title>
-	<meta
-		name="description"
-		content="See what a purchase costs you in hours of work, share of wealth and time to reach a retirement target."
-	/>
+	<meta name="description" content={DESCRIPTION} />
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="Is it worth it?" />
+	<meta property="og:title" content="Is it worth it?" />
+	<meta property="og:description" content={DESCRIPTION} />
+	<meta property="og:url" content={SITE_URL} />
+	<meta property="og:image" content={`${SITE_URL}/og-image.png`} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content={`Is it worth it? ${DESCRIPTION}`} />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href={SITE_URL} />
 </svelte:head>
 
 <div class="mx-auto max-w-4xl px-4 pt-8 pb-16 sm:pt-12">
 	<header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 		<div>
 			<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Is it worth it?</h1>
-			<p class="mt-1 text-stone-600 dark:text-stone-400">
-				What a purchase costs you based on your income, wealth and retirement target.
-			</p>
+			<p class="mt-1 text-stone-600 dark:text-stone-400">{DESCRIPTION}</p>
 		</div>
 		<div class="relative flex shrink-0 gap-2 self-end sm:self-auto">
 			<ThemeToggle class={iconButton} />
