@@ -15,7 +15,7 @@ export interface Purchase {
 }
 
 export interface Profile {
-	takeHomePerYear?: number;
+	salaryPerYear?: number;
 	hoursPerWeek?: number;
 	netWorth?: number;
 	annualSavings?: number;

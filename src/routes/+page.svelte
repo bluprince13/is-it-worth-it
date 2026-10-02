@@ -86,7 +86,7 @@
 			investYears: investYears === undefined ? NaN : investYears
 		})
 	);
-	const investYearsError = $derived(validateDraft(draft).investYears);
+	const draftErrors = $derived(validateDraft(draft, withTypical.profile.netWorth));
 	const chartSeries = $derived(
 		evaluation.retirement ? buildRetirementSeries(evaluation.retirement) : null
 	);
@@ -102,7 +102,7 @@
 			items: cards.filter((c) => c.lens.group === group && c.lens.id !== FEATURED)
 		})).filter((g) => g.items.length > 0 || g.group === featured?.lens.group)
 	);
-	const hasAmount = $derived((draft.amount ?? 0) > 0);
+	const hasAmount = $derived((draft.amount ?? 0) > 0 && !draftErrors.amount);
 
 	const headerButton =
 		'rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800';
@@ -175,7 +175,7 @@
 		{/each}
 	</div>
 
-	<PurchaseForm bind:draft />
+	<PurchaseForm bind:draft netWorth={withTypical.profile.netWorth} />
 
 	{#if hasAmount}
 		<div class="mt-8 space-y-10">
@@ -258,18 +258,18 @@
 				<FormattedNumberInput
 					inputmode="numeric"
 					aria-label="Number of years to invest"
-					aria-invalid={investYearsError ? true : undefined}
-					aria-describedby={investYearsError ? 'invest-years-error' : undefined}
-					class="w-20 rounded-lg bg-white py-1.5 tabular-nums dark:bg-stone-900 {investYearsError
+					aria-invalid={draftErrors.investYears ? true : undefined}
+					aria-describedby={draftErrors.investYears ? 'invest-years-error' : undefined}
+					class="w-20 rounded-lg bg-white py-1.5 tabular-nums dark:bg-stone-900 {draftErrors.investYears
 						? 'border-rose-500'
 						: 'border-stone-300 dark:border-stone-700'}"
 					bind:value={draft.investYears}
 				/>
 				<span class="text-stone-600 dark:text-stone-300">years</span>
 			</div>
-			{#if investYearsError}
+			{#if draftErrors.investYears}
 				<p id="invest-years-error" class="text-xs text-rose-700 dark:text-rose-400">
-					{investYearsError}
+					{draftErrors.investYears}
 				</p>
 			{/if}
 		{/if}

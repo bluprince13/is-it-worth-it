@@ -4,7 +4,7 @@ import type { Profile } from './finance/types';
 import { decodeShare, encodeShare } from './share';
 
 const profile: Profile = {
-	takeHomePerYear: 42_000,
+	salaryPerYear: 42_000,
 	hoursPerWeek: 37.5,
 	annualSavings: 12_000,
 	netWorth: 100_000,
@@ -25,7 +25,7 @@ const netflix: PurchaseDraft = {
 describe('encodeShare', () => {
 	it('writes compact params for purchase and profile', () => {
 		expect(encodeShare(netflix, profile)).toBe(
-			'amt=15&for=Netflix+%26+chill&every=1m&dur=fi&pay=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5'
+			'amt=15&for=Netflix+%26+chill&every=1m&dur=fi&sal=42000&hrs=37.5&sav=12000&nw=100000&tgt=600000&ret=5'
 		);
 	});
 

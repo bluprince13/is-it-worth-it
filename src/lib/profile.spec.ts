@@ -6,7 +6,7 @@ describe('withDefaults', () => {
 		const { profile, defaulted } = withDefaults({ realReturn: 0.05 });
 		expect(profile).toEqual(TYPICAL_PROFILE);
 		expect(defaulted).toEqual([
-			'takeHomePerYear',
+			'salaryPerYear',
 			'hoursPerWeek',
 			'annualSavings',
 			'netWorth',
@@ -17,11 +17,11 @@ describe('withDefaults', () => {
 	it('keeps entered values, including zero', () => {
 		const { profile, defaulted } = withDefaults({
 			netWorth: 0,
-			takeHomePerYear: 50_000,
+			salaryPerYear: 50_000,
 			realReturn: 0.03
 		});
 		expect(profile.netWorth).toBe(0);
-		expect(profile.takeHomePerYear).toBe(50_000);
+		expect(profile.salaryPerYear).toBe(50_000);
 		expect(profile.realReturn).toBe(0.03);
 		expect(defaulted).toEqual(['hoursPerWeek', 'annualSavings', 'retirementTarget']);
 	});
@@ -39,22 +39,22 @@ describe('validateProfile', () => {
 		expect(validateProfile(valid)).toEqual({});
 	});
 
-	it('requires savings below take-home pay', () => {
-		expect(validateProfile({ ...valid, annualSavings: 30_000 }).annualSavings).toBe(
-			'Must be less than take-home pay (£30,000)'
+	it('requires savings below salary', () => {
+		expect(validateProfile({ ...valid, annualSavings: 39_039 }).annualSavings).toBe(
+			'Must be less than salary (£39,039)'
 		);
 	});
 
-	it('checks savings against the placeholder pay when pay is empty or invalid', () => {
-		const { takeHomePerYear: _, ...noPay } = valid;
-		expect(validateProfile({ ...noPay, annualSavings: 31_000 }).annualSavings).toBeDefined();
+	it('checks savings against the placeholder salary when salary is empty or invalid', () => {
+		const { salaryPerYear: _, ...noSalary } = valid;
+		expect(validateProfile({ ...noSalary, annualSavings: 40_000 }).annualSavings).toBeDefined();
 		expect(
-			validateProfile({ ...valid, takeHomePerYear: -1, annualSavings: 31_000 }).annualSavings
+			validateProfile({ ...valid, salaryPerYear: -1, annualSavings: 40_000 }).annualSavings
 		).toBeDefined();
 	});
 
 	it.each([
-		['takeHomePerYear', 0],
+		['salaryPerYear', 0],
 		['hoursPerWeek', 0],
 		['hoursPerWeek', 101],
 		['annualSavings', -1],

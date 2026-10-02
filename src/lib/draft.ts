@@ -1,4 +1,5 @@
 import type { Duration, Purchase, Recurrence, Unit } from './finance/types';
+import { formatMoney } from './format';
 
 /** Form state for the purchase inputs; kept flat so it binds and serialises easily. */
 export interface PurchaseDraft {
@@ -65,7 +66,7 @@ export const EXAMPLES: PurchaseDraft[] = [
 	example('Gym', 40, { every: 1, unit: 'month', durationKind: 'untilFI' }),
 	example('New phone every 2 years', 1_000, { every: 2, unit: 'year', durationKind: 'untilFI' }),
 	example('Holiday', 3_000),
-	example('New car', 25_000)
+	example('New car', 15_000)
 ];
 
 /** Shown on first load so the app's purpose lands before anything is entered. */
@@ -81,9 +82,13 @@ function isPositiveInt(value: number | null | undefined): boolean {
 	return typeof value === 'number' && Number.isInteger(value) && value >= 1;
 }
 
-export function validateDraft(draft: PurchaseDraft): DraftErrors {
+/** A one-off comes out of today's net worth, so it can't be more than that. */
+export function validateDraft(draft: PurchaseDraft, netWorth = Infinity): DraftErrors {
 	const errors: DraftErrors = {};
 	if (draft.amount !== undefined && !(draft.amount > 0)) errors.amount = 'Must be more than £0';
+	else if (!draft.recurring && draft.amount !== undefined && draft.amount > netWorth) {
+		errors.amount = `Must be at most your net worth (${formatMoney(netWorth)})`;
+	}
 	if (draft.recurring && !isPositiveInt(draft.every)) errors.every = WHOLE_NUMBER;
 	if (draft.recurring && draft.durationKind === 'fixed' && !isPositiveInt(draft.durationCount)) {
 		errors.durationCount = WHOLE_NUMBER;

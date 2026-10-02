@@ -43,7 +43,7 @@ function workTime(ctx: LensContext, wage: number, wageSteps: Step[]): LensResult
 	if (!(wage > 0)) return null;
 	const { purchase, profile, recurring } = ctx;
 	const hoursPerWeek = profile.hoursPerWeek!;
-	const perHour = `At ${formatMoney(wage)} an hour.`;
+	const perHour = `At ${formatMoney(wage)} an hour before tax.`;
 
 	if (!recurring) {
 		const hours = purchase.amount / wage;
@@ -65,7 +65,7 @@ function workTime(ctx: LensContext, wage: number, wageSteps: Step[]): LensResult
 		value: yearlyHours,
 		headline: formatWorkTime(yearlyHours, hoursPerWeek),
 		caption: 'a year',
-		sentence: `The yearly cost of ${formatMoney(yearly)}, at ${formatMoney(wage)} an hour.`,
+		sentence: `The yearly cost of ${formatMoney(yearly)}, at ${formatMoney(wage)} an hour before tax.`,
 		working: [
 			...wageSteps,
 			annualCostStep(purchase),
@@ -84,11 +84,11 @@ export const workHours: Lens = {
 	id: 'work-hours',
 	title: 'Hours of work',
 	group: 'income',
-	requires: ['takeHomePerYear', 'hoursPerWeek'],
+	requires: ['salaryPerYear', 'hoursPerWeek'],
 	appliesTo: 'both',
 	compute(ctx) {
-		const { takeHomePerYear, hoursPerWeek } = ctx.profile;
-		const wage = hourlyWage(takeHomePerYear!, hoursPerWeek!);
+		const { salaryPerYear, hoursPerWeek } = ctx.profile;
+		const wage = hourlyWage(salaryPerYear!, hoursPerWeek!);
 		return workTime(ctx, wage, [
 			{
 				label: 'Working weeks',
@@ -97,7 +97,7 @@ export const workHours: Lens = {
 			},
 			{
 				label: 'Hourly rate',
-				expr: `${formatMoney(takeHomePerYear!)} take-home ÷ (${decimals(hoursPerWeek!)} h/week × ${decimals(WORKING_WEEKS_PER_YEAR)} weeks)`,
+				expr: `${formatMoney(salaryPerYear!)} salary ÷ (${decimals(hoursPerWeek!)} h/week × ${decimals(WORKING_WEEKS_PER_YEAR)} weeks)`,
 				result: `${formatMoney(wage)}/hour`
 			}
 		]);

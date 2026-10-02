@@ -43,6 +43,17 @@ describe('validateDraft', () => {
 		expect(validateDraft({ ...recurring, durationCount: 0 }).durationCount).toBeDefined();
 	});
 
+	it('rejects a one-off above net worth', () => {
+		const oneOff = { ...recurring, recurring: false, amount: 20_001 };
+		expect(validateDraft(oneOff, 20_000).amount).toBe('Must be at most your net worth (£20,000)');
+		expect(validateDraft({ ...oneOff, amount: 20_000 }, 20_000)).toEqual({});
+	});
+
+	it('does not cap recurring costs or check against an invalid net worth', () => {
+		expect(validateDraft({ ...recurring, amount: 50 }, 20)).toEqual({});
+		expect(validateDraft({ ...recurring, recurring: false, amount: 50 }, NaN)).toEqual({});
+	});
+
 	it('ignores recurrence fields for a one-off', () => {
 		expect(validateDraft({ ...recurring, recurring: false, every: 0 })).toEqual({});
 	});

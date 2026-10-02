@@ -29,7 +29,9 @@ SvelteKit with `adapter-static` (prerendered, no server), Svelte 5 runes, TypeSc
 
 ## Model
 
-- **Profile:** take-home pay, hours per week, savings per year, net worth (investable), retirement target, and investment return (real, above inflation).
+- **Profile:** salary (before tax), hours per week, savings per year (including pension contributions), net worth (investable, including pensions), retirement target, and investment return (real, above inflation).
+- **Hours of work** uses the before-tax hourly rate; tax isn't modelled.
+- **One-off purchases** can't exceed net worth; the amount shows an error instead of results.
 - **No other inputs:** no tax, withdrawal rate, spending figure or age. Keep inputs to what the maths needs.
 - **Retirement target:** used exactly as entered. It is never derived or adjusted by a purchase.
 - **Retirement delay:** savings are added to net worth each month and grow at the return. A one-off comes out of today's net worth. A recurring cost comes out of monthly savings until the target is reached, or until a fixed duration ends. The crossing month is interpolated, so small purchases show hours or days.

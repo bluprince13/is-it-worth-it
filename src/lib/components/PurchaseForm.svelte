@@ -6,7 +6,7 @@
 	import FormattedNumberInput from './FormattedNumberInput.svelte';
 	import Segmented from './Segmented.svelte';
 
-	let { draft = $bindable() }: { draft: PurchaseDraft } = $props();
+	let { draft = $bindable(), netWorth }: { draft: PurchaseDraft; netWorth: number } = $props();
 
 	let customFrequency = $state(false);
 
@@ -47,7 +47,7 @@
 	];
 
 	const purchase = $derived(toPurchase(draft));
-	const errors = $derived(validateDraft(draft));
+	const errors = $derived(validateDraft(draft, netWorth));
 
 	const smallInput = (error: string | undefined) =>
 		`w-20 rounded-lg bg-white py-1.5 tabular-nums dark:bg-stone-900 ${error ? 'border-rose-500' : 'border-stone-300 dark:border-stone-700'}`;

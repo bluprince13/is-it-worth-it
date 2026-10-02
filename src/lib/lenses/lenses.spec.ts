@@ -4,7 +4,7 @@ import { futureValue, futureValueOfMonthlySeries } from '$lib/finance/growth';
 import { evaluate } from './index';
 
 const profile: Profile = {
-	takeHomePerYear: 42_000,
+	salaryPerYear: 42_000,
 	hoursPerWeek: 40,
 	netWorth: 100_000,
 	annualSavings: 12_000,
@@ -32,7 +32,7 @@ describe('evaluate', () => {
 		const { results, blocked } = evaluate({ realReturn: 0.05 }, bike);
 		expect(results).toEqual([]);
 		expect(blocked.find((b) => b.lens.id === 'work-hours')?.invalid).toEqual([
-			'takeHomePerYear',
+			'salaryPerYear',
 			'hoursPerWeek'
 		]);
 	});
@@ -61,7 +61,7 @@ describe('one-off purchase', () => {
 			},
 			{
 				label: 'Hourly rate',
-				expr: '£42,000 take-home ÷ (40 h/week × 46.4 weeks)',
+				expr: '£42,000 salary ÷ (40 h/week × 46.4 weeks)',
 				result: '£22.63/hour'
 			},
 			{ label: 'Hours of work', expr: '£1,200 ÷ £22.63/hour', result: '53.03 hours' },
