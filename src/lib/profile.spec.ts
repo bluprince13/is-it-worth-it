@@ -6,7 +6,7 @@ describe('withDefaults', () => {
 		const { profile, defaulted } = withDefaults({ realReturn: 0.05 });
 		expect(profile).toEqual(TYPICAL_PROFILE);
 		expect(defaulted).toEqual([
-			'salaryPerYear',
+			'takeHomePerYear',
 			'hoursPerWeek',
 			'annualSavings',
 			'netWorth',
@@ -17,11 +17,11 @@ describe('withDefaults', () => {
 	it('keeps entered values, including zero', () => {
 		const { profile, defaulted } = withDefaults({
 			netWorth: 0,
-			salaryPerYear: 50_000,
+			takeHomePerYear: 50_000,
 			realReturn: 0.03
 		});
 		expect(profile.netWorth).toBe(0);
-		expect(profile.salaryPerYear).toBe(50_000);
+		expect(profile.takeHomePerYear).toBe(50_000);
 		expect(profile.realReturn).toBe(0.03);
 		expect(defaulted).toEqual(['hoursPerWeek', 'annualSavings', 'retirementTarget']);
 	});
@@ -39,22 +39,12 @@ describe('validateProfile', () => {
 		expect(validateProfile(valid)).toEqual({});
 	});
 
-	it('requires savings below salary', () => {
-		expect(validateProfile({ ...valid, annualSavings: 39_039 }).annualSavings).toBe(
-			'Must be less than salary (£39,039)'
-		);
-	});
-
-	it('checks savings against the placeholder salary when salary is empty or invalid', () => {
-		const { salaryPerYear: _, ...noSalary } = valid;
-		expect(validateProfile({ ...noSalary, annualSavings: 40_000 }).annualSavings).toBeDefined();
-		expect(
-			validateProfile({ ...valid, salaryPerYear: -1, annualSavings: 40_000 }).annualSavings
-		).toBeDefined();
+	it('accepts savings above take-home pay, since pension contributions are included', () => {
+		expect(validateProfile({ ...valid, annualSavings: 40_000 })).toEqual({});
 	});
 
 	it.each([
-		['salaryPerYear', 0],
+		['takeHomePerYear', 0],
 		['hoursPerWeek', 0],
 		['hoursPerWeek', 101],
 		['annualSavings', -1],
@@ -72,7 +62,7 @@ describe('validateProfile', () => {
 	});
 
 	it('marks invalid fields unusable instead of using a placeholder', () => {
-		const { profile, defaulted, errors } = withDefaults({ ...valid, annualSavings: 40_000 });
+		const { profile, defaulted, errors } = withDefaults({ ...valid, annualSavings: -1 });
 		expect(profile.annualSavings).toBeNaN();
 		expect(defaulted).toEqual([]);
 		expect(errors.annualSavings).toBeDefined();

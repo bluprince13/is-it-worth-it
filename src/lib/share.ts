@@ -7,7 +7,7 @@ const UNITS_BY_CODE = Object.fromEntries(
 ) as Record<string, Unit>;
 
 const PROFILE_PARAMS: { param: string; key: keyof Profile; percent?: boolean }[] = [
-	{ param: 'sal', key: 'salaryPerYear' },
+	{ param: 'pay', key: 'takeHomePerYear' },
 	{ param: 'hrs', key: 'hoursPerWeek' },
 	{ param: 'sav', key: 'annualSavings' },
 	{ param: 'nw', key: 'netWorth' },

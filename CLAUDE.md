@@ -29,8 +29,7 @@ SvelteKit with `adapter-static` (prerendered, no server), Svelte 5 runes, TypeSc
 
 ## Model
 
-- **Profile:** salary (before tax), hours per week, savings per year (including pension contributions), net worth (investable, including pensions), retirement target, and investment return (real, above inflation).
-- **Hours of work** uses the before-tax hourly rate; tax isn't modelled.
+- **Profile:** take-home pay, hours per week, savings per year (including pension contributions, so they may exceed take-home pay), net worth (investable, including pensions), retirement target, and investment return (real, above inflation).
 - **One-off purchases** can't exceed net worth; the amount shows an error instead of results.
 - **No other inputs:** no tax, withdrawal rate, spending figure or age. Keep inputs to what the maths needs.
 - **Retirement target:** used exactly as entered. It is never derived or adjusted by a purchase.

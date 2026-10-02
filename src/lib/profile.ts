@@ -1,5 +1,4 @@
 import type { Profile } from './finance/types';
-import { formatMoney } from './format';
 import type { InfoNote } from './info';
 
 const STORAGE_KEY = 'is-it-worth-it:profile';
@@ -7,14 +6,14 @@ const STORAGE_KEY = 'is-it-worth-it:profile';
 export const DEFAULT_PROFILE: Profile = { realReturn: 0.05 };
 
 /**
- * Typical UK full-time employee, used for any field left empty. Salary is the ONS
- * April 2025 median full-time salary. Savings are £3,000 from take-home pay plus
- * auto-enrolment pension contributions (5% employee, 3% employer, on qualifying
- * earnings above £6,240). The target is 25× the £27,000 spent from the roughly
- * £30,000 take-home pay, the conventional 4% rule.
+ * Typical UK full-time employee, used for any field left empty. Take-home is the
+ * ONS April 2025 median full-time salary (£39,039) after tax, NI and 5% pension.
+ * Savings are £3,000 from take-home pay plus auto-enrolment pension contributions
+ * (5% employee, 3% employer, on qualifying earnings above £6,240). The target is
+ * 25× the £27,000 spent, the conventional 4% rule.
  */
 export const TYPICAL_PROFILE: Required<Profile> = {
-	salaryPerYear: 39_039,
+	takeHomePerYear: 30_000,
 	hoursPerWeek: 37.5,
 	annualSavings: 5_600,
 	netWorth: 20_000,
@@ -29,9 +28,9 @@ const isNumber = (value: unknown): value is number =>
 
 export function validateProfile(profile: Profile): ProfileErrors {
 	const errors: ProfileErrors = {};
-	const { salaryPerYear: salary, hoursPerWeek, annualSavings, netWorth, realReturn } = profile;
+	const { takeHomePerYear: pay, hoursPerWeek, annualSavings, netWorth, realReturn } = profile;
 
-	if (isNumber(salary) && salary <= 0) errors.salaryPerYear = 'Must be more than £0';
+	if (isNumber(pay) && pay <= 0) errors.takeHomePerYear = 'Must be more than £0';
 	if (isNumber(hoursPerWeek) && (hoursPerWeek <= 0 || hoursPerWeek > 100)) {
 		errors.hoursPerWeek = 'Must be more than 0 and at most 100';
 	}
@@ -39,14 +38,7 @@ export function validateProfile(profile: Profile): ProfileErrors {
 	if (isNumber(profile.retirementTarget) && profile.retirementTarget <= 0) {
 		errors.retirementTarget = 'Must be more than £0';
 	}
-	if (isNumber(annualSavings)) {
-		const effectiveSalary =
-			isNumber(salary) && !errors.salaryPerYear ? salary : TYPICAL_PROFILE.salaryPerYear;
-		if (annualSavings < 0) errors.annualSavings = 'Must be £0 or more';
-		else if (annualSavings >= effectiveSalary) {
-			errors.annualSavings = `Must be less than salary (${formatMoney(effectiveSalary)})`;
-		}
-	}
+	if (isNumber(annualSavings) && annualSavings < 0) errors.annualSavings = 'Must be £0 or more';
 	if (isNumber(realReturn) && (realReturn < 0 || realReturn > 1)) {
 		errors.realReturn = 'Must be between 0% and 100%';
 	}
@@ -89,9 +81,8 @@ export const PROFILE_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
 		title: 'Income',
 		fields: [
 			{
-				key: 'salaryPerYear',
-				label: 'Salary per year',
-				hint: 'Before tax',
+				key: 'takeHomePerYear',
+				label: 'Take-home pay per year',
 				kind: 'money'
 			},
 			{ key: 'hoursPerWeek', label: 'Hours worked per week', kind: 'hours' },
